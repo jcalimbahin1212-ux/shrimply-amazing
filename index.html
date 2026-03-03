@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Docs</title>
+  <link rel="icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo">shrimpify</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#" data-page="home" class="nav-link active"><span class="nav-icon">⌂</span> Home</a></li>
+        <li><a href="#" data-page="tools" class="nav-link"><span class="nav-icon">◈</span> Tools</a></li>
+        <li><a href="#" data-page="writer" class="nav-link"><span class="nav-icon">✎</span> Writer</a></li>
+        <li><a href="#" data-page="reference" class="nav-link"><span class="nav-icon">⊞</span> Reference</a></li>
+        <li><a href="#" data-page="notes" class="nav-link"><span class="nav-icon">▤</span> Notes</a></li>
+        <li><a href="#" data-page="apps" class="nav-link"><span class="nav-icon">◻</span> Apps</a></li>
+        <li><a href="#" data-page="cheats" class="nav-link"><span class="nav-icon">⚙</span> Cheats</a></li>
+        <li><a href="#" data-page="settings" class="nav-link"><span class="nav-icon">☰</span> Settings</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <button id="panic-btn" title="Quick exit (Esc)">✕ Panic</button>
+      </div>
+    </nav>
+
+    <main id="content">
+
+      <!-- ==================== HOME ==================== -->
+      <div id="page-home" class="page active">
+        <div class="hero">
+          <h1>shrimpify</h1>
+          <p class="subtitle">the key to get through school</p>
+          <p class="subtitle" style="font-size:0.75rem;margin-top:6px;color:var(--text-dim)">made by james c</p>
+        </div>
+        <div class="quick-actions">
+          <div class="card" data-page="tools">
+            <div class="card-icon">◈</div>
+            <h3>Tools</h3>
+            <p>Calculator, converter, timer, GPA</p>
+          </div>
+          <div class="card" data-page="writer">
+            <div class="card-icon">✎</div>
+            <h3>Writer</h3>
+            <p>Text tools & citation generator</p>
+          </div>
+          <div class="card" data-page="reference">
+            <div class="card-icon">⊞</div>
+            <h3>Reference</h3>
+            <p>Formulas & periodic table</p>
+          </div>
+          <div class="card" data-page="notes">
+            <div class="card-icon">▤</div>
+            <h3>Notes</h3>
+            <p>Save notes locally</p>
+          </div>
+          <div class="card" data-page="apps">
+            <div class="card-icon">◻</div>
+            <h3>Apps</h3>
+            <p>Unblocked games & tools</p>
+          </div>
+          <div class="card" data-page="cheats">
+            <div class="card-icon">⚙</div>
+            <h3>Cheats</h3>
+            <p>Kahoot, Blooket, Gimkit & more</p>
+          </div>
+          <div class="card" data-page="settings">
+            <div class="card-icon">☰</div>
+            <h3>Settings</h3>
+            <p>Tab cloak & panic button</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TOOLS ==================== -->
+      <div id="page-tools" class="page">
+        <h2>Tools</h2>
+        <p class="page-desc">Calculators, converters, and utilities.</p>
+        <div class="tool-tabs">
+          <button class="tool-tab active" data-tool="calculator">Calculator</button>
+          <button class="tool-tab" data-tool="unit-converter">Unit Converter</button>
+          <button class="tool-tab" data-tool="timer">Timer</button>
+          <button class="tool-tab" data-tool="gpa">GPA Calculator</button>
+        </div>
+
+        <!-- Calculator -->
+        <div id="tool-calculator" class="tool-panel active">
+          <div class="calc-display">
+            <div id="calc-expression" class="calc-expression"></div>
+            <div id="calc-result" class="calc-result">0</div>
+          </div>
+          <div class="calc-grid">
+            <button class="calc-btn calc-fn" data-val="sin(">sin</button>
+            <button class="calc-btn calc-fn" data-val="cos(">cos</button>
+            <button class="calc-btn calc-fn" data-val="tan(">tan</button>
+            <button class="calc-btn calc-fn" data-val="log(">log</button>
+            <button class="calc-btn calc-fn" data-val="ln(">ln</button>
+            <button class="calc-btn calc-fn" data-val="sqrt(">sqrt</button>
+            <button class="calc-btn calc-fn" data-val="^">x^y</button>
+            <button class="calc-btn calc-fn" data-val="(">(</button>
+            <button class="calc-btn calc-fn" data-val=")">)</button>
+            <button class="calc-btn calc-fn" data-val="pi">pi</button>
+            <button class="calc-btn" data-val="7">7</button>
+            <button class="calc-btn" data-val="8">8</button>
+            <button class="calc-btn" data-val="9">9</button>
+            <button class="calc-btn calc-op" data-val="/">/</button>
+            <button class="calc-btn calc-action" data-action="backspace">DEL</button>
+            <button class="calc-btn" data-val="4">4</button>
+            <button class="calc-btn" data-val="5">5</button>
+            <button class="calc-btn" data-val="6">6</button>
+            <button class="calc-btn calc-op" data-val="*">x</button>
+            <button class="calc-btn calc-action" data-action="clear">AC</button>
+            <button class="calc-btn" data-val="1">1</button>
+            <button class="calc-btn" data-val="2">2</button>
+            <button class="calc-btn" data-val="3">3</button>
+            <button class="calc-btn calc-op" data-val="-">-</button>
+            <button class="calc-btn calc-fn" data-val="e">e</button>
+            <button class="calc-btn" data-val="0">0</button>
+            <button class="calc-btn" data-val=".">.</button>
+            <button class="calc-btn calc-op" data-val="%">%</button>
+            <button class="calc-btn calc-op" data-val="+">+</button>
+            <button class="calc-btn calc-equals" data-action="equals">=</button>
+          </div>
+          <div class="calc-history">
+            <h4>History</h4>
+            <div id="calc-history-list"></div>
+            <button id="calc-history-clear" class="btn btn-secondary" style="margin-top:8px">Clear History</button>
+          </div>
+        </div>
+
+        <!-- Unit Converter -->
+        <div id="tool-unit-converter" class="tool-panel">
+          <div class="converter-controls">
+            <div class="converter-category-tabs" id="converter-categories"></div>
+            <div class="converter-row">
+              <div class="converter-col">
+                <label>From</label>
+                <input type="number" id="converter-input" value="1" step="any">
+                <select id="converter-from"></select>
+              </div>
+              <button id="converter-swap" class="btn btn-secondary converter-swap-btn">swap</button>
+              <div class="converter-col">
+                <label>To</label>
+                <div id="converter-output" class="converter-output">—</div>
+                <select id="converter-to"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timer -->
+        <div id="tool-timer" class="tool-panel">
+          <div class="timer-mode-tabs">
+            <button class="timer-mode-tab active" data-mode="stopwatch">Stopwatch</button>
+            <button class="timer-mode-tab" data-mode="countdown">Countdown</button>
+            <button class="timer-mode-tab" data-mode="pomodoro">Pomodoro</button>
+          </div>
+          <div id="timer-display" class="timer-display">00:00.00</div>
+          <div id="timer-countdown-inputs" class="timer-inputs" style="display:none">
+            <input type="number" id="timer-hours" min="0" max="99" value="0" placeholder="H">
+            <span>:</span>
+            <input type="number" id="timer-minutes" min="0" max="59" value="5" placeholder="M">
+            <span>:</span>
+            <input type="number" id="timer-seconds" min="0" max="59" value="0" placeholder="S">
+          </div>
+          <div id="timer-pomodoro-info" class="timer-pomodoro-info" style="display:none">
+            <span id="pomodoro-phase">Work</span> — <span id="pomodoro-count">0</span> sessions completed
+          </div>
+          <div class="timer-controls">
+            <button id="timer-start" class="btn">Start</button>
+            <button id="timer-lap" class="btn btn-secondary" style="display:none">Lap</button>
+            <button id="timer-pause" class="btn btn-secondary" disabled>Pause</button>
+            <button id="timer-reset" class="btn btn-secondary">Reset</button>
+          </div>
+          <div id="timer-lap-list" class="timer-laps"></div>
+        </div>
+
+        <!-- GPA Calculator -->
+        <div id="tool-gpa" class="tool-panel">
+          <div class="gpa-result-bar">
+            <span>Your GPA:</span>
+            <span id="gpa-value" class="gpa-value">0.00</span>
+          </div>
+          <div class="gpa-scale-toggle">
+            <label>Scale:</label>
+            <select id="gpa-scale">
+              <option value="4.0">4.0 (Standard)</option>
+              <option value="5.0">5.0 (Weighted)</option>
+            </select>
+          </div>
+          <table class="gpa-table">
+            <thead>
+              <tr><th>Class Name</th><th>Grade</th><th>Credits</th><th></th></tr>
+            </thead>
+            <tbody id="gpa-rows"></tbody>
+          </table>
+          <button id="gpa-add-row" class="btn" style="margin-top:12px">+ Add Class</button>
+        </div>
+      </div>
+
+      <!-- ==================== WRITER ==================== -->
+      <div id="page-writer" class="page">
+        <h2>Writer</h2>
+        <p class="page-desc">Text analysis and citation tools.</p>
+        <div class="tool-tabs">
+          <button class="tool-tab active" data-tool="text-tools">Text Tools</button>
+          <button class="tool-tab" data-tool="citations">Citation Generator</button>
+        </div>
+
+        <!-- Text Tools -->
+        <div id="tool-text-tools" class="tool-panel active">
+          <textarea id="text-input" class="text-input" placeholder="Paste or type your text here..." rows="10"></textarea>
+          <div class="text-stats" id="text-stats">
+            <span><strong id="stat-words">0</strong> words</span>
+            <span><strong id="stat-chars">0</strong> characters</span>
+            <span><strong id="stat-sentences">0</strong> sentences</span>
+            <span><strong id="stat-paragraphs">0</strong> paragraphs</span>
+            <span>~<strong id="stat-reading-time">0</strong> min read</span>
+          </div>
+          <div class="text-actions">
+            <h4>Case Converter</h4>
+            <div class="text-btn-row">
+              <button class="btn btn-secondary" data-case="upper">UPPERCASE</button>
+              <button class="btn btn-secondary" data-case="lower">lowercase</button>
+              <button class="btn btn-secondary" data-case="title">Title Case</button>
+              <button class="btn btn-secondary" data-case="sentence">Sentence case</button>
+            </div>
+          </div>
+          <div class="text-actions">
+            <h4>Find & Replace</h4>
+            <div class="text-find-row">
+              <input type="text" id="text-find" placeholder="Find...">
+              <input type="text" id="text-replace" placeholder="Replace with...">
+              <button id="text-replace-btn" class="btn">Replace All</button>
+            </div>
+          </div>
+          <div class="text-actions">
+            <h4>Transform</h4>
+            <div class="text-btn-row">
+              <button id="text-reverse" class="btn btn-secondary">Reverse Text</button>
+              <button id="text-remove-duplicates" class="btn btn-secondary">Remove Duplicate Lines</button>
+              <button id="text-sort-lines" class="btn btn-secondary">Sort Lines A-Z</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Citation Generator -->
+        <div id="tool-citations" class="tool-panel">
+          <div class="citation-form">
+            <div class="citation-type-row">
+              <label>Source Type</label>
+              <select id="cite-type">
+                <option value="website">Website</option>
+                <option value="book">Book</option>
+                <option value="journal">Journal Article</option>
+              </select>
+            </div>
+            <div class="setting-row"><label>Author First</label><input type="text" id="cite-first" placeholder="John"></div>
+            <div class="setting-row"><label>Author Last</label><input type="text" id="cite-last" placeholder="Smith"></div>
+            <div class="setting-row"><label>Title</label><input type="text" id="cite-title" placeholder="Article Title"></div>
+            <div class="setting-row"><label>Publisher / Site</label><input type="text" id="cite-publisher" placeholder="Publisher or Website Name"></div>
+            <div class="setting-row"><label>Date Published</label><input type="text" id="cite-date" placeholder="1 Jan. 2025"></div>
+            <div class="setting-row"><label>URL</label><input type="text" id="cite-url" placeholder="https://..."></div>
+            <div class="setting-row"><label>Access Date</label><input type="text" id="cite-accessed" placeholder="1 Mar. 2026"></div>
+            <div class="setting-row cite-journal-field" style="display:none"><label>Journal Name</label><input type="text" id="cite-journal" placeholder="Journal of Science"></div>
+            <div class="setting-row cite-journal-field" style="display:none"><label>Volume(Issue)</label><input type="text" id="cite-volume" placeholder="12(3)"></div>
+            <div class="setting-row cite-journal-field" style="display:none"><label>Pages</label><input type="text" id="cite-pages" placeholder="15-28"></div>
+            <div class="setting-row cite-book-field" style="display:none"><label>Edition</label><input type="text" id="cite-edition" placeholder="2nd"></div>
+            <div class="setting-row cite-book-field" style="display:none"><label>City</label><input type="text" id="cite-city" placeholder="New York"></div>
+          </div>
+          <button id="cite-generate" class="btn" style="margin-top:16px">Generate Citations</button>
+          <div id="citation-output" class="citation-output" style="display:none">
+            <div class="citation-block"><h4>MLA</h4><div id="cite-mla" class="citation-text"></div><button class="btn btn-secondary copy-cite-btn" data-format="mla">Copy</button></div>
+            <div class="citation-block"><h4>APA</h4><div id="cite-apa" class="citation-text"></div><button class="btn btn-secondary copy-cite-btn" data-format="apa">Copy</button></div>
+            <div class="citation-block"><h4>Chicago</h4><div id="cite-chicago" class="citation-text"></div><button class="btn btn-secondary copy-cite-btn" data-format="chicago">Copy</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== REFERENCE ==================== -->
+      <div id="page-reference" class="page">
+        <h2>Reference</h2>
+        <p class="page-desc">Searchable formulas and periodic table.</p>
+        <div class="tool-tabs">
+          <button class="tool-tab active" data-tool="formulas">Formula Sheets</button>
+          <button class="tool-tab" data-tool="periodic-table">Periodic Table</button>
+        </div>
+
+        <!-- Formula Sheets -->
+        <div id="tool-formulas" class="tool-panel active">
+          <div class="search-bar">
+            <input type="text" id="formula-search" placeholder="Search formulas...">
+          </div>
+          <div class="formula-category-tabs" id="formula-categories"></div>
+          <div id="formula-grid" class="formula-grid"></div>
+        </div>
+
+        <!-- Periodic Table -->
+        <div id="tool-periodic-table" class="tool-panel">
+          <div id="element-detail" class="element-detail" style="display:none">
+            <div id="element-detail-content"></div>
+          </div>
+          <div id="periodic-grid" class="periodic-grid"></div>
+          <div class="element-legend">
+            <span class="legend-item legend-nonmetal">Nonmetal</span>
+            <span class="legend-item legend-noble">Noble Gas</span>
+            <span class="legend-item legend-alkali">Alkali Metal</span>
+            <span class="legend-item legend-alkaline">Alkaline Earth</span>
+            <span class="legend-item legend-metalloid">Metalloid</span>
+            <span class="legend-item legend-halogen">Halogen</span>
+            <span class="legend-item legend-transition">Transition Metal</span>
+            <span class="legend-item legend-post-transition">Post-Transition</span>
+            <span class="legend-item legend-lanthanide">Lanthanide</span>
+            <span class="legend-item legend-actinide">Actinide</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== NOTES ==================== -->
+      <div id="page-notes" class="page">
+        <h2>Notes</h2>
+        <p class="page-desc">Your notes, saved locally in this browser.</p>
+        <div class="notes-layout">
+          <div class="notes-sidebar">
+            <button id="note-new" class="btn" style="width:100%;margin-bottom:12px">+ New Note</button>
+            <div id="notes-list" class="notes-list"></div>
+          </div>
+          <div class="notes-editor">
+            <input type="text" id="note-title" class="note-title-input" placeholder="Note title...">
+            <textarea id="note-body" class="note-body-input" placeholder="Start writing..."></textarea>
+            <div class="notes-editor-footer">
+              <span id="note-last-saved" class="text-muted"></span>
+              <button id="note-delete" class="btn btn-secondary">Delete Note</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== APPS ==================== -->
+      <div id="page-apps" class="page">
+        <h2>Apps</h2>
+        <p class="page-desc">Opens in about:blank for stealth.</p>
+        <div class="apps-grid">
+          <div class="app-card" data-url="https://howtotech.infotechnology.com/">
+            <div class="app-card-icon">🎮</div>
+            <h3>Truffled</h3>
+            <p>Unblocked games hub</p>
+          </div>
+          <div class="app-card" data-url="https://sage-school.yafers.org/">
+            <div class="app-card-icon">🔢</div>
+            <h3>GN-Math</h3>
+            <p>Unblocked games & math</p>
+          </div>
+          <div class="app-card" data-url="https://science.reldas.com.ar/">
+            <div class="app-card-icon">⚡</div>
+            <h3>Kazwire</h3>
+            <p>Unblocked games & apps</p>
+          </div>
+          <div class="app-card" data-url="https://tl.sniper.ro/">
+            <div class="app-card-icon">🔬</div>
+            <h3>Definetly Science</h3>
+            <p>Unblocked games & apps</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== CHEATS (unchanged) ==================== -->
+      <div id="page-cheats" class="page">
+        <h2>Cheats</h2>
+        <p class="page-desc">Auto-answer tools for classroom games. Click a game for the full manual.</p>
+        <div id="cheats-list" class="cheats-list"></div>
+        <div id="cheat-detail" class="cheat-detail" style="display:none">
+          <button id="cheat-back" class="btn btn-secondary cheat-back-btn">Back</button>
+          <div id="cheat-detail-header" class="cheat-detail-header"></div>
+          <div id="cheat-manual" class="cheat-manual"></div>
+          <div id="cheat-gamemodes" class="cheat-gamemodes">
+            <h3>Gamemodes</h3>
+            <div id="gamemode-tabs" class="gamemode-tabs"></div>
+            <div id="gamemode-content" class="gamemode-content"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SETTINGS (unchanged) ==================== -->
+      <div id="page-settings" class="page">
+        <h2>Settings</h2>
+        <p class="page-desc">Customize your experience.</p>
+        <div class="settings-group">
+          <h3>Tab Cloak</h3>
+          <p class="setting-desc">Disguise this tab to look like something else.</p>
+          <div class="setting-row"><label>Tab Title</label><input type="text" id="cloak-title" placeholder="Google Docs"></div>
+          <div class="setting-row"><label>Favicon URL</label><input type="text" id="cloak-favicon" placeholder="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico"></div>
+          <div class="setting-row">
+            <button id="apply-cloak" class="btn">Apply Cloak</button>
+            <button id="reset-cloak" class="btn btn-secondary">Reset</button>
+          </div>
+          <div class="cloak-presets">
+            <h4>Quick Presets</h4>
+            <div class="preset-grid">
+              <button class="preset-btn" data-title="Google Docs" data-icon="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">Google Docs</button>
+              <button class="preset-btn" data-title="Google Drive" data-icon="https://ssl.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png">Google Drive</button>
+              <button class="preset-btn" data-title="Classroom" data-icon="https://ssl.gstatic.com/classroom/favicon.png">Classroom</button>
+              <button class="preset-btn" data-title="Canvas" data-icon="https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico">Canvas</button>
+              <button class="preset-btn" data-title="Clever | Portal" data-icon="https://assets.clever.com/media/icons/favicon.ico">Clever</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-group">
+          <h3>Panic Button</h3>
+          <p class="setting-desc">Configure your quick exit.</p>
+          <div class="setting-row"><label>Panic URL</label><input type="text" id="panic-url" placeholder="https://classroom.google.com" value="https://classroom.google.com"></div>
+          <div class="setting-row"><label>Panic Key</label><span class="key-badge" id="panic-key-display">Esc</span></div>
+        </div>
+        <div class="settings-group">
+          <h3>About:Blank Mode</h3>
+          <p class="setting-desc">Open this entire site in an about:blank tab.</p>
+          <div class="setting-row"><button id="aboutblank-self" class="btn">Open in about:blank</button></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

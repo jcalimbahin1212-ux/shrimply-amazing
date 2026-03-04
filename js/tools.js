@@ -1610,56 +1610,101 @@
     var searchBtn = $("#source-search-btn");
     var loadingEl = $("#source-loading");
     var resultsEl = $("#source-results");
-    var articlesCol = $("#source-articles-col");
+    var webCol = $("#source-web-col");
+    var academicCol = $("#source-academic-col");
     var booksCol = $("#source-books-col");
 
-    function stripHtml(html) {
-      return html.replace(/<[^>]+>/g, "");
+    // SearXNG public instances (fallback chain)
+    var searxInstances = [
+      "https://searx.be",
+      "https://search.sapti.me",
+      "https://searx.tiekoetter.com"
+    ];
+
+    function fetchWithTimeout(url, ms) {
+      var controller = new AbortController();
+      var timer = setTimeout(function() { controller.abort(); }, ms);
+      return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
+    }
+
+    function trySearx(query, idx) {
+      if (idx >= searxInstances.length) return Promise.resolve(null);
+      var url = searxInstances[idx] + "/search?q=" + encodeURIComponent(query) + "&format=json&categories=general&language=en";
+      return fetchWithTimeout(url, 8000)
+        .then(function(r) { return r.json(); })
+        .catch(function() { return trySearx(query, idx + 1); });
+    }
+
+    function extractDomain(url) {
+      try { return new URL(url).hostname.replace(/^www\./, ""); } catch(e) { return ""; }
+    }
+
+    function isAcademic(url) {
+      var domain = extractDomain(url);
+      return /\.(edu|gov|org)$/i.test(domain);
+    }
+
+    function renderCard(item) {
+      var domain = extractDomain(item.url || "");
+      return '<div class="source-card">' +
+        '<div class="source-title">' + (item.title || "Untitled") + '</div>' +
+        (domain ? '<div class="source-domain">' + domain + '</div>' : '') +
+        '<div class="source-snippet">' + (item.content || "") + '</div>' +
+        '<a href="' + item.url + '" target="_blank" rel="noopener" class="source-link">Visit Source</a>' +
+        '</div>';
     }
 
     function search() {
       var q = searchInput.value.trim();
-      if (!q) {
-        toast("Enter a search term");
-        return;
-      }
+      if (!q) { toast("Enter a search term"); return; }
 
       loadingEl.style.display = "";
       resultsEl.style.display = "none";
-      articlesCol.innerHTML = "";
+      webCol.innerHTML = "";
+      academicCol.innerHTML = "";
       booksCol.innerHTML = "";
 
-      var wikiUrl = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + encodeURIComponent(q) + "&srlimit=20&format=json&origin=*";
-      var bookUrl = "https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=20";
-
-      var wikiPromise = fetch(wikiUrl).then(function(r) { return r.json(); }).catch(function() { return null; });
+      var bookUrl = "https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=15";
+      var searxPromise = trySearx(q, 0);
       var bookPromise = fetch(bookUrl).then(function(r) { return r.json(); }).catch(function() { return null; });
 
-      Promise.all([wikiPromise, bookPromise]).then(function(results) {
+      Promise.all([searxPromise, bookPromise]).then(function(results) {
         loadingEl.style.display = "none";
         resultsEl.style.display = "";
 
-        var wikiData = results[0];
+        var searxData = results[0];
         var bookData = results[1];
 
-        // Render Wikipedia results
-        if (wikiData && wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
-          articlesCol.innerHTML = '<h4>Wikipedia Articles</h4>' + wikiData.query.search.map(function(item) {
-            var link = "https://en.wikipedia.org/wiki/" + encodeURIComponent(item.title);
-            var snippet = stripHtml(item.snippet);
-            return '<div class="source-card">' +
-              '<div class="source-title">' + item.title + '</div>' +
-              '<div class="source-snippet">' + snippet + '</div>' +
-              '<a href="' + link + '" target="_blank" rel="noopener" class="source-link">View on Wikipedia</a>' +
-              '</div>';
-          }).join("");
-        } else {
-          articlesCol.innerHTML = '<h4>Wikipedia Articles</h4><p style="color:var(--text-dim)">No articles found.</p>';
+        // Split SearXNG results into web and academic
+        var webResults = [];
+        var academicResults = [];
+        if (searxData && searxData.results && searxData.results.length > 0) {
+          searxData.results.forEach(function(item) {
+            if (isAcademic(item.url)) {
+              academicResults.push(item);
+            } else {
+              webResults.push(item);
+            }
+          });
         }
 
-        // Render OpenLibrary results
+        // Render web results
+        if (webResults.length > 0) {
+          webCol.innerHTML = webResults.slice(0, 15).map(renderCard).join("");
+        } else {
+          webCol.innerHTML = '<p style="color:var(--text-dim)">No web results found.</p>';
+        }
+
+        // Render academic results
+        if (academicResults.length > 0) {
+          academicCol.innerHTML = academicResults.slice(0, 15).map(renderCard).join("");
+        } else {
+          academicCol.innerHTML = '<p style="color:var(--text-dim)">No academic sources found. Try more specific keywords.</p>';
+        }
+
+        // Render books
         if (bookData && bookData.docs && bookData.docs.length > 0) {
-          booksCol.innerHTML = '<h4>Books</h4>' + bookData.docs.map(function(doc) {
+          booksCol.innerHTML = bookData.docs.map(function(doc) {
             var link = "https://openlibrary.org" + doc.key;
             var authors = doc.author_name ? doc.author_name.join(", ") : "Unknown author";
             var year = doc.first_publish_year || "Unknown year";
@@ -1670,7 +1715,7 @@
               '</div>';
           }).join("");
         } else {
-          booksCol.innerHTML = '<h4>Books</h4><p style="color:var(--text-dim)">No books found.</p>';
+          booksCol.innerHTML = '<p style="color:var(--text-dim)">No books found.</p>';
         }
 
         toast("Found sources!");
@@ -1681,11 +1726,8 @@
     }
 
     searchBtn.addEventListener("click", search);
-
     searchInput.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        search();
-      }
+      if (e.key === "Enter") search();
     });
   }
 
@@ -3047,6 +3089,134 @@
   }
 
   // ============================================================
+  //  AI ESSAY WRITER (Pollinations AI — free, no key)
+  // ============================================================
+  function _initEssayWriter() {
+    var topicInput = $("#essay-topic");
+    var typeSelect = $("#essay-type");
+    var lengthSelect = $("#essay-length");
+    var toneSelect = $("#essay-tone");
+    var generateBtn = $("#essay-generate-btn");
+    var loadingEl = $("#essay-loading");
+    var outputArea = $("#essay-output-area");
+    var outputTextarea = $("#essay-output");
+    var wordCountEl = $("#essay-word-count");
+    var copyBtn = $("#essay-copy-btn");
+
+    var lengthMap = { short: "approximately 300 words", medium: "approximately 500 words", long: "approximately 800 words" };
+
+    function countWords(text) {
+      return text.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+    }
+
+    function updateWordCount() {
+      wordCountEl.textContent = countWords(outputTextarea.value) + " words";
+    }
+
+    outputTextarea.addEventListener("input", updateWordCount);
+
+    copyBtn.addEventListener("click", function() {
+      navigator.clipboard.writeText(outputTextarea.value).then(function() { toast("Copied to clipboard!"); });
+    });
+
+    generateBtn.addEventListener("click", function() {
+      var topic = topicInput.value.trim();
+      if (!topic) { toast("Enter a topic or prompt"); return; }
+
+      var essayType = typeSelect.value;
+      var length = lengthMap[lengthSelect.value] || lengthMap.medium;
+      var tone = toneSelect.value;
+
+      var prompt = "Write a " + essayType + " essay about: " + topic + ". " +
+        "The essay should be " + length + " long. " +
+        "Use a " + tone + " tone. " +
+        "Include an introduction with a clear thesis statement, " +
+        "well-developed body paragraphs with supporting evidence, " +
+        "and a strong conclusion. " +
+        "Write it as a student would — use varied sentence structure, " +
+        "natural transitions between paragraphs, and avoid sounding robotic or overly formal.";
+
+      loadingEl.style.display = "";
+      outputArea.style.display = "none";
+      generateBtn.disabled = true;
+
+      fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
+        .then(function(r) { return r.text(); })
+        .then(function(text) {
+          outputTextarea.value = text.trim();
+          updateWordCount();
+          outputArea.style.display = "";
+          toast("Essay generated!");
+        })
+        .catch(function() {
+          toast("Error generating essay. Please try again.");
+        })
+        .finally(function() {
+          loadingEl.style.display = "none";
+          generateBtn.disabled = false;
+        });
+    });
+  }
+
+  // ============================================================
+  //  AI HUMANIZER (Pollinations AI — free, no key)
+  // ============================================================
+  function _initHumanizer() {
+    var inputTextarea = $("#humanizer-input");
+    var outputTextarea = $("#humanizer-output");
+    var goBtn = $("#humanizer-go-btn");
+    var loadingEl = $("#humanizer-loading");
+    var inputCount = $("#humanizer-input-count");
+    var outputCount = $("#humanizer-output-count");
+    var copyBtn = $("#humanizer-copy-btn");
+
+    function countWords(text) {
+      return text.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+    }
+
+    inputTextarea.addEventListener("input", function() {
+      inputCount.textContent = countWords(inputTextarea.value) + " words";
+    });
+
+    copyBtn.addEventListener("click", function() {
+      navigator.clipboard.writeText(outputTextarea.value).then(function() { toast("Copied to clipboard!"); });
+    });
+
+    goBtn.addEventListener("click", function() {
+      var text = inputTextarea.value.trim();
+      if (!text) { toast("Paste some text to humanize"); return; }
+
+      var prompt = "Rewrite the following text to sound completely natural and human-written. " +
+        "Make it sound like a real student wrote it: use contractions (don't, it's, they're), " +
+        "vary sentence lengths (mix short punchy sentences with longer ones), " +
+        "add occasional informal phrasing, use natural transitions, " +
+        "and avoid overly perfect grammar or robotic patterns. " +
+        "Keep the same meaning and information but make it undetectable as AI-written. " +
+        "Do not add any commentary — just output the rewritten text.\n\n" + text;
+
+      loadingEl.style.display = "";
+      goBtn.disabled = true;
+      outputTextarea.value = "";
+      outputCount.textContent = "0 words";
+
+      fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
+        .then(function(r) { return r.text(); })
+        .then(function(result) {
+          outputTextarea.value = result.trim();
+          outputCount.textContent = countWords(result.trim()) + " words";
+          toast("Text humanized!");
+        })
+        .catch(function() {
+          toast("Error humanizing text. Please try again.");
+        })
+        .finally(function() {
+          loadingEl.style.display = "none";
+          goBtn.disabled = false;
+        });
+    });
+  }
+
+  // ============================================================
   //  Public API (lazy init wrappers)
   // ============================================================
   window.ShrimpTools = {
@@ -3074,5 +3244,7 @@
     focusSounds: function () { initOnce("focusSounds", _initFocusSounds); },
     translator: function () { initOnce("translator", _initTranslator); },
     anatomy: function () { initOnce("anatomy", _initAnatomy); },
+    essayWriter: function () { initOnce("essayWriter", _initEssayWriter); },
+    humanizer: function () { initOnce("humanizer", _initHumanizer); },
   };
 })();

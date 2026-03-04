@@ -352,6 +352,8 @@
         ShrimpTools.essayOutliner();
         ShrimpTools.textToSpeech();
         ShrimpTools.translator();
+        ShrimpTools.essayWriter();
+        ShrimpTools.humanizer();
       } else if (page === "reference") {
         ShrimpTools.formulas();
         ShrimpTools.periodicTable();

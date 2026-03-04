@@ -31,7 +31,7 @@
 html, body {
   height: 100%;
   font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg);
+  background: radial-gradient(ellipse at top, #141414 0%, #0a0a0a 50%, #050505 100%);
   color: var(--text);
   overflow: hidden;
 }
@@ -102,7 +102,13 @@ body::before {
   font-weight: 700;
   letter-spacing: -0.5px;
   color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+.logo-icon { display: inline-flex; flex-shrink: 0; }
+.logo-icon svg { width: 20px; height: 20px; }
 
 .nav-links {
   list-style: none;
@@ -191,7 +197,27 @@ body::before {
 
 .hero {
   text-align: center;
-  padding: 80px 0 48px;
+  padding: 100px 0 56px;
+  position: relative;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  width: 400px;
+  height: 200px;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.03) 0%, transparent 70%);
+  animation: heroGlow 4s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes heroGlow {
+  0% { opacity: 0.5; transform: translate(-50%, -60%) scale(1); }
+  100% { opacity: 1; transform: translate(-50%, -60%) scale(1.15); }
 }
 
 .hero h1 {
@@ -199,9 +225,14 @@ body::before {
   font-weight: 600;
   letter-spacing: -2px;
   color: var(--accent-hover);
-  margin-bottom: 10px;
+  margin-bottom: 14px;
   text-shadow: 0 0 60px rgba(255, 255, 255, 0.06);
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
 }
+
+.hero-icon svg { width: 48px; height: 48px; }
 
 .subtitle {
   color: var(--text-muted);
@@ -1325,6 +1356,33 @@ body.disguise #content { overflow-y: auto; height: calc(100vh - 64px); margin-to
 .anatomy-part-item:hover { background: var(--bg-card-hover); color: var(--text); border-color: var(--border-hover); }
 .anatomy-part-item.active { border-color: var(--border-hover); color: var(--accent-hover); }
 
+/* ---- AI Essay Writer ---- */
+
+.essay-writer-form { display: flex; flex-direction: column; gap: 12px; max-width: 640px; }
+.essay-writer-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.essay-writer-row label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: block; }
+.essay-writer-row select, .essay-writer-row input { flex: 1; min-width: 160px; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 0.85rem; outline: none; }
+.essay-writer-row select:focus, .essay-writer-row input:focus { border-color: var(--border-hover); }
+.essay-output-area { position: relative; margin-top: 16px; }
+.essay-output-area textarea { width: 100%; min-height: 300px; padding: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 0.88rem; line-height: 1.7; resize: vertical; outline: none; font-family: inherit; }
+.essay-output-area textarea:focus { border-color: var(--border-hover); }
+.essay-output-meta { display: flex; align-items: center; gap: 16px; margin-top: 8px; font-size: 0.78rem; color: var(--text-muted); }
+.essay-loading { display: none; text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.9rem; }
+.essay-loading.active { display: block; }
+
+/* ---- AI Humanizer ---- */
+
+.humanizer-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.humanizer-panel textarea { width: 100%; min-height: 260px; padding: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 0.88rem; line-height: 1.7; resize: vertical; outline: none; font-family: inherit; }
+.humanizer-panel textarea:focus { border-color: var(--border-hover); }
+.humanizer-panel h4 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
+.humanizer-meta { display: flex; align-items: center; gap: 16px; margin-top: 8px; font-size: 0.78rem; color: var(--text-muted); }
+
+/* ---- Source Finder 3-column ---- */
+
+.source-results-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
+.source-domain { font-size: 0.68rem; color: var(--text-dim); margin-top: 2px; }
+
 /* ---- Responsive ---- */
 
 @media (max-width: 768px) {
@@ -1369,6 +1427,16 @@ body.disguise #content { overflow-y: auto; height: calc(100vh - 64px); margin-to
   }
   .source-results-grid {
     grid-template-columns: 1fr;
+  }
+  .source-results-grid.three-col {
+    grid-template-columns: 1fr;
+  }
+  .humanizer-container {
+    grid-template-columns: 1fr;
+  }
+  .hero-icon svg {
+    width: 32px;
+    height: 32px;
   }
   .quiz-choices {
     grid-template-columns: 1fr;

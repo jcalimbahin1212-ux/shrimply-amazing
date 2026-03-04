@@ -13,6 +13,219 @@
     selectedGamemode: 0,
   };
 
+  // ---- Panel CSS for about:blank game launcher ----
+  const PANEL_CSS = `
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;overflow:hidden;background:#111;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;color:#ccc}
+    #game-frame{position:fixed;top:0;left:0;bottom:0;right:280px;width:calc(100% - 280px);height:100%;border:none;transition:right .25s ease,width .25s ease}
+    #game-frame.full{right:32px;width:calc(100% - 32px)}
+    #panel-toggle{position:fixed;top:0;right:248px;width:32px;bottom:0;background:#161616;border-left:1px solid #222;border-right:1px solid #222;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:right .25s ease;user-select:none}
+    #panel-toggle.collapsed{right:0}
+    #panel-toggle:hover{background:#1a1a1a}
+    #panel-toggle span{color:#555;font-size:14px;transition:transform .25s ease}
+    #panel-toggle.collapsed span{transform:rotate(180deg)}
+    #panel{position:fixed;top:0;right:0;width:248px;bottom:0;background:#161616;overflow-y:auto;transition:transform .25s ease;z-index:9;display:flex;flex-direction:column}
+    #panel.collapsed{transform:translateX(248px)}
+    #panel::-webkit-scrollbar{width:4px}
+    #panel::-webkit-scrollbar-track{background:transparent}
+    #panel::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px}
+    .p-header{padding:14px 16px;border-bottom:1px solid #222}
+    .p-title{display:flex;align-items:center;gap:8px}
+    .p-title span{font-size:1.2rem}
+    .p-title h2{font-size:.85rem;font-weight:400;color:#888;letter-spacing:.5px}
+    .p-tabs{display:flex;flex-wrap:wrap;gap:4px;padding:10px 14px;border-bottom:1px solid #222}
+    .p-tab{padding:5px 10px;background:transparent;border:1px solid #2a2a2a;border-radius:4px;color:#555;font-size:.72rem;cursor:pointer;transition:all .15s;text-transform:lowercase}
+    .p-tab:hover{color:#aaa;border-color:#444}
+    .p-tab.active{color:#ccc;border-color:#444;background:#1e1e1e}
+    .p-scripts{padding:10px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+    .p-btn{display:block;width:100%;padding:10px 14px;background:#1a1a1a;border:1px solid #252525;border-radius:6px;color:#999;font-size:.78rem;text-align:left;cursor:pointer;transition:all .15s;font-family:inherit;text-transform:lowercase}
+    .p-btn:hover{background:#1e1e1e;color:#ddd;border-color:#3a3a3a}
+    .p-btn.copied{color:#6a8;border-color:#3a5a4a}
+    .p-hint{padding:12px 14px;font-size:.65rem;color:#444;text-align:center;border-top:1px solid #222;margin-top:auto;opacity:0;transition:opacity .3s ease}
+    .p-hint.visible{opacity:1}
+    .p-lookup{padding:10px 14px;border-bottom:1px solid #222}
+    .p-lookup-title{font-size:.68rem;color:#555;margin-bottom:8px;letter-spacing:.3px}
+    .p-lookup-row{display:flex;gap:4px;margin-bottom:4px}
+    .p-lookup-input{flex:1;padding:8px 10px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:4px;color:#ccc;font-size:.75rem;outline:none;font-family:inherit}
+    .p-lookup-input:focus{border-color:#444}
+    .p-lookup-input::placeholder{color:#3a3a3a}
+    .p-lookup-go{padding:8px 12px;background:#1e1e1e;border:1px solid #333;border-radius:4px;color:#aaa;font-size:.72rem;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit}
+    .p-lookup-go:hover{background:#252525;color:#ddd;border-color:#555}
+    .p-lookup-go:disabled{opacity:.4;cursor:not-allowed}
+    .p-lookup-hint{font-size:.58rem;color:#3a3a3a;margin-top:2px;line-height:1.3}
+    .p-lookup-status{font-size:.68rem;padding:6px 0;text-align:center}
+    .p-status-err{color:#c88}
+    .p-status-load{color:#666}
+    .p-status-ok{color:#6a8}
+    .p-answers{padding:0 14px 10px;overflow-y:auto;flex:1}
+    .p-answer-item{padding:8px 10px;background:#1a1a1a;border:1px solid #222;border-radius:4px;margin-bottom:4px;font-size:.72rem}
+    .p-answer-q{color:#888;margin-bottom:3px;line-height:1.3}
+    .p-answer-num{color:#555;font-size:.66rem;margin-right:4px}
+    .p-answer-choices{margin-top:3px;display:flex;flex-direction:column;gap:1px}
+    .p-answer-correct{color:#6a8;font-weight:500}
+    .p-answer-wrong{color:#444;font-size:.68rem}
+    .p-divider{border:none;border-top:1px solid #222;margin:4px 14px}
+  `;
+
+  // ---- Panel API JS for about:blank game launcher (answer fetching) ----
+  const PANEL_API_JS = `
+    var PROXIES=[
+      {name:"corsproxy",prefix:"https://corsproxy.io/?",post:true},
+      {name:"allorigins",prefix:"https://api.allorigins.win/raw?url=",post:false},
+      {name:"codetabs",prefix:"https://api.codetabs.com/v1/proxy?quest=",post:false}
+    ];
+    function proxyFetch(url,opts){
+      var method=(opts&&opts.method)||"GET";
+      var isPost=method==="POST";
+      var list=isPost?PROXIES.filter(function(p){return p.post}):PROXIES;
+      return tryP(0);
+      function tryP(i){
+        if(i>=list.length)return Promise.reject(new Error("all proxies failed — your school may be blocking them."));
+        var p=list[i];
+        var pUrl=p.prefix+encodeURIComponent(url);
+        var fo={method:method};
+        if(opts&&opts.headers)fo.headers=opts.headers;
+        if(opts&&opts.body)fo.body=opts.body;
+        var ac=new AbortController();fo.signal=ac.signal;
+        var tid=setTimeout(function(){ac.abort()},10000);
+        return fetch(pUrl,fo).then(function(r){
+          clearTimeout(tid);
+          if(!r.ok)throw new Error("HTTP "+r.status);
+          return r;
+        }).catch(function(e){
+          clearTimeout(tid);
+          return tryP(i+1);
+        });
+      }
+    }
+    function fetchQuizizz(input){
+      var v=input.trim();
+      if(/^[a-f0-9]{24}$/i.test(v))return fetchQuizizzQuiz(v);
+      if(!/^\\d+$/.test(v))return Promise.reject(new Error("enter a numeric room code or 24-char quiz id."));
+      return proxyFetch("https://game.quizizz.com/play-api/v5/checkRoom",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({roomCode:v})
+      }).then(function(r){return r.json()}).then(function(d){
+        var qid=(d.room&&d.room.quizId)||(d.data&&d.data.room&&d.data.room.quizId);
+        if(!qid)throw new Error("could not find quiz for that code — game may have ended.");
+        return fetchQuizizzQuiz(qid);
+      });
+    }
+    function fetchQuizizzQuiz(qid){
+      return proxyFetch("https://quizizz.com/api/main/quiz/"+qid+"?bypassProfanity=true")
+        .then(function(r){return r.json()}).then(function(d){
+          var quiz=d.data||d;
+          var qs=(quiz.info&&quiz.info.questions)||[];
+          if(!qs.length)throw new Error("no questions found in quiz.");
+          return qs.map(function(q,i){
+            var txt=(q.structure&&q.structure.query&&q.structure.query.text)||("question "+(i+1));
+            txt=txt.replace(/<[^>]+>/g,"");
+            var opts=(q.structure&&q.structure.options)||[];
+            var ans=q.structure&&q.structure.answer;
+            var ci=Array.isArray(ans)?ans:(typeof ans==="number"?[ans]:[]);
+            return{num:i+1,question:txt,options:opts.map(function(o,oi){
+              return{text:(o.text||"").replace(/<[^>]+>/g,""),correct:ci.indexOf(oi)!==-1};
+            })};
+          });
+        });
+    }
+    function fetchKahoot(input){
+      var v=input.trim();
+      var m=v.match(/kahoots?\\/([-\\w]+)/i)||v.match(/([\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12})/);
+      if(m)v=m[1];
+      if(!v||v.length<8)return Promise.reject(new Error("enter a kahoot quiz link or uuid. game PINs won't work."));
+      return proxyFetch("https://play.kahoot.it/rest/kahoots/"+v)
+        .then(function(r){return r.json()}).then(function(d){
+          var qs=d.questions;
+          if(!qs||!qs.length)throw new Error("quiz not found — it may be private. ask teacher for share link.");
+          return qs.map(function(q,i){
+            var txt=(q.question||("question "+(i+1))).replace(/<[^>]+>/g,"");
+            var ch=q.choices||[];
+            return{num:i+1,question:txt,options:ch.map(function(c){
+              return{text:(c.answer||"").replace(/<[^>]+>/g,""),correct:!!c.correct};
+            })};
+          });
+        });
+    }
+    function fetchEdpuzzle(input,gameUrl){
+      var id=input.trim();
+      if(!id&&gameUrl){var m=gameUrl.match(/\\/(assignments|media)\\/([\\da-f]+)/i);if(m)id=m[2];}
+      if(id.indexOf("edpuzzle.com")!==-1){var m2=id.match(/\\/(assignments|media)\\/([\\da-f]+)/i);if(m2)id=m2[2];}
+      if(!id)return Promise.reject(new Error("could not detect assignment id. paste the edpuzzle url."));
+      return proxyFetch("https://edpuzzle.com/api/v3/assignments/"+id)
+        .then(function(r){return r.json()}).then(function(d){
+          var qs=d.questions||(d.medias&&d.medias[0]&&d.medias[0].questions)||[];
+          if(!qs.length)throw new Error("no questions found — assignment may need login.");
+          return qs.map(function(q,i){
+            var txt=(q.body&&q.body[0]&&q.body[0].text)||q.title||("question "+(i+1));
+            txt=txt.replace(/<[^>]+>/g,"");
+            var ans=q.answers||[];
+            return{num:i+1,question:txt,options:ans.map(function(a){
+              var at=(a.body&&a.body[0]&&a.body[0].text)||a.text||"";
+              return{text:at.replace(/<[^>]+>/g,""),correct:!!a.isCorrect};
+            })};
+          });
+        });
+    }
+    function escHTML(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+    if(DATA.apiLookup){
+      var lkDiv=document.getElementById("p-lookup");
+      var lkIn=document.getElementById("p-lookup-input");
+      var lkBtn=document.getElementById("p-lookup-go");
+      var lkHint=document.getElementById("p-lookup-hint");
+      var lkStatus=document.getElementById("p-lookup-status");
+      var ansDiv=document.getElementById("p-answers");
+      var dividerEl=document.getElementById("p-divider");
+      lkDiv.style.display="";
+      lkIn.placeholder=DATA.apiLookup.inputPlaceholder||"enter code...";
+      lkHint.textContent=DATA.apiLookup.hint||"";
+      if(DATA.apiLookup.platform==="edpuzzle"&&DATA.gameUrl){
+        var am=DATA.gameUrl.match(/\\/(assignments|media)\\/([\\da-f]+)/i);
+        if(am){lkIn.value=am[2];lkIn.placeholder="auto-detected";}
+      }
+      function doLookup(){
+        var val=lkIn.value;
+        lkBtn.disabled=true;lkBtn.textContent="fetching...";
+        lkStatus.textContent="";lkStatus.className="p-lookup-status p-status-load";
+        ansDiv.style.display="none";ansDiv.innerHTML="";
+        var h;
+        if(DATA.apiLookup.platform==="quizizz")h=fetchQuizizz(val);
+        else if(DATA.apiLookup.platform==="kahoot")h=fetchKahoot(val);
+        else if(DATA.apiLookup.platform==="edpuzzle")h=fetchEdpuzzle(val,DATA.gameUrl);
+        else{lkBtn.disabled=false;lkBtn.textContent="fetch";return;}
+        h.then(function(results){
+          lkBtn.disabled=false;lkBtn.textContent="fetch";
+          lkStatus.textContent="found "+results.length+" questions";
+          lkStatus.className="p-lookup-status p-status-ok";
+          renderAnswers(results);
+        }).catch(function(err){
+          lkBtn.disabled=false;lkBtn.textContent="fetch";
+          lkStatus.textContent=err.message||"fetch failed.";
+          lkStatus.className="p-lookup-status p-status-err";
+          ansDiv.style.display="none";
+        });
+      }
+      function renderAnswers(results){
+        dividerEl.style.display="";ansDiv.style.display="";
+        ansDiv.innerHTML=results.map(function(r){
+          var h='<div class="p-answer-item">';
+          h+='<div class="p-answer-q"><span class="p-answer-num">q'+r.num+':</span> '+escHTML(r.question)+'</div>';
+          if(r.options.length>0){
+            h+='<div class="p-answer-choices">';
+            r.options.forEach(function(o){
+              if(o.correct)h+='<div class="p-answer-correct">\\u2192 '+escHTML(o.text)+'</div>';
+              else h+='<div class="p-answer-wrong">\\u00a0\\u00a0 '+escHTML(o.text)+'</div>';
+            });
+            h+='</div>';
+          }
+          h+='</div>';return h;
+        }).join("");
+      }
+      lkBtn.addEventListener("click",doLookup);
+      lkIn.addEventListener("keydown",function(e){if(e.key==="Enter")doLookup();});
+    }
+  `;
+
   // ---- DOM refs ----
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
@@ -59,14 +272,31 @@
         ShrimpTools.unitConverter();
         ShrimpTools.timer();
         ShrimpTools.gpa();
+        ShrimpTools.gradeCalc();
+        ShrimpTools.typingTest();
+        ShrimpTools.randomPicker();
       } else if (page === "writer") {
         ShrimpTools.textTools();
         ShrimpTools.citations();
+        ShrimpTools.essayOutliner();
+        ShrimpTools.textToSpeech();
       } else if (page === "reference") {
         ShrimpTools.formulas();
         ShrimpTools.periodicTable();
       } else if (page === "notes") {
         ShrimpTools.notes();
+      } else if (page === "whiteboard") {
+        ShrimpTools.whiteboard();
+      } else if (page === "study") {
+        ShrimpTools.flashcards();
+        ShrimpTools.quizMode();
+        ShrimpTools.studyPlanner();
+        ShrimpTools.classSchedule();
+      } else if (page === "settings") {
+        ShrimpTools.focusSounds();
+      } else if (page === "library") {
+        ShrimpTools.sourceFinder();
+        ShrimpTools.vocabulary();
       }
     }
   }
@@ -143,6 +373,113 @@
     toast("Opened in about:blank");
   }
 
+  // ---- Game Launcher with Script Panel ----
+  function openGameWithPanel(cheat) {
+    const win = window.open("about:blank", "_blank");
+    if (!win) {
+      toast("Pop-up blocked! Allow pop-ups for this site.");
+      return;
+    }
+    const cloakTitle = document.title || "Google Docs";
+    const cloakIcon = ($$("link[rel='icon']")[0] || {}).href ||
+      "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
+
+    // Serialize cheat data as Base64 JSON to avoid </script> parsing issues
+    const payload = {
+      name: cheat.name,
+      icon: cheat.icon,
+      gamemodes: cheat.gamemodes,
+      apiLookup: cheat.apiLookup || null,
+      gameUrl: cheat.url
+    };
+    const dataB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+
+    win.document.write(buildPanelHTML(cloakTitle, cloakIcon, cheat.url, dataB64));
+    win.document.close();
+    try { win.document.querySelector("#game-frame").focus(); } catch (_) {}
+    toast("Launched " + cheat.name + " with shrimpanel");
+  }
+
+  function buildPanelHTML(cloakTitle, cloakIcon, gameUrl, dataB64) {
+    return '<!DOCTYPE html><html><head>' +
+      '<title>' + cloakTitle + '</title>' +
+      '<link rel="icon" href="' + cloakIcon + '">' +
+      '<style>' + PANEL_CSS + '</style>' +
+      '</head><body>' +
+      '<iframe id="game-frame" src="' + gameUrl + '" allowfullscreen allow="clipboard-read;clipboard-write"></iframe>' +
+      '<div id="panel-toggle"><span>&#9664;</span></div>' +
+      '<div id="panel">' +
+        '<div class="p-header">' +
+          '<div class="p-title"><span id="p-icon"></span><h2 id="p-name">shrimpanel</h2></div>' +
+        '</div>' +
+        '<div class="p-tabs" id="p-tabs"></div>' +
+        '<div class="p-lookup" id="p-lookup" style="display:none">' +
+          '<div class="p-lookup-title">answer lookup</div>' +
+          '<div class="p-lookup-row">' +
+            '<input class="p-lookup-input" id="p-lookup-input" type="text" placeholder="">' +
+            '<button class="p-lookup-go" id="p-lookup-go">fetch</button>' +
+          '</div>' +
+          '<div class="p-lookup-hint" id="p-lookup-hint"></div>' +
+          '<div class="p-lookup-status" id="p-lookup-status"></div>' +
+        '</div>' +
+        '<div class="p-answers" id="p-answers" style="display:none"></div>' +
+        '<hr class="p-divider" id="p-divider" style="display:none">' +
+        '<div class="p-scripts" id="p-scripts"></div>' +
+        '<div class="p-hint" id="p-hint">paste in console (F12)</div>' +
+      '</div>' +
+      '<script>' +
+        'var DATA=JSON.parse(decodeURIComponent(escape(atob("' + dataB64 + '"))));' +
+        'var activeGM=0;' +
+        'document.getElementById("p-icon").textContent=DATA.icon;' +
+        'function renderTabs(){' +
+          'var tabs=document.getElementById("p-tabs");' +
+          'tabs.innerHTML=DATA.gamemodes.map(function(gm,i){' +
+            'return "\\x3cbutton class=\\"p-tab"+(i===activeGM?" active":"")+ "\\" data-i=\\""+i+"\\">"+gm.name.toLowerCase()+"\\x3c/button>"' +
+          '}).join("");' +
+          'tabs.querySelectorAll(".p-tab").forEach(function(t){' +
+            't.addEventListener("click",function(){' +
+              'activeGM=parseInt(t.dataset.i);' +
+              'renderTabs();renderScripts()' +
+            '})' +
+          '})' +
+        '}' +
+        'function renderScripts(){' +
+          'var gm=DATA.gamemodes[activeGM];' +
+          'var el=document.getElementById("p-scripts");' +
+          'el.innerHTML=gm.cheats.map(function(c,i){' +
+            'return "\\x3cbutton class=\\"p-btn\\" data-i=\\""+i+"\\">"+c.name.toLowerCase()+"\\x3c/button>"' +
+          '}).join("");' +
+          'el.querySelectorAll(".p-btn").forEach(function(btn){' +
+            'btn.addEventListener("click",function(){' +
+              'var code=gm.cheats[parseInt(btn.dataset.i)].code;' +
+              'var orig=btn.textContent;' +
+              'navigator.clipboard.writeText(code).then(function(){' +
+                'btn.textContent="copied \\u2713";btn.classList.add("copied");' +
+                'document.getElementById("p-hint").classList.add("visible");' +
+                'setTimeout(function(){btn.textContent=orig;btn.classList.remove("copied")},1500)' +
+              '},function(){' +
+                'var ta=document.createElement("textarea");ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);' +
+                'btn.textContent="copied \\u2713";btn.classList.add("copied");' +
+                'document.getElementById("p-hint").classList.add("visible");' +
+                'setTimeout(function(){btn.textContent=orig;btn.classList.remove("copied")},1500)' +
+              '})' +
+            '})' +
+          '})' +
+        '}' +
+        'renderTabs();renderScripts();' +
+        'var toggle=document.getElementById("panel-toggle");' +
+        'var panel=document.getElementById("panel");' +
+        'var frame=document.getElementById("game-frame");' +
+        'toggle.addEventListener("click",function(){' +
+          'var c=panel.classList.toggle("collapsed");' +
+          'toggle.classList.toggle("collapsed",c);' +
+          'frame.classList.toggle("full",c)' +
+        '});' +
+      PANEL_API_JS +
+      '</' + 'script>' +
+      '</body></html>';
+  }
+
   // ---- Cheats: List View ----
   function showCheatList() {
     state.selectedCheat = null;
@@ -191,7 +528,11 @@
         <a href="${cheat.url}" class="cheat-site-link" target="_blank">${cheat.url}</a>
       </div>
       <p class="cheat-detail-desc">${cheat.desc}</p>
+      <button class="btn cheat-launch-btn" id="cheat-launch-game">launch with shrimpanel</button>
     `;
+
+    // Launch button handler
+    $("#cheat-launch-game").addEventListener("click", () => openGameWithPanel(cheat));
 
     // Manual
     $("#cheat-manual").innerHTML = `
@@ -384,6 +725,52 @@
     }
     openInBlank(window.location.href);
   });
+
+  // ---- Google Docs Disguise Mode ----
+  const disguiseBar = document.createElement("div");
+  disguiseBar.id = "disguise-bar";
+  disguiseBar.innerHTML = '<div class="db-icon"><svg viewBox="0 0 48 48"><path fill="#2196F3" d="M37 45H11c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h17l11 11v29c0 1.1-.9 2-2 2z"/><path fill="#BBDEFB" d="M40 14H28V2z"/><path fill="#E1F5FE" d="M15 23h18v2H15zm0 4h18v2H15zm0 4h12v2H15z"/></svg></div><div><div class="db-title">Untitled document</div><div class="db-subtitle">File Edit View Insert Format Tools</div></div>';
+  document.body.appendChild(disguiseBar);
+
+  const disguiseExit = document.createElement("button");
+  disguiseExit.id = "disguise-exit";
+  disguiseExit.title = "Exit disguise";
+  document.body.appendChild(disguiseExit);
+
+  function activateDisguise() {
+    document.body.classList.add("disguise");
+    document.title = "Untitled document - Google Docs";
+    let link = $("link[rel='icon']");
+    if (link) link.href = "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
+    localStorage.setItem("shrimpify-disguise", "1");
+    toast("Disguise activated");
+  }
+
+  function deactivateDisguise() {
+    document.body.classList.remove("disguise");
+    const savedTitle = localStorage.getItem("shrimpify-cloak-title");
+    const savedIcon = localStorage.getItem("shrimpify-cloak-icon");
+    document.title = savedTitle || "Google Docs";
+    let link = $("link[rel='icon']");
+    if (link) link.href = savedIcon || "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
+    localStorage.removeItem("shrimpify-disguise");
+    toast("Disguise deactivated");
+  }
+
+  $("#disguise-toggle").addEventListener("click", () => {
+    if (document.body.classList.contains("disguise")) deactivateDisguise();
+    else activateDisguise();
+  });
+
+  disguiseExit.addEventListener("click", deactivateDisguise);
+
+  // Restore disguise on load
+  if (localStorage.getItem("shrimpify-disguise") === "1") {
+    document.body.classList.add("disguise");
+    document.title = "Untitled document - Google Docs";
+    let link = $("link[rel='icon']");
+    if (link) link.href = "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
+  }
 
   // ---- Apps: open in about:blank ----
   $$(".app-card").forEach((card) => {

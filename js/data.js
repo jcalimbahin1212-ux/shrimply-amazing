@@ -130,6 +130,28 @@ const FORMULAS = [
   { category: "Chemistry", name: "Percent Composition", formula: "% = (mass of element / molar mass) * 100", desc: "Mass percent of an element in a compound" },
   { category: "Chemistry", name: "Moles from Mass", formula: "n = m / M", desc: "Mass divided by molar mass" },
   { category: "Chemistry", name: "Avogadro's Number", formula: "1 mol = 6.022 * 10^23 particles", desc: "Number of particles in one mole" },
+  // Biology
+  { category: "Biology", name: "Hardy-Weinberg Equation", formula: "p^2 + 2pq + q^2 = 1", desc: "Allele frequency in a population at equilibrium" },
+  { category: "Biology", name: "Allele Frequency", formula: "p + q = 1", desc: "Sum of dominant (p) and recessive (q) allele frequencies" },
+  { category: "Biology", name: "Population Growth", formula: "dN/dt = rN", desc: "Exponential growth: r=rate, N=population size" },
+  { category: "Biology", name: "Logistic Growth", formula: "dN/dt = rN((K-N)/K)", desc: "Growth limited by carrying capacity K" },
+  { category: "Biology", name: "Photosynthesis", formula: "6CO2 + 6H2O -> C6H12O6 + 6O2", desc: "Light energy converts CO2 and water to glucose and oxygen" },
+  { category: "Biology", name: "Cellular Respiration", formula: "C6H12O6 + 6O2 -> 6CO2 + 6H2O + ATP", desc: "Glucose broken down for energy" },
+  { category: "Biology", name: "BMI", formula: "BMI = mass(kg) / height(m)^2", desc: "Body mass index" },
+  { category: "Biology", name: "Surface Area:Volume", formula: "SA:V = surface area / volume", desc: "Decreases as cell size increases, limits cell size" },
+  { category: "Biology", name: "Water Potential", formula: "Psi = Psi_s + Psi_p", desc: "Solute potential plus pressure potential" },
+  { category: "Biology", name: "Simpson's Diversity Index", formula: "D = 1 - Sum(n/N)^2", desc: "n=individuals of one species, N=total individuals" },
+  // Statistics
+  { category: "Statistics", name: "Mean", formula: "x_bar = Sum(x) / n", desc: "Sum of values divided by count" },
+  { category: "Statistics", name: "Standard Deviation", formula: "sigma = sqrt(Sum(x - x_bar)^2 / n)", desc: "Spread of data around the mean" },
+  { category: "Statistics", name: "Variance", formula: "sigma^2 = Sum(x - x_bar)^2 / n", desc: "Square of standard deviation" },
+  { category: "Statistics", name: "Z-Score", formula: "z = (x - mu) / sigma", desc: "How many standard deviations from the mean" },
+  { category: "Statistics", name: "Probability (OR)", formula: "P(A or B) = P(A) + P(B) - P(A and B)", desc: "Addition rule for probability" },
+  { category: "Statistics", name: "Probability (AND)", formula: "P(A and B) = P(A) * P(B|A)", desc: "Multiplication rule for probability" },
+  { category: "Statistics", name: "Combinations", formula: "C(n,r) = n! / (r!(n-r)!)", desc: "Number of ways to choose r items from n" },
+  { category: "Statistics", name: "Permutations", formula: "P(n,r) = n! / (n-r)!", desc: "Number of ordered arrangements of r items from n" },
+  { category: "Statistics", name: "Linear Regression", formula: "y_hat = a + bx", desc: "Predicted value from slope b and intercept a" },
+  { category: "Statistics", name: "Correlation Coefficient", formula: "r = Sum((x-x_bar)(y-y_bar)) / sqrt(Sum(x-x_bar)^2 * Sum(y-y_bar)^2)", desc: "Strength of linear relationship, -1 to 1" },
 ];
 
 // ---- Periodic Table Elements ----
@@ -302,7 +324,13 @@ const CHEATS = [
           }
         ]
       }
-    ]
+    ],
+    apiLookup: {
+      platform: "kahoot",
+      inputLabel: "quiz link or uuid",
+      inputPlaceholder: "paste kahoot quiz link or uuid...",
+      hint: "get the quiz share link from your teacher. game PINs won't work."
+    }
   },
   {
     id: "blooket",
@@ -581,7 +609,13 @@ const CHEATS = [
           }
         ]
       }
-    ]
+    ],
+    apiLookup: {
+      platform: "quizizz",
+      inputLabel: "room code or quiz id",
+      inputPlaceholder: "e.g. 123456",
+      hint: "enter the game code from your teacher's screen."
+    }
   },
   {
     id: "edpuzzle",
@@ -619,7 +653,14 @@ const CHEATS = [
           }
         ]
       }
-    ]
+    ],
+    apiLookup: {
+      platform: "edpuzzle",
+      inputLabel: "assignment url or id",
+      inputPlaceholder: "auto-detected from game url",
+      hint: "id is auto-extracted from the url. you can also paste an assignment link.",
+      autoDetect: true
+    }
   },
   {
     id: "quizlet",

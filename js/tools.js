@@ -997,6 +997,1813 @@
   }
 
   // ============================================================
+  //  10. FLASHCARDS
+  // ============================================================
+  function _initFlashcards() {
+    var decks = JSON.parse(localStorage.getItem("shrimpify-flashcard-decks") || "[]");
+    var currentDeckId = null;
+    var studyCards = [];
+    var studyIndex = 0;
+    var isFlipped = false;
+
+    var deckView = $("#fc-deck-view");
+    var editorView = $("#fc-editor");
+    var studyArea = $("#fc-study-area");
+
+    function saveDecks() {
+      localStorage.setItem("shrimpify-flashcard-decks", JSON.stringify(decks));
+    }
+
+    function getDeck(id) {
+      return decks.find(function(d) { return d.id === id; });
+    }
+
+    function showView(view) {
+      deckView.style.display = view === "decks" ? "" : "none";
+      editorView.style.display = view === "editor" ? "" : "none";
+      studyArea.style.display = view === "study" ? "" : "none";
+    }
+
+    function renderDeckList() {
+      var deckGrid = $("#fc-deck-list");
+      if (decks.length === 0) {
+        deckGrid.innerHTML = '<p style="color:var(--text-dim)">No decks yet. Create one below!</p>';
+        return;
+      }
+      deckGrid.innerHTML = decks.map(function(deck) {
+        return '<div class="fc-deck-card" data-id="' + deck.id + '">' +
+          '<div class="fc-deck-name">' + (deck.name || "Untitled Deck") + '</div>' +
+          '<div class="fc-deck-count">' + deck.cards.length + ' card' + (deck.cards.length !== 1 ? 's' : '') + '</div>' +
+          '<div class="fc-deck-actions">' +
+          '<button class="fc-study-deck-btn" data-id="' + deck.id + '">Study</button>' +
+          '<button class="fc-edit-deck-btn" data-id="' + deck.id + '">Edit</button>' +
+          '<button class="fc-delete-deck-btn" data-id="' + deck.id + '">Delete</button>' +
+          '</div>' +
+          '</div>';
+      }).join("");
+
+      deckGrid.querySelectorAll(".fc-study-deck-btn").forEach(function(btn) {
+        btn.addEventListener("click", function(e) {
+          e.stopPropagation();
+          var deck = getDeck(btn.dataset.id);
+          if (deck && deck.cards.length > 0) {
+            currentDeckId = deck.id;
+            startStudy();
+          } else {
+            toast("Add some cards first!");
+          }
+        });
+      });
+
+      deckGrid.querySelectorAll(".fc-edit-deck-btn").forEach(function(btn) {
+        btn.addEventListener("click", function(e) {
+          e.stopPropagation();
+          currentDeckId = btn.dataset.id;
+          openEditor();
+        });
+      });
+
+      deckGrid.querySelectorAll(".fc-delete-deck-btn").forEach(function(btn) {
+        btn.addEventListener("click", function(e) {
+          e.stopPropagation();
+          decks = decks.filter(function(d) { return d.id !== btn.dataset.id; });
+          saveDecks();
+          renderDeckList();
+          toast("Deck deleted");
+        });
+      });
+    }
+
+    function openEditor() {
+      var deck = getDeck(currentDeckId);
+      if (!deck) return;
+      $("#fc-deck-title").textContent = deck.name || "Untitled Deck";
+      renderCardList();
+      showView("editor");
+    }
+
+    function renderCardList() {
+      var deck = getDeck(currentDeckId);
+      if (!deck) return;
+      var cardList = $("#fc-card-list");
+      if (deck.cards.length === 0) {
+        cardList.innerHTML = '<p style="color:var(--text-dim)">No cards yet. Add one above!</p>';
+        return;
+      }
+      cardList.innerHTML = deck.cards.map(function(card, idx) {
+        return '<div class="fc-card-item">' +
+          '<div class="fc-card-front-preview">' + card.front + '</div>' +
+          '<div class="fc-card-back-preview">' + card.back + '</div>' +
+          '<span class="fc-card-status">' + (card.mastered ? "Mastered" : "") + '</span>' +
+          '<button class="fc-delete-card-btn" data-idx="' + idx + '">Delete</button>' +
+          '</div>';
+      }).join("");
+
+      cardList.querySelectorAll(".fc-delete-card-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var deck = getDeck(currentDeckId);
+          if (deck) {
+            deck.cards.splice(parseInt(btn.dataset.idx), 1);
+            saveDecks();
+            renderCardList();
+            toast("Card deleted");
+          }
+        });
+      });
+    }
+
+    function shuffleArray(arr) {
+      var shuffled = arr.slice();
+      for (var i = shuffled.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = shuffled[i];
+        shuffled[i] = shuffled[j];
+        shuffled[j] = temp;
+      }
+      return shuffled;
+    }
+
+    function startStudy() {
+      var deck = getDeck(currentDeckId);
+      if (!deck) return;
+      var unmastered = deck.cards.filter(function(c) { return !c.mastered; });
+      if (unmastered.length === 0) {
+        unmastered = deck.cards.slice();
+        deck.cards.forEach(function(c) { c.mastered = false; });
+        saveDecks();
+      }
+      studyCards = shuffleArray(unmastered);
+      studyIndex = 0;
+      isFlipped = false;
+      showView("study");
+      renderStudyCard();
+    }
+
+    function renderStudyCard() {
+      var studyDone = $("#fc-study-done");
+      var studyCardArea = $("#fc-study-card-area");
+      var progressBar = $("#fc-progress-bar");
+      var progressText = $("#fc-progress-text");
+
+      if (studyIndex >= studyCards.length) {
+        studyDone.style.display = "";
+        studyCardArea.style.display = "none";
+        progressText.textContent = "Complete!";
+        progressBar.style.width = "100%";
+        return;
+      }
+
+      studyDone.style.display = "none";
+      studyCardArea.style.display = "";
+
+      var card = studyCards[studyIndex];
+      $("#fc-study-front").textContent = card.front;
+      $("#fc-study-back").textContent = card.back;
+      $("#fc-study-card").classList.remove("flipped");
+      isFlipped = false;
+
+      var progress = Math.round((studyIndex / studyCards.length) * 100);
+      progressBar.style.width = progress + "%";
+      progressText.textContent = (studyIndex + 1) + " / " + studyCards.length;
+    }
+
+    // New deck
+    $("#fc-new-deck").addEventListener("click", function() {
+      var nameInput = $("#fc-deck-name-input");
+      var name = nameInput.value.trim();
+      if (!name) {
+        toast("Enter a deck name");
+        return;
+      }
+      var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      decks.push({ id: id, name: name, cards: [] });
+      saveDecks();
+      nameInput.value = "";
+      renderDeckList();
+      toast("Deck created");
+    });
+
+    // Add card
+    $("#fc-add-card").addEventListener("click", function() {
+      var deck = getDeck(currentDeckId);
+      if (!deck) return;
+      var front = $("#fc-card-front").value.trim();
+      var back = $("#fc-card-back").value.trim();
+      if (!front || !back) {
+        toast("Enter both front and back");
+        return;
+      }
+      deck.cards.push({ front: front, back: back, mastered: false });
+      saveDecks();
+      $("#fc-card-front").value = "";
+      $("#fc-card-back").value = "";
+      renderCardList();
+      toast("Card added");
+    });
+
+    // Start study from editor
+    $("#fc-start-study").addEventListener("click", function() {
+      var deck = getDeck(currentDeckId);
+      if (deck && deck.cards.length > 0) {
+        startStudy();
+      } else {
+        toast("Add some cards first!");
+      }
+    });
+
+    // Back to decks
+    $("#fc-back-to-decks").addEventListener("click", function() {
+      showView("decks");
+      renderDeckList();
+    });
+
+    // Study controls
+    $("#fc-flip-card").addEventListener("click", function() {
+      var cardEl = $("#fc-study-card");
+      if (isFlipped) {
+        cardEl.classList.remove("flipped");
+      } else {
+        cardEl.classList.add("flipped");
+      }
+      isFlipped = !isFlipped;
+    });
+
+    $("#fc-got-it").addEventListener("click", function() {
+      var deck = getDeck(currentDeckId);
+      if (deck) {
+        var currentCard = studyCards[studyIndex];
+        var originalCard = deck.cards.find(function(c) {
+          return c.front === currentCard.front && c.back === currentCard.back;
+        });
+        if (originalCard) {
+          originalCard.mastered = true;
+          saveDecks();
+        }
+      }
+      studyIndex++;
+      renderStudyCard();
+    });
+
+    $("#fc-again").addEventListener("click", function() {
+      studyIndex++;
+      renderStudyCard();
+    });
+
+    // Back to editor from study
+    $("#fc-back-to-editor").addEventListener("click", function() {
+      openEditor();
+    });
+
+    // Restart study
+    $("#fc-restart-study").addEventListener("click", function() {
+      startStudy();
+    });
+
+    // Initial render
+    showView("decks");
+    renderDeckList();
+  }
+
+  // ============================================================
+  //  11. QUIZ MODE
+  // ============================================================
+  function _initQuizMode() {
+    var currentDeck = null;
+    var quizType = "multiple-choice";
+    var quizQuestions = [];
+    var currentQuestion = 0;
+    var score = 0;
+    var answered = false;
+
+    var setupView = $("#quiz-setup");
+    var quizArea = $("#quiz-area");
+    var resultsView = $("#quiz-results");
+
+    function getDecks() {
+      return JSON.parse(localStorage.getItem("shrimpify-flashcard-decks") || "[]");
+    }
+
+    function showQuizView(view) {
+      setupView.style.display = view === "setup" ? "" : "none";
+      quizArea.style.display = view === "quiz" ? "" : "none";
+      resultsView.style.display = view === "results" ? "" : "none";
+    }
+
+    function populateDeckSelect() {
+      var decks = getDecks();
+      var deckSelect = $("#quiz-deck-select");
+      var noDecks = $("#quiz-no-decks");
+
+      var validDecks = decks.filter(function(d) { return d.cards.length >= 4; });
+
+      if (validDecks.length === 0) {
+        noDecks.style.display = "";
+        noDecks.textContent = "No decks with 4+ cards available. Create flashcard decks first!";
+        deckSelect.style.display = "none";
+        $("#quiz-start").disabled = true;
+        return;
+      }
+
+      noDecks.style.display = "none";
+      deckSelect.style.display = "";
+      $("#quiz-start").disabled = false;
+
+      deckSelect.innerHTML = validDecks.map(function(d) {
+        return '<option value="' + d.id + '">' + d.name + ' (' + d.cards.length + ' cards)</option>';
+      }).join("");
+    }
+
+    function shuffleArray(arr) {
+      var shuffled = arr.slice();
+      for (var i = shuffled.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = shuffled[i];
+        shuffled[i] = shuffled[j];
+        shuffled[j] = temp;
+      }
+      return shuffled;
+    }
+
+    function startQuiz() {
+      var decks = getDecks();
+      var deckId = $("#quiz-deck-select").value;
+      currentDeck = decks.find(function(d) { return d.id === deckId; });
+      if (!currentDeck || currentDeck.cards.length < 4) {
+        toast("Select a valid deck");
+        return;
+      }
+
+      quizType = $("#quiz-type").value;
+      var count = parseInt($("#quiz-count").value) || 10;
+      count = Math.min(count, currentDeck.cards.length);
+
+      quizQuestions = shuffleArray(currentDeck.cards).slice(0, count);
+      currentQuestion = 0;
+      score = 0;
+      answered = false;
+
+      showQuizView("quiz");
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      if (currentQuestion >= quizQuestions.length) {
+        showResults();
+        return;
+      }
+
+      var q = quizQuestions[currentQuestion];
+      $("#quiz-question").textContent = q.front;
+      $("#quiz-progress").textContent = "Question " + (currentQuestion + 1) + " of " + quizQuestions.length;
+      $("#quiz-feedback").textContent = "";
+      $("#quiz-feedback").className = "quiz-feedback";
+      $("#quiz-next").style.display = "none";
+      answered = false;
+
+      var choicesDiv = $("#quiz-choices");
+      var typeInputDiv = $("#quiz-type-input");
+
+      if (quizType === "multiple-choice") {
+        choicesDiv.style.display = "";
+        typeInputDiv.style.display = "none";
+
+        var wrongAnswers = currentDeck.cards.filter(function(c) {
+          return c.back !== q.back;
+        });
+        var wrongChoices = shuffleArray(wrongAnswers).slice(0, 3).map(function(c) {
+          return c.back;
+        });
+        var allChoices = shuffleArray([q.back].concat(wrongChoices));
+
+        choicesDiv.innerHTML = allChoices.map(function(choice) {
+          return '<button class="quiz-choice-btn" data-answer="' + choice.replace(/"/g, '&quot;') + '">' + choice + '</button>';
+        }).join("");
+
+        choicesDiv.querySelectorAll(".quiz-choice-btn").forEach(function(btn) {
+          btn.addEventListener("click", function() {
+            if (answered) return;
+            checkAnswer(btn.dataset.answer, q.back);
+            choicesDiv.querySelectorAll(".quiz-choice-btn").forEach(function(b) {
+              if (b.dataset.answer === q.back) {
+                b.classList.add("correct");
+              } else if (b === btn && btn.dataset.answer !== q.back) {
+                b.classList.add("incorrect");
+              }
+              b.disabled = true;
+            });
+          });
+        });
+      } else {
+        choicesDiv.style.display = "none";
+        typeInputDiv.style.display = "";
+        $("#quiz-answer-input").value = "";
+        $("#quiz-answer-input").disabled = false;
+        $("#quiz-submit-answer").disabled = false;
+        $("#quiz-answer-input").focus();
+      }
+    }
+
+    function checkAnswer(userAnswer, correctAnswer) {
+      answered = true;
+      var feedback = $("#quiz-feedback");
+
+      var isCorrect = userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+
+      if (isCorrect) {
+        score++;
+        feedback.textContent = "Correct!";
+        feedback.className = "quiz-feedback correct";
+      } else {
+        feedback.textContent = "Wrong! The answer was: " + correctAnswer;
+        feedback.className = "quiz-feedback incorrect";
+      }
+
+      $("#quiz-next").style.display = "";
+    }
+
+    function showResults() {
+      showQuizView("results");
+      var percent = Math.round((score / quizQuestions.length) * 100);
+      $("#quiz-score").innerHTML = "You scored <strong>" + score + " / " + quizQuestions.length + "</strong> (" + percent + "%)";
+    }
+
+    // Event listeners
+    $("#quiz-start").addEventListener("click", startQuiz);
+
+    $("#quiz-submit-answer").addEventListener("click", function() {
+      if (answered) return;
+      var userAnswer = $("#quiz-answer-input").value;
+      var q = quizQuestions[currentQuestion];
+      checkAnswer(userAnswer, q.back);
+      $("#quiz-answer-input").disabled = true;
+      $("#quiz-submit-answer").disabled = true;
+    });
+
+    $("#quiz-answer-input").addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && !answered) {
+        $("#quiz-submit-answer").click();
+      }
+    });
+
+    $("#quiz-next").addEventListener("click", function() {
+      currentQuestion++;
+      renderQuestion();
+    });
+
+    $("#quiz-restart").addEventListener("click", function() {
+      startQuiz();
+    });
+
+    $("#quiz-back-setup").addEventListener("click", function() {
+      showQuizView("setup");
+      populateDeckSelect();
+    });
+
+    // Initialize
+    showQuizView("setup");
+    populateDeckSelect();
+  }
+
+  // ============================================================
+  //  12. STUDY PLANNER
+  // ============================================================
+  function _initStudyPlanner() {
+    var tasks = JSON.parse(localStorage.getItem("shrimpify-study-planner") || "[]");
+    var currentFilter = "all";
+
+    function saveTasks() {
+      localStorage.setItem("shrimpify-study-planner", JSON.stringify(tasks));
+    }
+
+    function getToday() {
+      var d = new Date();
+      return d.toISOString().split("T")[0];
+    }
+
+    function getWeekFromNow() {
+      var d = new Date();
+      d.setDate(d.getDate() + 7);
+      return d.toISOString().split("T")[0];
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "No due date";
+      var d = new Date(dateStr + "T00:00:00");
+      var options = { weekday: "short", month: "short", day: "numeric" };
+      return d.toLocaleDateString(undefined, options);
+    }
+
+    function isOverdue(dateStr, done) {
+      if (!dateStr || done) return false;
+      return dateStr < getToday();
+    }
+
+    function filterTasks() {
+      var today = getToday();
+      var weekEnd = getWeekFromNow();
+
+      return tasks.filter(function(t) {
+        if (currentFilter === "all") return true;
+        if (currentFilter === "today") return t.due === today;
+        if (currentFilter === "week") return t.due >= today && t.due <= weekEnd;
+        if (currentFilter === "overdue") return isOverdue(t.due, t.done);
+        return true;
+      });
+    }
+
+    function renderTasks() {
+      var list = $("#planner-list");
+      var filtered = filterTasks();
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<p style="color:var(--text-dim)">No tasks found.</p>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(function(task) {
+        var overdueClass = isOverdue(task.due, task.done) ? " overdue" : "";
+        var doneClass = task.done ? " done" : "";
+        return '<div class="planner-task' + overdueClass + doneClass + '" data-id="' + task.id + '">' +
+          '<input type="checkbox" class="planner-checkbox" data-id="' + task.id + '"' + (task.done ? ' checked' : '') + '>' +
+          '<span class="planner-subject-badge">' + task.subject + '</span>' +
+          '<span class="planner-task-name">' + task.task + '</span>' +
+          '<span class="planner-due-date">' + formatDate(task.due) + '</span>' +
+          '<button class="planner-delete-btn" data-id="' + task.id + '">Delete</button>' +
+          '</div>';
+      }).join("");
+
+      list.querySelectorAll(".planner-checkbox").forEach(function(cb) {
+        cb.addEventListener("change", function() {
+          var task = tasks.find(function(t) { return t.id === cb.dataset.id; });
+          if (task) {
+            task.done = cb.checked;
+            saveTasks();
+            renderTasks();
+          }
+        });
+      });
+
+      list.querySelectorAll(".planner-delete-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          tasks = tasks.filter(function(t) { return t.id !== btn.dataset.id; });
+          saveTasks();
+          renderTasks();
+          toast("Task deleted");
+        });
+      });
+    }
+
+    // Add task
+    $("#planner-add-task").addEventListener("click", function() {
+      var subject = $("#planner-subject-input").value.trim();
+      var taskName = $("#planner-task-input").value.trim();
+      var due = $("#planner-due-date").value;
+
+      if (!subject || !taskName) {
+        toast("Enter subject and task");
+        return;
+      }
+
+      var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      tasks.push({
+        id: id,
+        subject: subject,
+        task: taskName,
+        due: due,
+        done: false
+      });
+      saveTasks();
+
+      $("#planner-subject-input").value = "";
+      $("#planner-task-input").value = "";
+      $("#planner-due-date").value = "";
+
+      renderTasks();
+      toast("Task added");
+    });
+
+    // Filter
+    $("#planner-filter").addEventListener("change", function() {
+      currentFilter = this.value;
+      renderTasks();
+    });
+
+    // Clear done
+    $("#planner-clear-done").addEventListener("click", function() {
+      var beforeCount = tasks.length;
+      tasks = tasks.filter(function(t) { return !t.done; });
+      var removed = beforeCount - tasks.length;
+      saveTasks();
+      renderTasks();
+      toast("Cleared " + removed + " completed task" + (removed !== 1 ? "s" : ""));
+    });
+
+    // Initial render
+    renderTasks();
+  }
+
+  // ============================================================
+  //  13. SOURCE FINDER
+  // ============================================================
+  function _initSourceFinder() {
+    var searchInput = $("#source-search-input");
+    var searchBtn = $("#source-search-btn");
+    var loadingEl = $("#source-loading");
+    var resultsEl = $("#source-results");
+    var articlesCol = $("#source-articles-col");
+    var booksCol = $("#source-books-col");
+
+    function stripHtml(html) {
+      return html.replace(/<[^>]+>/g, "");
+    }
+
+    function search() {
+      var q = searchInput.value.trim();
+      if (!q) {
+        toast("Enter a search term");
+        return;
+      }
+
+      loadingEl.style.display = "";
+      resultsEl.style.display = "none";
+      articlesCol.innerHTML = "";
+      booksCol.innerHTML = "";
+
+      var wikiUrl = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + encodeURIComponent(q) + "&srlimit=20&format=json&origin=*";
+      var bookUrl = "https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=20";
+
+      var wikiPromise = fetch(wikiUrl).then(function(r) { return r.json(); }).catch(function() { return null; });
+      var bookPromise = fetch(bookUrl).then(function(r) { return r.json(); }).catch(function() { return null; });
+
+      Promise.all([wikiPromise, bookPromise]).then(function(results) {
+        loadingEl.style.display = "none";
+        resultsEl.style.display = "";
+
+        var wikiData = results[0];
+        var bookData = results[1];
+
+        // Render Wikipedia results
+        if (wikiData && wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
+          articlesCol.innerHTML = '<h4>Wikipedia Articles</h4>' + wikiData.query.search.map(function(item) {
+            var link = "https://en.wikipedia.org/wiki/" + encodeURIComponent(item.title);
+            var snippet = stripHtml(item.snippet);
+            return '<div class="source-card">' +
+              '<div class="source-title">' + item.title + '</div>' +
+              '<div class="source-snippet">' + snippet + '</div>' +
+              '<a href="' + link + '" target="_blank" rel="noopener" class="source-link">View on Wikipedia</a>' +
+              '</div>';
+          }).join("");
+        } else {
+          articlesCol.innerHTML = '<h4>Wikipedia Articles</h4><p style="color:var(--text-dim)">No articles found.</p>';
+        }
+
+        // Render OpenLibrary results
+        if (bookData && bookData.docs && bookData.docs.length > 0) {
+          booksCol.innerHTML = '<h4>Books</h4>' + bookData.docs.map(function(doc) {
+            var link = "https://openlibrary.org" + doc.key;
+            var authors = doc.author_name ? doc.author_name.join(", ") : "Unknown author";
+            var year = doc.first_publish_year || "Unknown year";
+            return '<div class="source-card">' +
+              '<div class="source-title">' + doc.title + '</div>' +
+              '<div class="source-meta">By ' + authors + ' (' + year + ')</div>' +
+              '<a href="' + link + '" target="_blank" rel="noopener" class="source-link">View on OpenLibrary</a>' +
+              '</div>';
+          }).join("");
+        } else {
+          booksCol.innerHTML = '<h4>Books</h4><p style="color:var(--text-dim)">No books found.</p>';
+        }
+
+        toast("Found sources!");
+      }).catch(function() {
+        loadingEl.style.display = "none";
+        toast("Error searching sources");
+      });
+    }
+
+    searchBtn.addEventListener("click", search);
+
+    searchInput.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        search();
+      }
+    });
+  }
+
+  // ============================================================
+  //  14. VOCABULARY BUILDER
+  // ============================================================
+  function _initVocabulary() {
+    var searchInput = $("#vocab-word-input");
+    var searchBtn = $("#vocab-lookup-btn");
+    var resultArea = $("#vocab-result");
+    var wordTitle = $("#vocab-word-title");
+    var phonetic = $("#vocab-phonetic");
+    var definitions = $("#vocab-definitions");
+    var saveBtn = $("#vocab-save-btn");
+    var wordList = $("#vocab-word-list");
+    var clearBtn = $("#vocab-clear-list");
+    var loadingEl = $("#vocab-loading");
+
+    var currentWord = null;
+
+    function getSavedWords() {
+      return JSON.parse(localStorage.getItem("shrimpify-vocab-list") || "[]");
+    }
+
+    function saveWords(words) {
+      localStorage.setItem("shrimpify-vocab-list", JSON.stringify(words));
+    }
+
+    function renderSavedWords() {
+      var words = getSavedWords();
+      if (words.length === 0) {
+        wordList.innerHTML = '<p style="color:var(--text-dim)">No saved words yet.</p>';
+        return;
+      }
+      wordList.innerHTML = words.map(function(w, idx) {
+        return '<div class="vocab-saved-item">' +
+          '<span class="vocab-saved-word">' + w.word + '</span>' +
+          '<button class="vocab-delete-word" data-idx="' + idx + '">Delete</button>' +
+          '</div>';
+      }).join("");
+
+      wordList.querySelectorAll(".vocab-delete-word").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var words = getSavedWords();
+          words.splice(parseInt(btn.dataset.idx), 1);
+          saveWords(words);
+          renderSavedWords();
+          toast("Word removed");
+        });
+      });
+    }
+
+    function lookup() {
+      var word = searchInput.value.trim().toLowerCase();
+      if (!word) {
+        toast("Enter a word");
+        return;
+      }
+
+      resultArea.style.display = "none";
+      if (loadingEl) loadingEl.style.display = "";
+      wordTitle.textContent = "";
+      phonetic.textContent = "";
+      definitions.innerHTML = "";
+      currentWord = null;
+
+      var url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word);
+
+      fetch(url)
+        .then(function(r) {
+          if (!r.ok) throw new Error("Not found");
+          return r.json();
+        })
+        .then(function(data) {
+          if (loadingEl) loadingEl.style.display = "none";
+          if (!data || data.length === 0) {
+            toast("Word not found");
+            return;
+          }
+
+          var entry = data[0];
+          currentWord = entry;
+
+          wordTitle.textContent = entry.word;
+
+          var phoneticText = entry.phonetic || "";
+          if (!phoneticText && entry.phonetics && entry.phonetics.length > 0) {
+            for (var i = 0; i < entry.phonetics.length; i++) {
+              if (entry.phonetics[i].text) {
+                phoneticText = entry.phonetics[i].text;
+                break;
+              }
+            }
+          }
+          phonetic.textContent = phoneticText;
+
+          var html = "";
+          if (entry.meanings && entry.meanings.length > 0) {
+            entry.meanings.forEach(function(meaning) {
+              html += '<div class="vocab-meaning-section">';
+              html += '<h4 class="vocab-pos">' + meaning.partOfSpeech + '</h4>';
+              html += '<ol class="vocab-def-list">';
+              meaning.definitions.forEach(function(def) {
+                html += '<li>' + def.definition;
+                if (def.example) {
+                  html += '<div class="vocab-example">"' + def.example + '"</div>';
+                }
+                html += '</li>';
+              });
+              html += '</ol>';
+              html += '</div>';
+            });
+          }
+          definitions.innerHTML = html;
+          resultArea.style.display = "";
+        })
+        .catch(function() {
+          if (loadingEl) loadingEl.style.display = "none";
+          toast("Word not found");
+        });
+    }
+
+    searchBtn.addEventListener("click", lookup);
+
+    searchInput.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        lookup();
+      }
+    });
+
+    saveBtn.addEventListener("click", function() {
+      if (!currentWord) {
+        toast("Look up a word first");
+        return;
+      }
+
+      var words = getSavedWords();
+      var exists = words.some(function(w) {
+        return w.word.toLowerCase() === currentWord.word.toLowerCase();
+      });
+
+      if (exists) {
+        toast("Word already saved");
+        return;
+      }
+
+      var simplified = {
+        word: currentWord.word,
+        phonetic: phonetic.textContent,
+        meanings: currentWord.meanings.map(function(m) {
+          return {
+            partOfSpeech: m.partOfSpeech,
+            definitions: m.definitions.slice(0, 3).map(function(d) {
+              return d.definition;
+            })
+          };
+        })
+      };
+
+      words.push(simplified);
+      saveWords(words);
+      renderSavedWords();
+      toast("Word saved!");
+    });
+
+    clearBtn.addEventListener("click", function() {
+      localStorage.removeItem("shrimpify-vocab-list");
+      renderSavedWords();
+      toast("Word list cleared");
+    });
+
+    // Initial render
+    renderSavedWords();
+  }
+
+  // ============================================================
+  //  15. ESSAY OUTLINER
+  // ============================================================
+  function _initEssayOutliner() {
+    var saveTimer = null;
+
+    function getOutline() {
+      var saved = localStorage.getItem("shrimpify-essay-outline");
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      return { thesis: "", intro: "", bodies: [""], conclusion: "" };
+    }
+
+    function saveOutline(outline) {
+      localStorage.setItem("shrimpify-essay-outline", JSON.stringify(outline));
+    }
+
+    function loadOutline() {
+      var outline = getOutline();
+      $("#outline-thesis").value = outline.thesis || "";
+      $("#outline-intro").value = outline.intro || "";
+      $("#outline-conclusion").value = outline.conclusion || "";
+      renderBodyParagraphs(outline.bodies || [""]);
+    }
+
+    function renderBodyParagraphs(bodies) {
+      var container = $("#outline-body-list");
+      if (!bodies || bodies.length === 0) {
+        bodies = [""];
+      }
+      container.innerHTML = bodies.map(function(body, idx) {
+        return '<div class="outline-body-item">' +
+          '<label>Body Paragraph ' + (idx + 1) + '</label>' +
+          '<textarea class="outline-body-textarea" data-idx="' + idx + '" rows="3" placeholder="Enter body paragraph ' + (idx + 1) + ' content...">' + body + '</textarea>' +
+          '<button class="outline-remove-body" data-idx="' + idx + '">Remove</button>' +
+          '</div>';
+      }).join("");
+
+      container.querySelectorAll(".outline-body-textarea").forEach(function(ta) {
+        ta.addEventListener("input", scheduleAutoSave);
+      });
+
+      container.querySelectorAll(".outline-remove-body").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var outline = getOutline();
+          outline.bodies.splice(parseInt(btn.dataset.idx), 1);
+          if (outline.bodies.length === 0) {
+            outline.bodies = [""];
+          }
+          saveOutline(outline);
+          renderBodyParagraphs(outline.bodies);
+          toast("Paragraph removed");
+        });
+      });
+    }
+
+    function collectOutline() {
+      var thesis = $("#outline-thesis").value;
+      var intro = $("#outline-intro").value;
+      var conclusion = $("#outline-conclusion").value;
+      var bodies = [];
+      $$("#outline-body-list .outline-body-textarea").forEach(function(ta) {
+        bodies.push(ta.value);
+      });
+      return { thesis: thesis, intro: intro, bodies: bodies, conclusion: conclusion };
+    }
+
+    function scheduleAutoSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(function() {
+        var outline = collectOutline();
+        saveOutline(outline);
+      }, 500);
+    }
+
+    // Event listeners for main fields
+    $("#outline-thesis").addEventListener("input", scheduleAutoSave);
+    $("#outline-intro").addEventListener("input", scheduleAutoSave);
+    $("#outline-conclusion").addEventListener("input", scheduleAutoSave);
+
+    // Add body paragraph
+    $("#outline-add-body").addEventListener("click", function() {
+      var outline = collectOutline();
+      outline.bodies.push("");
+      saveOutline(outline);
+      renderBodyParagraphs(outline.bodies);
+    });
+
+    // Export
+    $("#outline-export").addEventListener("click", function() {
+      var outline = collectOutline();
+      var text = "ESSAY OUTLINE\n";
+      text += "=============\n\n";
+      text += "THESIS STATEMENT:\n";
+      text += (outline.thesis || "(empty)") + "\n\n";
+      text += "INTRODUCTION:\n";
+      text += (outline.intro || "(empty)") + "\n\n";
+      outline.bodies.forEach(function(body, idx) {
+        text += "BODY PARAGRAPH " + (idx + 1) + ":\n";
+        text += (body || "(empty)") + "\n\n";
+      });
+      text += "CONCLUSION:\n";
+      text += (outline.conclusion || "(empty)") + "\n";
+
+      navigator.clipboard.writeText(text).then(function() {
+        toast("Outline copied to clipboard!");
+      }).catch(function() {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast("Outline copied to clipboard!");
+      });
+    });
+
+    // Clear
+    $("#outline-clear").addEventListener("click", function() {
+      localStorage.removeItem("shrimpify-essay-outline");
+      $("#outline-thesis").value = "";
+      $("#outline-intro").value = "";
+      $("#outline-conclusion").value = "";
+      renderBodyParagraphs([""]);
+      toast("Outline cleared");
+    });
+
+    // Initial load
+    loadOutline();
+  }
+
+  // ============================================================
+  //  Grade Calculator
+  // ============================================================
+  function _initGradeCalc() {
+    var $ = function(s) { return document.querySelector(s); };
+
+    // Final exam calculator
+    $("#gc-calculate").addEventListener("click", function() {
+      var current = parseFloat($("#gc-current").value);
+      var weight = parseFloat($("#gc-weight").value) / 100;
+      var target = parseFloat($("#gc-target").value);
+      if (isNaN(current) || isNaN(weight) || isNaN(target) || weight <= 0) {
+        var r = $("#gc-result"); r.style.display = "block";
+        r.className = "gc-result gc-impossible";
+        r.innerHTML = "Please fill in all fields with valid numbers.";
+        return;
+      }
+      var needed = (target - current * (1 - weight)) / weight;
+      var r = $("#gc-result");
+      r.style.display = "block";
+      if (needed <= 0) {
+        r.className = "gc-result gc-safe";
+        r.innerHTML = "You're safe! You could score <span class='gc-score'>0%</span> and still hit your target.";
+      } else if (needed > 100) {
+        r.className = "gc-result gc-impossible";
+        r.innerHTML = "You'd need <span class='gc-score'>" + needed.toFixed(1) + "%</span> — that's mathematically impossible. Aim for a lower target.";
+      } else {
+        r.className = "gc-result gc-possible";
+        r.innerHTML = "You need at least <span class='gc-score'>" + needed.toFixed(1) + "%</span> on the final.";
+      }
+    });
+
+    // Semester grade calculator
+    var semesterRows = [];
+    function addSemesterRow(cat, grade, weight) {
+      semesterRows.push({ cat: cat || "", grade: grade || "", weight: weight || "" });
+      renderSemesterRows();
+    }
+    function renderSemesterRows() {
+      var tbody = $("#gc-semester-rows");
+      tbody.innerHTML = "";
+      semesterRows.forEach(function(row, i) {
+        var tr = document.createElement("tr");
+        tr.innerHTML = '<td><input type="text" value="' + row.cat + '" data-i="' + i + '" data-f="cat" placeholder="Homework"></td>' +
+          '<td><input type="number" value="' + row.grade + '" data-i="' + i + '" data-f="grade" step="0.1" placeholder="95"></td>' +
+          '<td><input type="number" value="' + row.weight + '" data-i="' + i + '" data-f="weight" step="0.1" placeholder="30"></td>' +
+          '<td><button class="gpa-remove-btn" data-i="' + i + '">x</button></td>';
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll("input").forEach(function(inp) {
+        inp.addEventListener("input", function() {
+          semesterRows[parseInt(inp.dataset.i)][inp.dataset.f] = inp.value;
+          calcSemester();
+        });
+      });
+      tbody.querySelectorAll(".gpa-remove-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          semesterRows.splice(parseInt(btn.dataset.i), 1);
+          renderSemesterRows();
+          calcSemester();
+        });
+      });
+    }
+    function calcSemester() {
+      var totalWeight = 0, weighted = 0;
+      semesterRows.forEach(function(r) {
+        var g = parseFloat(r.grade), w = parseFloat(r.weight);
+        if (!isNaN(g) && !isNaN(w)) { weighted += g * w; totalWeight += w; }
+      });
+      var res = $("#gc-semester-result");
+      if (totalWeight > 0) {
+        var avg = weighted / totalWeight;
+        res.style.display = "block";
+        res.className = "gc-result gc-possible";
+        res.innerHTML = "Semester grade: <span class='gc-score'>" + avg.toFixed(1) + "%</span>" +
+          (totalWeight < 100 ? " <span style='font-size:0.8rem;color:var(--text-dim)'>(weights total " + totalWeight.toFixed(0) + "%)</span>" : "");
+      } else {
+        res.style.display = "none";
+      }
+    }
+    $("#gc-add-category").addEventListener("click", function() { addSemesterRow(); });
+    addSemesterRow("Homework", "", "");
+    addSemesterRow("Tests", "", "");
+    addSemesterRow("Final Exam", "", "");
+  }
+
+  // ============================================================
+  //  Typing Test
+  // ============================================================
+  function _initTypingTest() {
+    var $ = function(s) { return document.querySelector(s); };
+    var $$ = function(s) { return document.querySelectorAll(s); };
+    var toast = window.shrimpToast || function() {};
+
+    var passages = [
+      "The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump.",
+      "In a village of La Mancha, the name of which I have no desire to call to mind, there lived not long since one of those gentlemen that keep a lance in the lance-rack, an old buckler, a lean hack, and a greyhound for coursing.",
+      "It was a bright cold day in April, and the clocks were striking thirteen. Winston Smith, his chin nuzzled into his breast in an effort to escape the vile wind, slipped quickly through the glass doors.",
+      "All happy families are alike; each unhappy family is unhappy in its own way. Everything was in confusion in the Oblonskys' house.",
+      "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood.",
+      "Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world.",
+      "The sun rose slowly over the misty mountains, casting golden rays across the forest floor. Birds began their morning songs as the world came alive with color and sound.",
+      "Science is not only a disciple of reason but also one of romance and passion. The desire to understand the universe is the primary drive behind all scientific discovery and exploration.",
+      "Education is the most powerful weapon which you can use to change the world. It is the key to eliminating gender inequality, to reducing poverty, to creating a sustainable planet, and to fostering peace.",
+      "Technology is best when it brings people together. The advances we make should always serve to improve human connection and understanding across all boundaries and borders.",
+      "The only way to do great work is to love what you do. If you have not found it yet, keep looking. Do not settle. As with all matters of the heart, you will know when you find it.",
+      "Success is not final, failure is not fatal. It is the courage to continue that counts. Every champion was once a contender who refused to give up when things got difficult."
+    ];
+
+    var duration = 15, timer = null, startTime = null, started = false, finished = false;
+    var currentPassage = "", charIndex = 0, errors = 0, totalTyped = 0;
+    var bestWpm = parseInt(localStorage.getItem("shrimpify-best-wpm")) || 0;
+
+    function pickPassage() {
+      currentPassage = passages[Math.floor(Math.random() * passages.length)];
+      renderPassage();
+    }
+
+    function renderPassage() {
+      var el = $("#tt-passage");
+      el.innerHTML = currentPassage.split("").map(function(ch, i) {
+        var cls = i === 0 ? " current" : "";
+        return '<span class="tt-char' + cls + '" data-i="' + i + '">' + (ch === " " ? "&nbsp;" : ch.replace(/</g, "&lt;")) + '</span>';
+      }).join("");
+    }
+
+    function updateStats() {
+      if (!startTime) return;
+      var elapsed = (Date.now() - startTime) / 1000;
+      var timeLeft = Math.max(0, duration - elapsed);
+      var wordsTyped = (charIndex / 5);
+      var minutes = elapsed / 60;
+      var wpm = minutes > 0 ? Math.round(wordsTyped / minutes) : 0;
+      var accuracy = totalTyped > 0 ? Math.round(((totalTyped - errors) / totalTyped) * 100) : 100;
+      $("#tt-wpm").textContent = wpm;
+      $("#tt-accuracy").textContent = accuracy;
+      $("#tt-time").textContent = timeLeft.toFixed(0);
+    }
+
+    function endTest() {
+      finished = true;
+      clearInterval(timer);
+      var elapsed = duration;
+      var wordsTyped = charIndex / 5;
+      var minutes = elapsed / 60;
+      var wpm = minutes > 0 ? Math.round(wordsTyped / minutes) : 0;
+      var accuracy = totalTyped > 0 ? Math.round(((totalTyped - errors) / totalTyped) * 100) : 100;
+      if (wpm > bestWpm) { bestWpm = wpm; localStorage.setItem("shrimpify-best-wpm", bestWpm); }
+      $("#tt-final-wpm").textContent = wpm;
+      $("#tt-final-accuracy").textContent = accuracy + "%";
+      $("#tt-final-errors").textContent = errors;
+      $("#tt-best-wpm").textContent = bestWpm;
+      $("#tt-results").style.display = "block";
+      $("#tt-input").disabled = true;
+      $("#tt-time").textContent = "0";
+    }
+
+    function resetTest() {
+      clearInterval(timer);
+      timer = null; startTime = null; started = false; finished = false;
+      charIndex = 0; errors = 0; totalTyped = 0;
+      $("#tt-wpm").textContent = "0";
+      $("#tt-accuracy").textContent = "100";
+      $("#tt-time").textContent = duration;
+      $("#tt-results").style.display = "none";
+      $("#tt-input").value = "";
+      $("#tt-input").disabled = false;
+      pickPassage();
+    }
+
+    // Duration tabs
+    $$(".tt-mode-tab").forEach(function(tab) {
+      tab.addEventListener("click", function() {
+        $$(".tt-mode-tab").forEach(function(t) { t.classList.remove("active"); });
+        tab.classList.add("active");
+        duration = parseInt(tab.dataset.duration);
+        resetTest();
+      });
+    });
+
+    // Typing input
+    $("#tt-input").addEventListener("input", function(e) {
+      if (finished) return;
+      if (!started) {
+        started = true;
+        startTime = Date.now();
+        timer = setInterval(function() {
+          updateStats();
+          var elapsed = (Date.now() - startTime) / 1000;
+          if (elapsed >= duration) endTest();
+        }, 100);
+      }
+      var val = e.target.value;
+      var lastChar = val[val.length - 1];
+      if (charIndex < currentPassage.length) {
+        totalTyped++;
+        var chars = $$("#tt-passage .tt-char");
+        if (lastChar === currentPassage[charIndex]) {
+          chars[charIndex].classList.remove("current");
+          chars[charIndex].classList.add("correct");
+          charIndex++;
+          if (charIndex < chars.length) chars[charIndex].classList.add("current");
+        } else {
+          chars[charIndex].classList.remove("current");
+          chars[charIndex].classList.add("incorrect");
+          errors++;
+          charIndex++;
+          if (charIndex < chars.length) chars[charIndex].classList.add("current");
+        }
+        e.target.value = "";
+        if (charIndex >= currentPassage.length) endTest();
+      }
+    });
+
+    // Prevent paste
+    $("#tt-input").addEventListener("paste", function(e) { e.preventDefault(); });
+
+    // Restart
+    $("#tt-restart").addEventListener("click", resetTest);
+
+    // Init
+    resetTest();
+  }
+
+  // ============================================================
+  //  Whiteboard
+  // ============================================================
+  function _initWhiteboard() {
+    var $ = function(s) { return document.querySelector(s); };
+    var $$ = function(s) { return document.querySelectorAll(s); };
+
+    var canvas = $("#wb-canvas");
+    var ctx = canvas.getContext("2d");
+    var drawing = false, erasing = false;
+    var color = "#e0e0e0", lineWidth = 4;
+    var strokes = [], currentStroke = [];
+
+    function resizeCanvas() {
+      var wrap = $(".wb-canvas-wrap");
+      var rect = wrap.getBoundingClientRect();
+      var w = rect.width;
+      var h = Math.max(500, window.innerHeight - 300);
+      if (canvas.width !== w || canvas.height !== h) {
+        var imageData = canvas.toDataURL();
+        canvas.width = w;
+        canvas.height = h;
+        var img = new Image();
+        img.onload = function() { ctx.drawImage(img, 0, 0); };
+        img.src = imageData;
+      }
+    }
+
+    function getPos(e) {
+      var rect = canvas.getBoundingClientRect();
+      var t = e.touches ? e.touches[0] : e;
+      return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      drawing = true;
+      var pos = getPos(e);
+      currentStroke = [{ x: pos.x, y: pos.y, color: erasing ? "#1a1a1a" : color, width: erasing ? lineWidth * 4 : lineWidth }];
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      var pos = getPos(e);
+      var s = currentStroke[0];
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = s.width;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+      currentStroke.push({ x: pos.x, y: pos.y });
+    }
+
+    function endDraw() {
+      if (!drawing) return;
+      drawing = false;
+      if (currentStroke.length > 1) {
+        strokes.push(currentStroke);
+        if (strokes.length > 50) strokes.shift();
+      }
+    }
+
+    function redraw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      strokes.forEach(function(stroke) {
+        if (stroke.length < 2) return;
+        ctx.beginPath();
+        ctx.strokeStyle = stroke[0].color;
+        ctx.lineWidth = stroke[0].width;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.moveTo(stroke[0].x, stroke[0].y);
+        for (var i = 1; i < stroke.length; i++) {
+          ctx.lineTo(stroke[i].x, stroke[i].y);
+        }
+        ctx.stroke();
+      });
+    }
+
+    // Mouse events
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", endDraw);
+    canvas.addEventListener("mouseleave", endDraw);
+
+    // Touch events
+    canvas.addEventListener("touchstart", startDraw, { passive: false });
+    canvas.addEventListener("touchmove", draw, { passive: false });
+    canvas.addEventListener("touchend", endDraw);
+
+    // Colors
+    $$(".wb-color-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        $$(".wb-color-btn").forEach(function(b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        color = btn.dataset.color;
+        erasing = false;
+        $("#wb-eraser").classList.remove("active");
+      });
+    });
+
+    // Custom color
+    $("#wb-custom-color").addEventListener("input", function(e) {
+      color = e.target.value;
+      $$(".wb-color-btn").forEach(function(b) { b.classList.remove("active"); });
+      erasing = false;
+      $("#wb-eraser").classList.remove("active");
+    });
+
+    // Sizes
+    $$(".wb-size-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        $$(".wb-size-btn").forEach(function(b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        lineWidth = parseInt(btn.dataset.size);
+      });
+    });
+
+    // Eraser
+    $("#wb-eraser").addEventListener("click", function() {
+      erasing = !erasing;
+      this.classList.toggle("active", erasing);
+    });
+
+    // Undo
+    $("#wb-undo").addEventListener("click", function() {
+      if (strokes.length > 0) { strokes.pop(); redraw(); }
+    });
+
+    // Clear
+    $("#wb-clear").addEventListener("click", function() {
+      strokes = [];
+      redraw();
+    });
+
+    // Save
+    $("#wb-save").addEventListener("click", function() {
+      var link = document.createElement("a");
+      link.download = "whiteboard.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+
+    // Init
+    resizeCanvas();
+    ctx.fillStyle = "#1a1a1a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    window.addEventListener("resize", resizeCanvas);
+  }
+
+  // ============================================================
+  //  Random Picker
+  // ============================================================
+  function _initRandomPicker() {
+    var $ = function(s) { return document.querySelector(s); };
+    var $$ = function(s) { return document.querySelectorAll(s); };
+
+    // Mode tabs
+    $$(".rp-mode-tab").forEach(function(tab) {
+      tab.addEventListener("click", function() {
+        $$(".rp-mode-tab").forEach(function(t) { t.classList.remove("active"); });
+        tab.classList.add("active");
+        $$(".rp-panel").forEach(function(p) { p.classList.remove("active"); });
+        var panel = $("#rp-" + tab.dataset.mode);
+        if (panel) panel.classList.add("active");
+      });
+    });
+
+    // Coin Flip
+    $("#rp-flip-btn").addEventListener("click", function() {
+      var result = Math.random() < 0.5 ? "Heads" : "Tails";
+      var el = $("#rp-coin-result");
+      el.textContent = result;
+      el.style.animation = "none";
+      el.offsetHeight;
+      el.style.animation = "";
+    });
+
+    // Dice Roll
+    $("#rp-roll-btn").addEventListener("click", function() {
+      var count = parseInt($("#rp-dice-count").value) || 1;
+      var el = $("#rp-dice-result");
+      el.innerHTML = "";
+      for (var i = 0; i < count; i++) {
+        var val = Math.floor(Math.random() * 6) + 1;
+        var die = document.createElement("div");
+        die.className = "rp-die";
+        die.textContent = val;
+        el.appendChild(die);
+      }
+    });
+
+    // Number
+    $("#rp-number-btn").addEventListener("click", function() {
+      var min = parseInt($("#rp-num-min").value) || 0;
+      var max = parseInt($("#rp-num-max").value) || 100;
+      if (min > max) { var tmp = min; min = max; max = tmp; }
+      var val = Math.floor(Math.random() * (max - min + 1)) + min;
+      var el = $("#rp-number-result");
+      el.textContent = val;
+      el.style.animation = "none";
+      el.offsetHeight;
+      el.style.animation = "";
+    });
+
+    // Name Picker
+    $("#rp-name-btn").addEventListener("click", function() {
+      var text = $("#rp-name-list").value.trim();
+      var names = text.split("\n").map(function(n) { return n.trim(); }).filter(function(n) { return n.length > 0; });
+      if (names.length === 0) return;
+      var idx = Math.floor(Math.random() * names.length);
+      var picked = names[idx];
+      var el = $("#rp-name-result");
+      el.style.display = "block";
+      el.textContent = picked;
+      el.style.animation = "none";
+      el.offsetHeight;
+      el.style.animation = "";
+
+      if ($("#rp-remove-picked").checked) {
+        names.splice(idx, 1);
+        $("#rp-name-list").value = names.join("\n");
+      }
+    });
+  }
+
+  // ============================================================
+  //  Class Schedule
+  // ============================================================
+  function _initClassSchedule() {
+    var $ = function(s) { return document.querySelector(s); };
+    var toast = window.shrimpToast || function() {};
+
+    var KEY = "shrimpify-class-schedule";
+    var periods = 8;
+    var schedule = {};
+    var editCell = null;
+
+    function loadSchedule() {
+      try {
+        var saved = JSON.parse(localStorage.getItem(KEY));
+        if (saved) { schedule = saved.schedule || {}; periods = saved.periods || 8; }
+      } catch (e) {}
+    }
+
+    function saveSchedule() {
+      localStorage.setItem(KEY, JSON.stringify({ schedule: schedule, periods: periods }));
+    }
+
+    function getCellKey(period, day) { return period + "-" + day; }
+
+    function renderGrid() {
+      var tbody = $("#cs-body");
+      tbody.innerHTML = "";
+      var today = new Date().getDay();
+
+      // Highlight today column header
+      var ths = document.querySelectorAll("#cs-table thead th[data-day]");
+      ths.forEach(function(th) {
+        th.classList.toggle("cs-today", parseInt(th.dataset.day) === today);
+      });
+
+      for (var p = 1; p <= periods; p++) {
+        var tr = document.createElement("tr");
+        var tdLabel = document.createElement("td");
+        tdLabel.textContent = "P" + p;
+        tr.appendChild(tdLabel);
+
+        for (var d = 1; d <= 5; d++) {
+          var td = document.createElement("td");
+          var key = getCellKey(p, d);
+          var cell = document.createElement("div");
+          cell.className = "cs-cell";
+          cell.dataset.period = p;
+          cell.dataset.day = d;
+
+          var data = schedule[key];
+          if (data && data.subject) {
+            cell.style.background = data.color || "";
+            cell.innerHTML = '<div class="cs-cell-subject">' + data.subject + '</div>' +
+              (data.teacher || data.room ? '<div class="cs-cell-detail">' + [data.teacher, data.room].filter(Boolean).join(" · ") + '</div>' : '');
+          }
+
+          cell.addEventListener("click", function() {
+            openEditModal(this.dataset.period, this.dataset.day);
+          });
+
+          td.appendChild(cell);
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+    }
+
+    function openEditModal(period, day) {
+      editCell = { period: parseInt(period), day: parseInt(day) };
+      var key = getCellKey(editCell.period, editCell.day);
+      var data = schedule[key] || {};
+      $("#cs-edit-subject").value = data.subject || "";
+      $("#cs-edit-teacher").value = data.teacher || "";
+      $("#cs-edit-room").value = data.room || "";
+      $("#cs-edit-color").value = data.color || "#2a2a2a";
+      $("#cs-edit-modal").style.display = "flex";
+    }
+
+    $("#cs-edit-save").addEventListener("click", function() {
+      if (!editCell) return;
+      var key = getCellKey(editCell.period, editCell.day);
+      var subject = $("#cs-edit-subject").value.trim();
+      if (subject) {
+        schedule[key] = {
+          subject: subject,
+          teacher: $("#cs-edit-teacher").value.trim(),
+          room: $("#cs-edit-room").value.trim(),
+          color: $("#cs-edit-color").value
+        };
+      } else {
+        delete schedule[key];
+      }
+      saveSchedule();
+      renderGrid();
+      $("#cs-edit-modal").style.display = "none";
+      editCell = null;
+    });
+
+    $("#cs-edit-delete").addEventListener("click", function() {
+      if (!editCell) return;
+      delete schedule[getCellKey(editCell.period, editCell.day)];
+      saveSchedule();
+      renderGrid();
+      $("#cs-edit-modal").style.display = "none";
+      editCell = null;
+    });
+
+    $("#cs-edit-cancel").addEventListener("click", function() {
+      $("#cs-edit-modal").style.display = "none";
+      editCell = null;
+    });
+
+    // Close modal on background click
+    $("#cs-edit-modal").addEventListener("click", function(e) {
+      if (e.target === this) {
+        this.style.display = "none";
+        editCell = null;
+      }
+    });
+
+    // Add/Remove periods
+    $("#cs-add-period").addEventListener("click", function() {
+      if (periods < 12) { periods++; saveSchedule(); renderGrid(); }
+    });
+
+    $("#cs-remove-period").addEventListener("click", function() {
+      if (periods > 1) {
+        for (var d = 1; d <= 5; d++) delete schedule[getCellKey(periods, d)];
+        periods--;
+        saveSchedule();
+        renderGrid();
+      }
+    });
+
+    $("#cs-clear").addEventListener("click", function() {
+      schedule = {};
+      saveSchedule();
+      renderGrid();
+      toast("Schedule cleared");
+    });
+
+    loadSchedule();
+    renderGrid();
+  }
+
+  // ============================================================
+  //  Text-to-Speech
+  // ============================================================
+  function _initTextToSpeech() {
+    var $ = function(s) { return document.querySelector(s); };
+    var synth = window.speechSynthesis;
+    if (!synth) return;
+
+    var utterance = null, speaking = false;
+
+    // Populate voices
+    function loadVoices() {
+      var voices = synth.getVoices();
+      var sel = $("#tts-voice");
+      sel.innerHTML = "";
+      voices.forEach(function(v, i) {
+        var opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = v.name + " (" + v.lang + ")";
+        sel.appendChild(opt);
+      });
+    }
+    loadVoices();
+    synth.addEventListener("voiceschanged", loadVoices);
+
+    // Rate slider
+    $("#tts-rate").addEventListener("input", function() {
+      $("#tts-rate-value").textContent = this.value + "x";
+    });
+
+    // Play
+    $("#tts-play").addEventListener("click", function() {
+      var text = $("#tts-text").value.trim();
+      if (!text) return;
+      synth.cancel();
+      utterance = new SpeechSynthesisUtterance(text);
+      var voices = synth.getVoices();
+      var voiceIdx = parseInt($("#tts-voice").value);
+      if (voices[voiceIdx]) utterance.voice = voices[voiceIdx];
+      utterance.rate = parseFloat($("#tts-rate").value);
+
+      // Sentence highlighting
+      var highlight = $("#tts-highlight");
+      var sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+      var sentIdx = 0;
+      highlight.classList.add("active");
+
+      function updateHighlight() {
+        highlight.innerHTML = sentences.map(function(s, i) {
+          return i === sentIdx ? '<span class="tts-current">' + s + '</span>' : s;
+        }).join("");
+      }
+      updateHighlight();
+
+      utterance.addEventListener("boundary", function(e) {
+        if (e.name === "sentence") {
+          var spoken = text.substring(0, e.charIndex);
+          var count = (spoken.match(/[.!?]+/g) || []).length;
+          if (count < sentences.length) { sentIdx = count; updateHighlight(); }
+        }
+      });
+
+      utterance.addEventListener("end", function() {
+        speaking = false;
+        highlight.classList.remove("active");
+      });
+
+      synth.speak(utterance);
+      speaking = true;
+    });
+
+    // Pause
+    $("#tts-pause").addEventListener("click", function() {
+      if (synth.speaking && !synth.paused) { synth.pause(); this.textContent = "Resume"; }
+      else if (synth.paused) { synth.resume(); this.textContent = "Pause"; }
+    });
+
+    // Stop
+    $("#tts-stop").addEventListener("click", function() {
+      synth.cancel();
+      speaking = false;
+      $("#tts-highlight").classList.remove("active");
+      $("#tts-pause").textContent = "Pause";
+    });
+  }
+
+  // ============================================================
+  //  Focus Sounds
+  // ============================================================
+  function _initFocusSounds() {
+    var $ = function(s) { return document.querySelector(s); };
+    var $$ = function(s) { return document.querySelectorAll(s); };
+    var toast = window.shrimpToast || function() {};
+
+    var audioCtx = null, sourceNode = null, gainNode = null;
+    var activeSound = null, stopTimer = null;
+
+    function getCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      return audioCtx;
+    }
+
+    function createWhiteNoise() {
+      var ctx = getCtx();
+      var bufferSize = 2 * ctx.sampleRate;
+      var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      var data = buffer.getChannelData(0);
+      for (var i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      var source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      return source;
+    }
+
+    function createBrownNoise() {
+      var ctx = getCtx();
+      var bufferSize = 2 * ctx.sampleRate;
+      var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      var data = buffer.getChannelData(0);
+      var last = 0;
+      for (var i = 0; i < bufferSize; i++) {
+        var white = Math.random() * 2 - 1;
+        data[i] = (last + 0.02 * white) / 1.02;
+        last = data[i];
+        data[i] *= 3.5;
+      }
+      var source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      return source;
+    }
+
+    function createRain() {
+      var ctx = getCtx();
+      var bufferSize = 2 * ctx.sampleRate;
+      var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      var data = buffer.getChannelData(0);
+      var last = 0;
+      for (var i = 0; i < bufferSize; i++) {
+        var white = Math.random() * 2 - 1;
+        data[i] = (last + 0.01 * white) / 1.01;
+        last = data[i];
+        data[i] *= 2;
+        if (Math.random() < 0.001) data[i] += (Math.random() - 0.5) * 0.5;
+      }
+      var source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      return source;
+    }
+
+    function startSound(type) {
+      stopSound();
+      var ctx = getCtx();
+      if (ctx.state === "suspended") ctx.resume();
+
+      if (type === "white") sourceNode = createWhiteNoise();
+      else if (type === "brown") sourceNode = createBrownNoise();
+      else if (type === "rain") sourceNode = createRain();
+
+      gainNode = ctx.createGain();
+      gainNode.gain.value = parseFloat($("#fs-volume").value);
+      sourceNode.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      sourceNode.start();
+      activeSound = type;
+
+      $$(".fs-sound-btn").forEach(function(b) { b.classList.remove("active"); });
+      var btn = document.querySelector('.fs-sound-btn[data-sound="' + type + '"]');
+      if (btn) btn.classList.add("active");
+
+      var timerVal = parseInt($("#fs-timer").value);
+      if (timerVal > 0) {
+        clearTimeout(stopTimer);
+        stopTimer = setTimeout(function() { stopSound(); toast("Focus sounds auto-stopped"); }, timerVal * 60000);
+        $("#fs-status").textContent = "Playing " + type + " noise — auto-stop in " + timerVal + "m";
+      } else {
+        $("#fs-status").textContent = "Playing " + type + " noise";
+      }
+    }
+
+    function stopSound() {
+      if (sourceNode) { try { sourceNode.stop(); } catch (e) {} sourceNode = null; }
+      if (gainNode) { gainNode.disconnect(); gainNode = null; }
+      clearTimeout(stopTimer);
+      activeSound = null;
+      $$(".fs-sound-btn").forEach(function(b) { b.classList.remove("active"); });
+      $("#fs-status").textContent = "";
+    }
+
+    $$(".fs-sound-btn[data-sound]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        if (activeSound === btn.dataset.sound) { stopSound(); return; }
+        startSound(btn.dataset.sound);
+      });
+    });
+
+    $("#fs-stop").addEventListener("click", stopSound);
+
+    $("#fs-volume").addEventListener("input", function() {
+      var val = parseFloat(this.value);
+      $("#fs-volume-value").textContent = Math.round(val * 100) + "%";
+      if (gainNode) gainNode.gain.value = val;
+    });
+  }
+
+  // ============================================================
   //  Public API (lazy init wrappers)
   // ============================================================
   window.ShrimpTools = {
@@ -1009,5 +2816,18 @@
     formulas: function () { initOnce("formulas", _initFormulas); },
     periodicTable: function () { initOnce("periodicTable", _initPeriodicTable); },
     notes: function () { initOnce("notes", _initNotes); },
+    flashcards: function () { initOnce("flashcards", _initFlashcards); },
+    quizMode: function () { initOnce("quizMode", _initQuizMode); },
+    studyPlanner: function () { initOnce("studyPlanner", _initStudyPlanner); },
+    sourceFinder: function () { initOnce("sourceFinder", _initSourceFinder); },
+    vocabulary: function () { initOnce("vocabulary", _initVocabulary); },
+    essayOutliner: function () { initOnce("essayOutliner", _initEssayOutliner); },
+    gradeCalc: function () { initOnce("gradeCalc", _initGradeCalc); },
+    typingTest: function () { initOnce("typingTest", _initTypingTest); },
+    whiteboard: function () { initOnce("whiteboard", _initWhiteboard); },
+    randomPicker: function () { initOnce("randomPicker", _initRandomPicker); },
+    classSchedule: function () { initOnce("classSchedule", _initClassSchedule); },
+    textToSpeech: function () { initOnce("textToSpeech", _initTextToSpeech); },
+    focusSounds: function () { initOnce("focusSounds", _initFocusSounds); },
   };
 })();

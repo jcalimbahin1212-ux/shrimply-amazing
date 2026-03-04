@@ -711,3 +711,122 @@ const CLOAK_PRESETS = {
   "Canvas": { title: "Canvas", icon: "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico" },
   "Clever": { title: "Clever | Portal", icon: "https://assets.clever.com/media/icons/favicon.ico" },
 };
+
+// ============================================================
+//  ANATOMY SYSTEMS DATA
+// ============================================================
+const ANATOMY_SYSTEMS = [
+  {
+    id: "skeletal", name: "Skeletal System", color: "#e8e0d0",
+    description: "The skeletal system provides structural support, protects internal organs, and enables movement. Adults have 206 bones connected by joints, ligaments, and cartilage.",
+    parts: [
+      { id: "skull", name: "Skull (Cranium)", description: "Protects the brain. Composed of 22 bones fused at sutures. Houses the brain, eyes, and inner ears.", cx: 200, cy: 40, r: 22 },
+      { id: "cervical", name: "Cervical Vertebrae", description: "7 vertebrae in the neck (C1-C7). C1 (atlas) supports the skull; C2 (axis) allows rotation.", path: "M200 62 L200 90" },
+      { id: "clavicle", name: "Clavicle (Collarbone)", description: "S-shaped bone connecting sternum to scapula. Most commonly fractured bone in the body.", path: "M165 98 L235 98" },
+      { id: "ribcage", name: "Rib Cage", description: "12 pairs of ribs enclosing the thoracic cavity. 7 true ribs, 3 false ribs, 2 floating ribs.", path: "M170 105 Q200 140 230 105 M168 115 Q200 152 232 115 M168 125 Q200 162 232 125 M170 135 Q200 170 230 135" },
+      { id: "sternum", name: "Sternum (Breastbone)", description: "Flat bone at center of chest. Three parts: manubrium, body, and xiphoid process.", path: "M200 98 L200 170" },
+      { id: "spine-thoracic", name: "Thoracic Spine", description: "12 vertebrae (T1-T12) in mid-back. Each attaches to a pair of ribs.", path: "M200 90 L200 180" },
+      { id: "spine-lumbar", name: "Lumbar Spine", description: "5 large vertebrae (L1-L5) in lower back. Bears most body weight. Common site of back pain.", path: "M200 180 L200 240" },
+      { id: "pelvis", name: "Pelvis", description: "Basin-shaped structure supporting spine and protecting abdominal organs. Wider in females.", path: "M170 240 Q168 260 175 275 Q200 290 225 275 Q232 260 230 240 Z" },
+      { id: "scapula-l", name: "Scapula L (Shoulder Blade)", description: "Triangular bone on posterior thorax. Attachment for 17 muscles.", cx: 162, cy: 118, rx: 10, ry: 18 },
+      { id: "scapula-r", name: "Scapula R (Shoulder Blade)", description: "Triangular bone on posterior thorax. Attachment for 17 muscles.", cx: 238, cy: 118, rx: 10, ry: 18 },
+      { id: "humerus-l", name: "Humerus L (Upper Arm)", description: "Long bone of upper arm. Connects shoulder to elbow.", path: "M155 100 L138 188" },
+      { id: "humerus-r", name: "Humerus R (Upper Arm)", description: "Long bone of upper arm. Connects shoulder to elbow.", path: "M245 100 L262 188" },
+      { id: "radius-ulna-l", name: "Radius & Ulna L (Forearm)", description: "Two parallel forearm bones. Radius (lateral); ulna (medial). Allow pronation/supination.", path: "M138 192 L128 268" },
+      { id: "radius-ulna-r", name: "Radius & Ulna R (Forearm)", description: "Two parallel forearm bones. Radius (lateral); ulna (medial). Allow pronation/supination.", path: "M262 192 L272 268" },
+      { id: "hand-l", name: "Hand L", description: "27 bones: 8 carpals, 5 metacarpals, 14 phalanges. Enable fine motor movements.", cx: 124, cy: 278, r: 10 },
+      { id: "hand-r", name: "Hand R", description: "27 bones: 8 carpals, 5 metacarpals, 14 phalanges. Enable fine motor movements.", cx: 276, cy: 278, r: 10 },
+      { id: "femur-l", name: "Femur L (Thigh Bone)", description: "Longest and strongest bone. Connects hip to knee.", path: "M182 280 L178 380" },
+      { id: "femur-r", name: "Femur R (Thigh Bone)", description: "Longest and strongest bone. Connects hip to knee.", path: "M218 280 L222 380" },
+      { id: "patella-l", name: "Patella L (Kneecap)", description: "Largest sesamoid bone. Protects knee joint.", cx: 177, cy: 386, r: 6 },
+      { id: "patella-r", name: "Patella R (Kneecap)", description: "Largest sesamoid bone. Protects knee joint.", cx: 223, cy: 386, r: 6 },
+      { id: "tibia-fibula-l", name: "Tibia & Fibula L", description: "Tibia bears weight; fibula provides muscle attachment.", path: "M176 394 L174 486" },
+      { id: "tibia-fibula-r", name: "Tibia & Fibula R", description: "Tibia bears weight; fibula provides muscle attachment.", path: "M224 394 L226 486" },
+      { id: "foot-l", name: "Foot L", description: "26 bones: tarsals, metatarsals, phalanges. Arches distribute body weight.", cx: 172, cy: 496, r: 10 },
+      { id: "foot-r", name: "Foot R", description: "26 bones: tarsals, metatarsals, phalanges. Arches distribute body weight.", cx: 228, cy: 496, r: 10 }
+    ]
+  },
+  {
+    id: "muscular", name: "Muscular System", color: "#c44040",
+    description: "Over 600 muscles enable movement, maintain posture, and generate heat. Three types: skeletal (voluntary), smooth (involuntary), and cardiac. Muscles make up ~40% of body weight.",
+    parts: [
+      { id: "trapezius", name: "Trapezius", description: "Large triangular upper back muscle. Moves, rotates, and stabilizes the scapula.", path: "M170 78 L200 62 L230 78 L240 100 L200 115 L160 100 Z" },
+      { id: "deltoid-l", name: "Deltoid L", description: "Shoulder cap muscle. Three heads: anterior, lateral, posterior. Arm abduction.", path: "M152 96 Q142 110 148 130 Q158 126 162 98 Z" },
+      { id: "deltoid-r", name: "Deltoid R", description: "Shoulder cap muscle. Three heads: anterior, lateral, posterior. Arm abduction.", path: "M248 96 Q258 110 252 130 Q242 126 238 98 Z" },
+      { id: "pectorals", name: "Pectoralis Major", description: "Large fan-shaped chest muscle. Adducts, flexes, and medially rotates the arm.", path: "M168 102 Q200 130 232 102 Q200 150 168 102 Z" },
+      { id: "biceps-l", name: "Biceps Brachii L", description: "Two-headed upper arm muscle. Flexes elbow and supinates forearm.", path: "M148 135 Q143 160 142 188 Q152 160 152 135 Z" },
+      { id: "biceps-r", name: "Biceps Brachii R", description: "Two-headed upper arm muscle. Flexes elbow and supinates forearm.", path: "M252 135 Q257 160 258 188 Q248 160 248 135 Z" },
+      { id: "abdominals", name: "Rectus Abdominis", description: "Six-pack muscle. Flexes trunk and stabilizes pelvis. Divided by tendinous intersections.", path: "M185 150 L185 245 L215 245 L215 150 Z" },
+      { id: "obliques", name: "External Obliques", description: "Side abdomen muscles. Enable trunk rotation and lateral flexion.", path: "M168 140 L165 230 L185 245 L185 150 Z M232 140 L235 230 L215 245 L215 150 Z" },
+      { id: "quadriceps-l", name: "Quadriceps L", description: "Four front-thigh muscles: rectus femoris, vastus lateralis/medialis/intermedius. Knee extensors.", path: "M172 270 Q168 325 172 380 Q185 325 182 270 Z" },
+      { id: "quadriceps-r", name: "Quadriceps R", description: "Four front-thigh muscles: rectus femoris, vastus lateralis/medialis/intermedius. Knee extensors.", path: "M218 270 Q222 325 228 380 Q215 325 218 270 Z" },
+      { id: "hamstrings-l", name: "Hamstrings L", description: "Three posterior thigh muscles. Flex knee and extend hip.", path: "M176 272 Q174 330 176 380 Q182 330 184 272 Z" },
+      { id: "hamstrings-r", name: "Hamstrings R", description: "Three posterior thigh muscles. Flex knee and extend hip.", path: "M216 272 Q218 330 224 380 Q226 330 224 272 Z" },
+      { id: "gastrocnemius-l", name: "Gastrocnemius L (Calf)", description: "Two-headed calf muscle. Plantar flexes foot. Essential for walking and jumping.", path: "M172 392 Q170 430 174 470 Q182 430 180 392 Z" },
+      { id: "gastrocnemius-r", name: "Gastrocnemius R (Calf)", description: "Two-headed calf muscle. Plantar flexes foot. Essential for walking and jumping.", path: "M220 392 Q222 430 226 470 Q230 430 228 392 Z" },
+      { id: "gluteus", name: "Gluteus Maximus", description: "Largest muscle in the body. Extends and laterally rotates hip.", path: "M170 248 Q165 265 175 278 Q200 290 225 278 Q235 265 230 248 Z" }
+    ]
+  },
+  {
+    id: "circulatory", name: "Circulatory System", color: "#cc3333",
+    description: "Transports blood, oxygen, nutrients, hormones, and waste. The heart beats ~100,000 times daily, pumping ~2,000 gallons through 60,000 miles of vessels.",
+    parts: [
+      { id: "heart", name: "Heart", description: "Muscular organ with 4 chambers. Pumps oxygenated blood to body, deoxygenated to lungs. Size of a fist.", cx: 207, cy: 142, r: 16 },
+      { id: "aorta", name: "Aorta", description: "Largest artery (~1 inch diameter). Carries oxygenated blood from left ventricle. Ascending, arch, descending.", path: "M207 126 Q207 108 200 105 L200 240" },
+      { id: "vena-cava", name: "Vena Cava", description: "Two large veins returning deoxygenated blood to right atrium. Superior (head/arms) and inferior (abdomen/legs).", path: "M193 80 L193 142 M193 142 L193 240" },
+      { id: "pulmonary", name: "Pulmonary Arteries", description: "Only arteries carrying deoxygenated blood. Transport from right ventricle to lungs for gas exchange.", path: "M207 132 Q180 120 165 128 M207 132 Q234 120 249 128" },
+      { id: "carotid", name: "Carotid Arteries", description: "Major arteries to the brain, neck, and face. Pulse felt here for heart rate.", path: "M196 98 L194 55 M204 98 L206 55" },
+      { id: "subclavian-l", name: "Subclavian Artery L", description: "Supplies blood to the left arm. Branches from aortic arch.", path: "M190 105 L155 100 L140 190" },
+      { id: "subclavian-r", name: "Subclavian Artery R", description: "Supplies blood to the right arm. Branches from brachiocephalic trunk.", path: "M210 105 L245 100 L260 190" },
+      { id: "femoral-l", name: "Femoral Artery L", description: "Major artery of the thigh. Supplies blood to lower extremity.", path: "M188 270 L178 385" },
+      { id: "femoral-r", name: "Femoral Artery R", description: "Major artery of the thigh. Supplies blood to lower extremity.", path: "M212 270 L222 385" },
+      { id: "tibial-l", name: "Tibial Arteries L", description: "Anterior and posterior tibial arteries supply lower leg and foot.", path: "M178 390 L175 490" },
+      { id: "tibial-r", name: "Tibial Arteries R", description: "Anterior and posterior tibial arteries supply lower leg and foot.", path: "M222 390 L225 490" }
+    ]
+  },
+  {
+    id: "nervous", name: "Nervous System", color: "#f0c040",
+    description: "The body's communication network with ~86 billion neurons. Central (brain + spinal cord) and peripheral (cranial + spinal) nervous systems.",
+    parts: [
+      { id: "brain", name: "Brain", description: "Control center (~3 lbs). Cerebrum (thought), cerebellum (coordination), brainstem (vital functions). Uses 20% of body's oxygen.", cx: 200, cy: 38, r: 22 },
+      { id: "cerebellum", name: "Cerebellum", description: "\"Little brain\" at base. 50% of brain's neurons. Coordinates movement, balance, posture, motor learning.", cx: 200, cy: 54, r: 8 },
+      { id: "spinal-cord", name: "Spinal Cord", description: "Nerve bundle (~45 cm) from brainstem to lumbar region. 31 pairs of spinal nerves. Protected by vertebral column.", path: "M200 60 L200 240" },
+      { id: "brachial-plexus-l", name: "Brachial Plexus L", description: "Nerve network (C5-T1) controlling shoulder, arm, and hand. Injury causes upper limb weakness.", path: "M196 92 L155 105 L138 188 L128 268" },
+      { id: "brachial-plexus-r", name: "Brachial Plexus R", description: "Nerve network (C5-T1) controlling shoulder, arm, and hand. Injury causes upper limb weakness.", path: "M204 92 L245 105 L262 188 L272 268" },
+      { id: "intercostal", name: "Intercostal Nerves", description: "Run between ribs (T1-T12). Motor and sensory innervation to chest and abdominal wall.", path: "M195 110 L168 120 M195 130 L168 140 M195 150 L168 160 M205 110 L232 120 M205 130 L232 140 M205 150 L232 160" },
+      { id: "lumbar-plexus", name: "Lumbar Plexus", description: "Nerves from L1-L4 supplying lower abdomen, hip, and anterior thigh. Key: femoral nerve.", path: "M198 200 L185 240 M202 200 L215 240" },
+      { id: "sciatic-l", name: "Sciatic Nerve L", description: "Longest nerve in body (~2 cm wide). Runs from lower back through buttock and down leg. Sciatica originates here.", path: "M186 260 L178 385 L175 490" },
+      { id: "sciatic-r", name: "Sciatic Nerve R", description: "Longest nerve in body (~2 cm wide). Runs from lower back through buttock and down leg. Sciatica originates here.", path: "M214 260 L222 385 L225 490" }
+    ]
+  },
+  {
+    id: "digestive", name: "Digestive System", color: "#66aa44",
+    description: "Breaks down food into nutrients for energy, growth, and repair. The alimentary canal is ~30 feet (9m) long. Complete digestion takes 24-72 hours.",
+    parts: [
+      { id: "mouth", name: "Mouth (Oral Cavity)", description: "Digestion begins here. Teeth grind; salivary amylase starts chemical breakdown.", cx: 200, cy: 50, r: 5 },
+      { id: "esophagus", name: "Esophagus", description: "Muscular tube (~25 cm). Peristalsis pushes food to stomach in ~8 seconds.", path: "M200 56 L200 128" },
+      { id: "stomach", name: "Stomach", description: "J-shaped organ (~1L). HCl (pH 1.5-3.5) and pepsin churn food into chyme over 2-6 hours.", path: "M188 130 Q178 150 185 170 Q200 180 215 168 Q222 150 215 130 Z" },
+      { id: "liver", name: "Liver", description: "Largest internal organ (~1.5 kg). 500+ functions: bile, detoxification, protein synthesis, glycogen storage.", path: "M220 120 Q245 128 252 142 Q245 155 228 152 Q218 145 220 120 Z" },
+      { id: "gallbladder", name: "Gallbladder", description: "Pear-shaped organ beneath liver. Stores/concentrates bile for fat digestion.", cx: 228, cy: 152, r: 5 },
+      { id: "pancreas", name: "Pancreas", description: "Dual-function (15 cm). Exocrine: digestive enzymes. Endocrine: insulin and glucagon.", path: "M198 165 L175 170 Q168 168 168 175 L178 172" },
+      { id: "small-intestine", name: "Small Intestine", description: "~20 ft, 3 sections: duodenum, jejunum, ileum. Primary nutrient absorption. Villi = ~250 m² surface.", path: "M190 178 Q185 192 192 205 Q202 215 212 205 Q220 192 212 182 Q202 195 192 192 Q184 200 192 215 Q202 225 214 220" },
+      { id: "large-intestine", name: "Large Intestine (Colon)", description: "~5 ft. Absorbs water. Houses trillions of gut bacteria. Ascending, transverse, descending, sigmoid.", path: "M230 185 L232 168 L168 168 L168 238 L232 238 L232 255" },
+      { id: "appendix", name: "Appendix", description: "Small pouch (~3.5 in) on cecum. Houses beneficial gut bacteria. Appendicitis = inflammation.", cx: 232, cy: 195, r: 4 }
+    ]
+  },
+  {
+    id: "respiratory", name: "Respiratory System", color: "#5599cc",
+    description: "Facilitates gas exchange: O2 in, CO2 out. 12-20 breaths/min at rest. Lungs have ~300 million alveoli with ~70 m² surface area for gas exchange.",
+    parts: [
+      { id: "nasal-cavity", name: "Nasal Cavity", description: "Warms, humidifies, and filters air. Contains olfactory receptors. Connected to paranasal sinuses.", cx: 200, cy: 44, r: 7 },
+      { id: "pharynx", name: "Pharynx (Throat)", description: "Shared air/food passageway (~13 cm). Nasopharynx, oropharynx, laryngopharynx.", path: "M200 52 L200 72" },
+      { id: "larynx", name: "Larynx (Voice Box)", description: "Contains vocal cords for sound. Epiglottis prevents food entering airway.", cx: 200, cy: 78, r: 5 },
+      { id: "trachea", name: "Trachea (Windpipe)", description: "Tube (~12 cm) with C-shaped cartilage rings. Ciliated mucosa traps particles.", path: "M200 84 L200 112" },
+      { id: "bronchi", name: "Bronchi", description: "Trachea divides into L and R main bronchi. Further branch into bronchioles.", path: "M200 112 L178 132 M200 112 L222 132" },
+      { id: "lung-l", name: "Left Lung", description: "2 lobes (smaller due to cardiac notch). ~150 million alveoli for gas exchange.", path: "M162 108 Q148 138 152 172 Q160 182 178 172 Q188 152 182 112 Z" },
+      { id: "lung-r", name: "Right Lung", description: "3 lobes (larger than left). ~150 million alveoli. Horizontal and oblique fissures.", path: "M238 108 Q252 138 248 172 Q240 182 222 172 Q212 152 218 112 Z" },
+      { id: "diaphragm", name: "Diaphragm", description: "Dome-shaped muscle separating thorax from abdomen. Primary breathing muscle. Innervated by phrenic nerve.", path: "M152 180 Q200 200 248 180" },
+      { id: "alveoli", name: "Alveoli (Gas Exchange)", description: "Tiny air sacs (0.2 mm) at bronchiole ends. O2 into blood, CO2 out. ~300 million total.", cx: 165, cy: 155, r: 6 }
+    ]
+  }
+];

@@ -5,6 +5,20 @@
 (function () {
   "use strict";
 
+  // ---- Splash Screen ----
+  (function() {
+    var splash = document.getElementById('splash-overlay');
+    if (!splash) return;
+    if (sessionStorage.getItem('shrimpify-splash-shown')) {
+      splash.remove();
+      return;
+    }
+    sessionStorage.setItem('shrimpify-splash-shown', '1');
+    splash.addEventListener('animationend', function() {
+      splash.remove();
+    });
+  })();
+
   // ---- State ----
   const state = {
     currentPage: "home",
@@ -280,9 +294,11 @@
         ShrimpTools.citations();
         ShrimpTools.essayOutliner();
         ShrimpTools.textToSpeech();
+        ShrimpTools.translator();
       } else if (page === "reference") {
         ShrimpTools.formulas();
         ShrimpTools.periodicTable();
+        ShrimpTools.anatomy();
       } else if (page === "notes") {
         ShrimpTools.notes();
       } else if (page === "whiteboard") {

@@ -2804,6 +2804,249 @@
   }
 
   // ============================================================
+  //  TRANSLATOR
+  // ============================================================
+  function _initTranslator() {
+    var inputEl = document.getElementById('translator-input');
+    var outputEl = document.getElementById('translator-output');
+    var fromSelect = document.getElementById('translator-from');
+    var toSelect = document.getElementById('translator-to');
+    var charCount = document.getElementById('translator-char-count');
+    var detectedLang = document.getElementById('translator-detected-lang');
+    var statusEl = document.getElementById('translator-status');
+    var translateBtn = document.getElementById('translator-go');
+    var swapBtn = document.getElementById('translator-swap');
+    var clearBtn = document.getElementById('translator-clear');
+    var copyBtn = document.getElementById('translator-copy');
+    if (!inputEl) return;
+
+    var MAX_CHARS = 500;
+    var debounceTimer = null;
+
+    function updateCharCount() {
+      var len = inputEl.value.length;
+      charCount.textContent = len + ' / ' + MAX_CHARS;
+      charCount.classList.toggle('over-limit', len > MAX_CHARS);
+    }
+
+    function doTranslate() {
+      var text = inputEl.value.trim();
+      if (!text) { outputEl.textContent = ''; statusEl.textContent = ''; return; }
+      if (text.length > MAX_CHARS) {
+        statusEl.textContent = 'Text exceeds ' + MAX_CHARS + ' character limit';
+        statusEl.className = 'translator-status error';
+        return;
+      }
+      var fromLang = fromSelect.value;
+      var toLang = toSelect.value;
+      if (fromLang === toLang && fromLang !== 'auto') {
+        outputEl.textContent = text;
+        statusEl.textContent = 'Same language selected';
+        return;
+      }
+      var langPair = (fromLang === 'auto' ? '' : fromLang) + '|' + toLang;
+      var url = 'https://api.mymemory.translated.net/get?q=' +
+        encodeURIComponent(text) + '&langpair=' + langPair;
+      statusEl.textContent = 'Translating...';
+      statusEl.className = 'translator-status';
+      translateBtn.disabled = true;
+      fetch(url)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          translateBtn.disabled = false;
+          if (data.responseStatus === 200 && data.responseData) {
+            outputEl.textContent = data.responseData.translatedText;
+            statusEl.textContent = '';
+            if (fromLang === 'auto' && data.responseData.detectedLanguage) {
+              detectedLang.textContent = 'Detected: ' + data.responseData.detectedLanguage;
+            } else { detectedLang.textContent = ''; }
+          } else {
+            statusEl.textContent = data.responseDetails || 'Translation failed';
+            statusEl.className = 'translator-status error';
+          }
+        })
+        .catch(function() {
+          translateBtn.disabled = false;
+          statusEl.textContent = 'Network error';
+          statusEl.className = 'translator-status error';
+        });
+    }
+
+    inputEl.addEventListener('input', function() {
+      updateCharCount();
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(doTranslate, 800);
+    });
+    translateBtn.addEventListener('click', doTranslate);
+    swapBtn.addEventListener('click', function() {
+      var fromVal = fromSelect.value;
+      var toVal = toSelect.value;
+      if (fromVal === 'auto') return;
+      fromSelect.value = toVal;
+      toSelect.value = fromVal;
+      var outputText = outputEl.textContent;
+      if (outputText) {
+        inputEl.value = outputText;
+        outputEl.textContent = '';
+        updateCharCount();
+        doTranslate();
+      }
+    });
+    clearBtn.addEventListener('click', function() {
+      inputEl.value = '';
+      outputEl.textContent = '';
+      statusEl.textContent = '';
+      detectedLang.textContent = '';
+      updateCharCount();
+    });
+    copyBtn.addEventListener('click', function() {
+      var text = outputEl.textContent;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(function() {
+        statusEl.textContent = 'Copied!';
+        setTimeout(function() { statusEl.textContent = ''; }, 1500);
+      });
+    });
+    updateCharCount();
+  }
+
+  // ============================================================
+  //  ANATOMY DIAGRAMS
+  // ============================================================
+  function _initAnatomy() {
+    if (typeof ANATOMY_SYSTEMS === 'undefined') return;
+    var svgEl = document.getElementById('anatomy-svg');
+    var tabsEl = document.getElementById('anatomy-system-tabs');
+    var searchEl = document.getElementById('anatomy-search');
+    var descEl = document.getElementById('anatomy-system-desc');
+    var detailEl = document.getElementById('anatomy-part-detail');
+    var nameEl = document.getElementById('anatomy-part-name');
+    var partDescEl = document.getElementById('anatomy-part-desc');
+    var partsListEl = document.getElementById('anatomy-parts-list');
+    if (!svgEl || !tabsEl) return;
+
+    var currentSystem = 0;
+    var activePart = null;
+    var searchQuery = '';
+
+    var BODY = 'M200 18 C210 18 218 24 220 36 C222 48 220 58 216 66 L212 74 L218 78 C232 82 244 90 250 98 L260 98 C264 100 268 106 268 114 L262 192 C260 198 256 202 250 204 L244 272 C242 278 240 280 236 280 L230 280 L228 260 L222 260 L220 282 C218 296 224 340 226 380 L228 388 C230 396 232 420 232 436 L230 490 C230 496 228 500 224 502 L218 504 C214 504 210 500 210 496 L206 436 L200 380 L194 436 L190 496 C190 500 186 504 182 504 L176 502 C172 500 170 496 170 490 L168 436 C168 420 170 396 172 388 L174 380 C176 340 182 296 180 282 L178 260 L172 260 L170 280 L164 280 C160 280 158 278 156 272 L150 204 C144 202 140 198 138 192 L132 114 C132 106 136 100 140 98 L150 98 C156 90 168 82 182 78 L188 74 L184 66 C180 58 178 48 180 36 C182 24 190 18 200 18 Z';
+
+    function renderSystemTabs() {
+      tabsEl.innerHTML = ANATOMY_SYSTEMS.map(function(sys, i) {
+        return '<button class="anatomy-system-tab' +
+          (i === currentSystem ? ' active' : '') +
+          '" data-idx="' + i + '">' + sys.name.replace(' System', '') + '</button>';
+      }).join('');
+      tabsEl.querySelectorAll('.anatomy-system-tab').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          currentSystem = parseInt(btn.dataset.idx);
+          activePart = null;
+          searchQuery = '';
+          searchEl.value = '';
+          renderSystemTabs();
+          renderDiagram();
+          renderInfo();
+          renderPartsList();
+        });
+      });
+    }
+
+    function renderDiagram() {
+      var sys = ANATOMY_SYSTEMS[currentSystem];
+      var html = '<path class="body-outline" d="' + BODY + '"/>';
+      var q = searchQuery.toLowerCase();
+      sys.parts.forEach(function(part) {
+        var match = !q || part.name.toLowerCase().indexOf(q) !== -1 ||
+          part.description.toLowerCase().indexOf(q) !== -1;
+        var dim = q && !match;
+        var act = activePart === part.id;
+        var cls = 'anatomy-part' + (act ? ' active' : '') + (dim ? ' dimmed' : '');
+        var col = sys.color;
+        if (part.path) {
+          var closed = part.path.indexOf('Z') !== -1;
+          html += '<path class="' + cls + '" data-part="' + part.id + '" d="' + part.path +
+            '" fill="' + (closed ? col : 'none') + '" fill-opacity="' + (closed ? '0.4' : '0') +
+            '" stroke="' + col + '" stroke-width="' + (closed ? '1' : '2.5') +
+            '" stroke-linecap="round"><title>' + part.name + '</title></path>';
+        } else if (part.rx) {
+          html += '<ellipse class="' + cls + '" data-part="' + part.id +
+            '" cx="' + part.cx + '" cy="' + part.cy + '" rx="' + part.rx + '" ry="' + part.ry +
+            '" fill="' + col + '" fill-opacity="0.4" stroke="' + col +
+            '" stroke-width="1"><title>' + part.name + '</title></ellipse>';
+        } else if (part.r) {
+          html += '<circle class="' + cls + '" data-part="' + part.id +
+            '" cx="' + part.cx + '" cy="' + part.cy + '" r="' + part.r +
+            '" fill="' + col + '" fill-opacity="0.4" stroke="' + col +
+            '" stroke-width="1"><title>' + part.name + '</title></circle>';
+        }
+      });
+      svgEl.innerHTML = html;
+      svgEl.querySelectorAll('.anatomy-part').forEach(function(el) {
+        el.addEventListener('click', function() {
+          activePart = activePart === el.dataset.part ? null : el.dataset.part;
+          renderDiagram();
+          renderInfo();
+          highlightList();
+        });
+      });
+    }
+
+    function renderInfo() {
+      var sys = ANATOMY_SYSTEMS[currentSystem];
+      descEl.textContent = sys.description;
+      if (activePart) {
+        var part = sys.parts.find(function(p) { return p.id === activePart; });
+        if (part) {
+          nameEl.textContent = part.name;
+          partDescEl.textContent = part.description;
+          detailEl.style.display = '';
+          return;
+        }
+      }
+      detailEl.style.display = 'none';
+    }
+
+    function renderPartsList() {
+      var sys = ANATOMY_SYSTEMS[currentSystem];
+      var q = searchQuery.toLowerCase();
+      var filtered = sys.parts.filter(function(p) {
+        return !q || p.name.toLowerCase().indexOf(q) !== -1 ||
+          p.description.toLowerCase().indexOf(q) !== -1;
+      });
+      partsListEl.innerHTML = filtered.map(function(part) {
+        return '<div class="anatomy-part-item' +
+          (activePart === part.id ? ' active' : '') +
+          '" data-part="' + part.id + '">' + part.name + '</div>';
+      }).join('');
+      partsListEl.querySelectorAll('.anatomy-part-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+          activePart = activePart === item.dataset.part ? null : item.dataset.part;
+          renderDiagram();
+          renderInfo();
+          renderPartsList();
+        });
+      });
+    }
+
+    function highlightList() {
+      partsListEl.querySelectorAll('.anatomy-part-item').forEach(function(item) {
+        item.classList.toggle('active', item.dataset.part === activePart);
+      });
+    }
+
+    searchEl.addEventListener('input', function() {
+      searchQuery = searchEl.value;
+      renderDiagram();
+      renderPartsList();
+    });
+
+    renderSystemTabs();
+    renderDiagram();
+    renderInfo();
+    renderPartsList();
+  }
+
+  // ============================================================
   //  Public API (lazy init wrappers)
   // ============================================================
   window.ShrimpTools = {
@@ -2829,5 +3072,7 @@
     classSchedule: function () { initOnce("classSchedule", _initClassSchedule); },
     textToSpeech: function () { initOnce("textToSpeech", _initTextToSpeech); },
     focusSounds: function () { initOnce("focusSounds", _initFocusSounds); },
+    translator: function () { initOnce("translator", _initTranslator); },
+    anatomy: function () { initOnce("anatomy", _initAnatomy); },
   };
 })();

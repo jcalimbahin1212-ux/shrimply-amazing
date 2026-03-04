@@ -8,6 +8,33 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Startup splash -->
+  <div id="splash-overlay">
+    <p class="splash-text">are you shrimping today?</p>
+  </div>
+  <style>
+    #splash-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: #0a0a0a; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      animation: splashFade 2.5s ease forwards;
+    }
+    .splash-text {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 1.4rem; font-weight: 400; color: #555;
+      letter-spacing: 0.5px; opacity: 0;
+      animation: splashTextIn 0.8s ease 0.2s forwards;
+    }
+    @keyframes splashTextIn {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes splashFade {
+      0%, 60% { opacity: 1; pointer-events: all; }
+      100% { opacity: 0; pointer-events: none; }
+    }
+  </style>
+
   <div id="app">
     <nav id="sidebar">
       <div class="sidebar-header">
@@ -54,7 +81,7 @@
           <div class="card" data-page="reference">
             <div class="card-icon">⊞</div>
             <h3>Reference</h3>
-            <p>Formulas & periodic table</p>
+            <p>Formulas, periodic table & anatomy</p>
           </div>
           <div class="card" data-page="notes">
             <div class="card-icon">▤</div>
@@ -320,6 +347,7 @@
           <button class="tool-tab" data-tool="citations">Citation Generator</button>
           <button class="tool-tab" data-tool="essay-outliner">Essay Outliner</button>
           <button class="tool-tab" data-tool="text-to-speech">Text-to-Speech</button>
+          <button class="tool-tab" data-tool="translator">Translator</button>
         </div>
 
         <!-- Text Tools -->
@@ -430,15 +458,108 @@
           </div>
           <div id="tts-highlight" class="tts-highlight"></div>
         </div>
+
+        <!-- Translator -->
+        <div id="tool-translator" class="tool-panel">
+          <div class="translator-container">
+            <div class="translator-controls">
+              <select id="translator-from" class="translator-lang-select">
+                <option value="auto">Auto-Detect</option>
+                <option value="en" selected>English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="zh">Chinese (Simplified)</option>
+                <option value="ar">Arabic</option>
+                <option value="hi">Hindi</option>
+                <option value="nl">Dutch</option>
+                <option value="sv">Swedish</option>
+                <option value="pl">Polish</option>
+                <option value="tr">Turkish</option>
+                <option value="vi">Vietnamese</option>
+                <option value="th">Thai</option>
+                <option value="uk">Ukrainian</option>
+                <option value="el">Greek</option>
+                <option value="he">Hebrew</option>
+                <option value="id">Indonesian</option>
+                <option value="ro">Romanian</option>
+                <option value="cs">Czech</option>
+                <option value="da">Danish</option>
+                <option value="fi">Finnish</option>
+                <option value="hu">Hungarian</option>
+                <option value="no">Norwegian</option>
+                <option value="la">Latin</option>
+              </select>
+              <button id="translator-swap" class="btn btn-secondary" style="padding:8px 14px;font-size:0.8rem">&#8646;</button>
+              <select id="translator-to" class="translator-lang-select">
+                <option value="es" selected>Spanish</option>
+                <option value="en">English</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="zh">Chinese (Simplified)</option>
+                <option value="ar">Arabic</option>
+                <option value="hi">Hindi</option>
+                <option value="nl">Dutch</option>
+                <option value="sv">Swedish</option>
+                <option value="pl">Polish</option>
+                <option value="tr">Turkish</option>
+                <option value="vi">Vietnamese</option>
+                <option value="th">Thai</option>
+                <option value="uk">Ukrainian</option>
+                <option value="el">Greek</option>
+                <option value="he">Hebrew</option>
+                <option value="id">Indonesian</option>
+                <option value="ro">Romanian</option>
+                <option value="cs">Czech</option>
+                <option value="da">Danish</option>
+                <option value="fi">Finnish</option>
+                <option value="hu">Hungarian</option>
+                <option value="no">Norwegian</option>
+                <option value="la">Latin</option>
+              </select>
+            </div>
+            <div class="translator-panels">
+              <div class="translator-panel">
+                <textarea id="translator-input" class="translator-textarea" placeholder="Enter text to translate..." rows="8"></textarea>
+                <div class="translator-footer">
+                  <span id="translator-char-count" class="translator-char-count">0 / 500</span>
+                  <button id="translator-clear" class="btn btn-secondary" style="font-size:0.75rem;padding:4px 12px">Clear</button>
+                </div>
+              </div>
+              <div class="translator-panel">
+                <div id="translator-output" class="translator-output" data-placeholder="Translation will appear here..."></div>
+                <div class="translator-footer">
+                  <span id="translator-detected-lang" class="translator-detected"></span>
+                  <button id="translator-copy" class="btn btn-secondary" style="font-size:0.75rem;padding:4px 12px">Copy</button>
+                </div>
+              </div>
+            </div>
+            <div class="translator-actions">
+              <button id="translator-go" class="btn">Translate</button>
+              <span id="translator-status" class="translator-status"></span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ==================== REFERENCE ==================== -->
       <div id="page-reference" class="page">
         <h2>Reference</h2>
-        <p class="page-desc">Searchable formulas and periodic table.</p>
+        <p class="page-desc">Searchable formulas, periodic table, and anatomy diagrams.</p>
         <div class="tool-tabs">
           <button class="tool-tab active" data-tool="formulas">Formula Sheets</button>
           <button class="tool-tab" data-tool="periodic-table">Periodic Table</button>
+          <button class="tool-tab" data-tool="anatomy">Anatomy Diagrams</button>
         </div>
 
         <!-- Formula Sheets -->
@@ -467,6 +588,31 @@
             <span class="legend-item legend-post-transition">Post-Transition</span>
             <span class="legend-item legend-lanthanide">Lanthanide</span>
             <span class="legend-item legend-actinide">Actinide</span>
+          </div>
+        </div>
+
+        <!-- Anatomy Diagrams -->
+        <div id="tool-anatomy" class="tool-panel">
+          <div class="anatomy-container">
+            <div class="anatomy-controls">
+              <div class="anatomy-system-tabs" id="anatomy-system-tabs"></div>
+              <div class="anatomy-search-row">
+                <input type="text" id="anatomy-search" placeholder="Search body parts...">
+              </div>
+            </div>
+            <div class="anatomy-layout">
+              <div class="anatomy-diagram-wrap">
+                <svg id="anatomy-svg" viewBox="0 0 400 550" class="anatomy-svg"></svg>
+              </div>
+              <div class="anatomy-info-panel" id="anatomy-info-panel">
+                <div class="anatomy-system-desc" id="anatomy-system-desc"></div>
+                <div class="anatomy-part-detail" id="anatomy-part-detail" style="display:none">
+                  <h4 id="anatomy-part-name"></h4>
+                  <p id="anatomy-part-desc"></p>
+                </div>
+                <div class="anatomy-parts-list" id="anatomy-parts-list"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

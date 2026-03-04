@@ -27,6 +27,64 @@
     selectedGamemode: 0,
   };
 
+  // ---- Scramjet Proxy Setup ----
+  const DEFAULT_WISP_URL = "wss://wisp.mercurywork.shop/";
+  let scramjetReady = false;
+  let scramjetController = null;
+  let bareMuxConn = null;
+
+  (function initScramjet() {
+    if (typeof $scramjetLoadController === "undefined" || typeof BareMux === "undefined") {
+      console.warn("Scramjet or BareMux not loaded. Proxy disabled.");
+      return;
+    }
+    try {
+      var ctrl = $scramjetLoadController();
+      scramjetController = new ctrl.ScramjetController({
+        files: {
+          wasm: "/scram/scramjet.wasm.wasm",
+          all: "/scram/scramjet.all.js",
+          sync: "/scram/scramjet.sync.js",
+        },
+      });
+      scramjetController.init();
+      bareMuxConn = new BareMux.BareMuxConnection("/baremux/worker.js");
+    } catch (e) {
+      console.error("Scramjet init error:", e);
+    }
+  })();
+
+  async function registerScramjetSW() {
+    if (!navigator.serviceWorker) {
+      throw new Error("Service workers not supported.");
+    }
+    var reg = await navigator.serviceWorker.register("/sw.js");
+    // Wait for the service worker to become active
+    if (!navigator.serviceWorker.controller) {
+      await new Promise(function(resolve) {
+        var sw = reg.installing || reg.waiting || reg.active;
+        if (sw) {
+          if (sw.state === "activated") { resolve(); return; }
+          sw.addEventListener("statechange", function() {
+            if (sw.state === "activated") resolve();
+          });
+        } else {
+          resolve();
+        }
+      });
+    }
+  }
+
+  async function ensureScramjetTransport() {
+    if (!bareMuxConn) throw new Error("BareMux not initialized.");
+    var wispUrl = localStorage.getItem("shrimpify-wisp-url") || DEFAULT_WISP_URL;
+    var currentTransport = null;
+    try { currentTransport = await bareMuxConn.getTransport(); } catch (_) {}
+    if (currentTransport !== "/epoxy/index.mjs") {
+      await bareMuxConn.setTransport("/epoxy/index.mjs", [{ wisp: wispUrl }]);
+    }
+  }
+
   // ---- Panel CSS for about:blank game launcher ----
   const PANEL_CSS = `
     *{margin:0;padding:0;box-sizing:border-box}
@@ -387,6 +445,56 @@
     // Focus the iframe so keyboard events work immediately
     try { win.document.querySelector("iframe").focus(); } catch (_) {}
     toast("Opened in about:blank");
+  }
+
+  // ---- About:Blank Launcher with Scramjet Proxy ----
+  async function openInBlankProxy(url) {
+    if (!scramjetController || !bareMuxConn) {
+      toast("Proxy not available. Opening directly.");
+      openInBlank(url);
+      return;
+    }
+
+    try {
+      toast("Starting proxy…");
+      await registerScramjetSW();
+      await ensureScramjetTransport();
+
+      // Encode the URL through Scramjet's proxy prefix
+      // Must be absolute URL so the about:blank iframe loads from our origin
+      // where the service worker is registered
+      var proxyUrl = location.origin + scramjetController.encodeUrl(url);
+
+      var win = window.open("about:blank", "_blank");
+      if (!win) {
+        toast("Pop-up blocked! Allow pop-ups for this site.");
+        return;
+      }
+
+      var cloakTitle = document.title || "Google Docs";
+      var cloakIcon = ($$("link[rel='icon']")[0] || {}).href ||
+        "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
+
+      win.document.write(
+        '<!DOCTYPE html><html><head>' +
+        '<title>' + cloakTitle + '</title>' +
+        '<link rel="icon" href="' + cloakIcon + '">' +
+        '<style>*{margin:0;padding:0;overflow:hidden}html,body,iframe{width:100%;height:100%;border:none}</style>' +
+        '</head><body>' +
+        '<iframe src="' + proxyUrl + '" allowfullscreen ' +
+        'sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" ' +
+        'allow="clipboard-read; clipboard-write" ' +
+        'style="width:100%;height:100%;border:none"></iframe>' +
+        '</body></html>'
+      );
+      win.document.close();
+      try { win.document.querySelector("iframe").focus(); } catch (_) {}
+      toast("Opened via Scramjet proxy");
+    } catch (err) {
+      console.error("Scramjet proxy error:", err);
+      toast("Proxy failed: " + (err.message || err) + ". Opening directly.");
+      openInBlank(url);
+    }
   }
 
   // ---- Game Launcher with Script Panel ----
@@ -788,12 +896,41 @@
     if (link) link.href = "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
   }
 
-  // ---- Apps: open in about:blank ----
+  // ---- Apps: open in about:blank via Scramjet proxy ----
   $$(".app-card").forEach((card) => {
     card.addEventListener("click", () => {
-      openInBlank(card.dataset.url);
+      openInBlankProxy(card.dataset.url);
     });
   });
+
+  // ---- Proxy Settings ----
+  (function initProxySettings() {
+    var wispInput = $("#wisp-url");
+    var saveBtn = $("#save-wisp-url");
+    var resetBtn = $("#reset-wisp-url");
+    var statusEl = $("#proxy-status");
+    if (!wispInput || !saveBtn || !resetBtn) return;
+
+    var stored = localStorage.getItem("shrimpify-wisp-url");
+    if (stored) wispInput.value = stored;
+
+    saveBtn.addEventListener("click", function() {
+      var url = wispInput.value.trim();
+      if (url) {
+        localStorage.setItem("shrimpify-wisp-url", url);
+        if (statusEl) statusEl.textContent = "✓ Proxy URL saved. Changes apply on next app launch.";
+        toast("Proxy URL saved");
+      }
+    });
+
+    resetBtn.addEventListener("click", function() {
+      localStorage.removeItem("shrimpify-wisp-url");
+      wispInput.value = "";
+      wispInput.placeholder = DEFAULT_WISP_URL;
+      if (statusEl) statusEl.textContent = "✓ Reset to default.";
+      toast("Proxy URL reset to default");
+    });
+  })();
 
   // ---- Init ----
   renderCheatsList();

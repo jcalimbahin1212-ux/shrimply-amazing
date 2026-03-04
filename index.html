@@ -6,6 +6,8 @@
   <title>Google Docs</title>
   <link rel="icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">
   <link rel="stylesheet" href="css/style.css">
+  <script src="/scram/scramjet.all.js"></script>
+  <script src="/baremux/index.js"></script>
 </head>
 <body>
   <!-- Startup splash -->
@@ -677,7 +679,7 @@
       <!-- ==================== APPS ==================== -->
       <div id="page-apps" class="page">
         <h2>Apps</h2>
-        <p class="page-desc">Opens in about:blank for stealth.</p>
+        <p class="page-desc">Opens in about:blank via Scramjet proxy for stealth. Does not appear in history.</p>
         <div class="apps-grid">
           <!-- ---- Existing Sites ---- -->
           <div class="app-card" data-url="https://ee.rxtech.cl/">
@@ -1230,6 +1232,16 @@
           <h3>About:Blank Mode</h3>
           <p class="setting-desc">Open this entire site in an about:blank tab.</p>
           <div class="setting-row"><button id="aboutblank-self" class="btn">Open in about:blank</button></div>
+        </div>
+        <div class="settings-group">
+          <h3>Proxy Settings</h3>
+          <p class="setting-desc">Configure the WISP server for Scramjet proxy. Apps will be routed through this proxy to unblock sites.</p>
+          <div class="setting-row"><label>WISP Server URL</label><input type="text" id="wisp-url" placeholder="wss://wisp.mercurywork.shop/"></div>
+          <div class="setting-row">
+            <button id="save-wisp-url" class="btn">Save Proxy URL</button>
+            <button id="reset-wisp-url" class="btn btn-secondary">Reset to Default</button>
+          </div>
+          <p class="setting-desc" id="proxy-status" style="margin-top:6px;"></p>
         </div>
         <div class="settings-group">
           <h3>Focus Sounds</h3>

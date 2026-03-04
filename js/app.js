@@ -29,7 +29,6 @@
 
   // ---- Scramjet Proxy Setup ----
   const DEFAULT_WISP_URL = "wss://wisp.mercurywork.shop/";
-  let scramjetReady = false;
   let scramjetController = null;
   let bareMuxConn = null;
 
@@ -79,7 +78,7 @@
     if (!bareMuxConn) throw new Error("BareMux not initialized.");
     var wispUrl = localStorage.getItem("shrimpify-wisp-url") || DEFAULT_WISP_URL;
     var currentTransport = null;
-    try { currentTransport = await bareMuxConn.getTransport(); } catch (_) {}
+    try { currentTransport = await bareMuxConn.getTransport(); } catch (e) { console.debug("getTransport:", e); }
     if (currentTransport !== "/epoxy/index.mjs") {
       await bareMuxConn.setTransport("/epoxy/index.mjs", [{ wisp: wispUrl }]);
     }
@@ -463,7 +462,7 @@
       // Encode the URL through Scramjet's proxy prefix
       // Must be absolute URL so the about:blank iframe loads from our origin
       // where the service worker is registered
-      var proxyUrl = location.origin + scramjetController.encodeUrl(url);
+      var proxyUrl = new URL(scramjetController.encodeUrl(url), location.origin).href;
 
       var win = window.open("about:blank", "_blank");
       if (!win) {
@@ -482,7 +481,6 @@
         '<style>*{margin:0;padding:0;overflow:hidden}html,body,iframe{width:100%;height:100%;border:none}</style>' +
         '</head><body>' +
         '<iframe src="' + proxyUrl + '" allowfullscreen ' +
-        'sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" ' +
         'allow="clipboard-read; clipboard-write" ' +
         'style="width:100%;height:100%;border:none"></iframe>' +
         '</body></html>'

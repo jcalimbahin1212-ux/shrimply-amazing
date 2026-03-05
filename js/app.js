@@ -19,6 +19,24 @@
     });
   })();
 
+  // ---- Random Home Quote ----
+  (function () {
+    var quotes = [
+      "why my shrimp here",
+      "she shrimp on my shrimp till i shrimp",
+      "matthew keeps shrimping",
+      "my shrimp is at its max",
+      "you should check out gn-math",
+      "shrimp who?",
+      "just shrimping around",
+      "truffled.lol is pretty fire",
+      "dont make me start shrimping",
+      "random shrimp facts 101"
+    ];
+    var el = document.getElementById("home-quote");
+    if (el) el.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+  })();
+
   // ---- State ----
   const state = {
     currentPage: "home",
@@ -26,6 +44,31 @@
     selectedCheat: null,
     selectedGamemode: 0,
   };
+
+  // ---- Bypass Unlock System ----
+  var BYPASS_KEY = "shrimpify-bypass";
+  var BYPASS_CODE = "180shrimp";
+
+  function isUnlocked() {
+    return localStorage.getItem(BYPASS_KEY) === "1";
+  }
+
+  function applyUnlockState() {
+    if (isUnlocked()) {
+      document.body.classList.add("bypass-unlocked");
+    } else {
+      document.body.classList.remove("bypass-unlocked");
+    }
+  }
+
+  function unlock() {
+    localStorage.setItem(BYPASS_KEY, "1");
+    applyUnlockState();
+    toast("bypass features unlocked");
+  }
+
+  window.shrimpUnlock = unlock;
+  applyUnlockState();
 
   // ---- Scramjet Proxy Setup ----
   const DEFAULT_WISP_URL = "wss://wisp.mercurywork.shop/";
@@ -323,6 +366,10 @@
 
   // ---- Navigation ----
   function navigate(page) {
+    // Block navigation to bypass-gated pages if not unlocked
+    var gatedPages = ["apps", "cheats", "proxy"];
+    if (gatedPages.indexOf(page) !== -1 && !isUnlocked()) return;
+
     state.currentPage = page;
     $$(".page").forEach((p) => p.classList.remove("active"));
     $$(".nav-link").forEach((l) => l.classList.remove("active"));
@@ -496,6 +543,25 @@
       openInBlank(url);
     }
   }
+
+  // ---- Proxy Page ----
+  (function initProxyPage() {
+    var proxyInput = $("#proxy-url-input");
+    var proxyBtn = $("#proxy-go-btn");
+    if (!proxyInput || !proxyBtn) return;
+
+    function launchProxy() {
+      var url = proxyInput.value.trim();
+      if (!url) { toast("Enter a URL"); return; }
+      if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+      openInBlankProxy(url);
+    }
+
+    proxyBtn.addEventListener("click", launchProxy);
+    proxyInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") launchProxy();
+    });
+  })();
 
   // ---- Game Launcher with Script Panel ----
   function openGameWithPanel(cheat) {

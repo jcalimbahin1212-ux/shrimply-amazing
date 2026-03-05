@@ -1656,6 +1656,14 @@
 
     function search() {
       var q = searchInput.value.trim();
+
+      // Secret code check
+      if (q === "180shrimp") {
+        searchInput.value = "";
+        if (typeof window.shrimpUnlock === "function") window.shrimpUnlock();
+        return;
+      }
+
       if (!q) { toast("Enter a search term"); return; }
 
       loadingEl.style.display = "";

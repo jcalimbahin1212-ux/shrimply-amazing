@@ -190,6 +190,8 @@
 
   // ---- Scramjet Proxy Setup ----
   const DEFAULT_WISP_URL = "wss://wisp.mercurywork.shop/";
+  // Derive base path so all proxy asset paths work on GitHub Pages (or any subdirectory)
+  const BASE_PATH = location.pathname.substring(0, location.pathname.lastIndexOf("/") + 1);
   let scramjetController = null;
   let bareMuxConn = null;
   let scramjetReady = false;
@@ -204,14 +206,14 @@
       var ctrl = $scramjetLoadController();
       scramjetController = new ctrl.ScramjetController({
         files: {
-          wasm: "/scram/scramjet.wasm.wasm",
-          all: "/scram/scramjet.all.js",
-          sync: "/scram/scramjet.sync.js",
+          wasm: BASE_PATH + "scram/scramjet.wasm.wasm",
+          all: BASE_PATH + "scram/scramjet.all.js",
+          sync: BASE_PATH + "scram/scramjet.sync.js",
         },
       });
       // init() is async — store the promise so we can await it later
       scramjetInitPromise = scramjetController.init();
-      bareMuxConn = new BareMux.BareMuxConnection("/baremux/worker.js");
+      bareMuxConn = new BareMux.BareMuxConnection(BASE_PATH + "baremux/worker.js");
       console.log("Scramjet controller created, init() pending...");
     } catch (e) {
       console.error("Scramjet init error:", e);
@@ -222,7 +224,7 @@
     if (!navigator.serviceWorker) {
       throw new Error("Service workers not supported.");
     }
-    var reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    var reg = await navigator.serviceWorker.register(BASE_PATH + "sw.js", { scope: BASE_PATH });
     // Wait for the service worker to become active
     if (!navigator.serviceWorker.controller) {
       await new Promise(function(resolve) {
@@ -244,9 +246,10 @@
     if (!bareMuxConn) throw new Error("BareMux not initialized.");
     var wispUrl = localStorage.getItem("shrimpify-wisp-url") || DEFAULT_WISP_URL;
     var currentTransport = null;
+    var epoxyPath = BASE_PATH + "epoxy/index.mjs";
     try { currentTransport = await bareMuxConn.getTransport(); } catch (e) { console.debug("getTransport:", e); }
-    if (currentTransport !== "/epoxy/index.mjs") {
-      await bareMuxConn.setTransport("/epoxy/index.mjs", [{ wisp: wispUrl }]);
+    if (currentTransport !== epoxyPath) {
+      await bareMuxConn.setTransport(epoxyPath, [{ wisp: wispUrl }]);
       console.log("Epoxy transport set with WISP:", wispUrl);
     }
   }

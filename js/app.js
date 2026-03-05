@@ -192,6 +192,8 @@
   const DEFAULT_WISP_URL = "wss://wisp.mercurywork.shop/";
   let scramjetController = null;
   let bareMuxConn = null;
+  let scramjetReady = false;
+  let scramjetInitPromise = null;
 
   (function initScramjet() {
     if (typeof $scramjetLoadController === "undefined" || typeof BareMux === "undefined") {
@@ -207,8 +209,10 @@
           sync: "/scram/scramjet.sync.js",
         },
       });
-      scramjetController.init();
+      // init() is async — store the promise so we can await it later
+      scramjetInitPromise = scramjetController.init();
       bareMuxConn = new BareMux.BareMuxConnection("/baremux/worker.js");
+      console.log("Scramjet controller created, init() pending...");
     } catch (e) {
       console.error("Scramjet init error:", e);
     }
@@ -218,7 +222,7 @@
     if (!navigator.serviceWorker) {
       throw new Error("Service workers not supported.");
     }
-    var reg = await navigator.serviceWorker.register("/sw.js");
+    var reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
     // Wait for the service worker to become active
     if (!navigator.serviceWorker.controller) {
       await new Promise(function(resolve) {
@@ -233,6 +237,7 @@
         }
       });
     }
+    console.log("Scramjet SW registered, scope:", reg.scope);
   }
 
   async function ensureScramjetTransport() {
@@ -242,6 +247,7 @@
     try { currentTransport = await bareMuxConn.getTransport(); } catch (e) { console.debug("getTransport:", e); }
     if (currentTransport !== "/epoxy/index.mjs") {
       await bareMuxConn.setTransport("/epoxy/index.mjs", [{ wisp: wispUrl }]);
+      console.log("Epoxy transport set with WISP:", wispUrl);
     }
   }
 
@@ -616,22 +622,80 @@
   }
 
   // ---- About:Blank Launcher with Scramjet Proxy ----
-  async function openInBlankProxy(url) {
+  var _currentProxyUrl = null; // tracks the original (non-encoded) URL loaded in proxy
+
+  async function ensureScramjetReady() {
     if (!scramjetController || !bareMuxConn) {
-      toast("Proxy not available. Opening directly.");
-      openInBlank(url);
-      return;
+      throw new Error("Scramjet not initialized. Check that the site is served over HTTP (not file://) and that scramjet.all.js loaded.");
     }
+    // Wait for controller init (writes config to IndexedDB)
+    if (scramjetInitPromise) {
+      await scramjetInitPromise;
+      scramjetInitPromise = null;
+      console.log("Scramjet controller init() completed");
+    }
+    await registerScramjetSW();
+    // After SW is active, re-send config so SW has it in memory
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        scramjet$type: "loadConfig",
+        config: scramjetController.config || {}
+      });
+    }
+    await ensureScramjetTransport();
+    scramjetReady = true;
+  }
+
+  function encodeProxyUrl(url) {
+    return new URL(scramjetController.encodeUrl(url), location.origin).href;
+  }
+
+  // Pre-warm the proxy on page load so it's ready when user clicks
+  (async function preWarmProxy() {
+    try {
+      await ensureScramjetReady();
+      console.log("Scramjet proxy pre-warmed and ready");
+    } catch (e) {
+      console.warn("Proxy pre-warm failed:", e.message);
+    }
+  })();
+
+  // Open URL inside the built-in proxy browser on the Proxy page
+  async function openInBuiltInProxy(url) {
+    var landing = $("#proxy-landing");
+    var browser = $("#proxy-browser");
+    var frame = $("#proxy-frame");
+    var addressBar = $("#proxy-address-bar");
+
+    // Always navigate to proxy page and show browser
+    if (state.currentPage !== "proxy") {
+      navigate("proxy");
+    }
+    if (landing) landing.style.display = "none";
+    if (browser) browser.style.display = "flex";
+    if (addressBar) addressBar.value = url;
+    _currentProxyUrl = url;
 
     try {
-      toast("Starting proxy…");
-      await registerScramjetSW();
-      await ensureScramjetTransport();
+      toast("Loading proxy\u2026");
+      await ensureScramjetReady();
 
-      // Encode the URL through Scramjet's proxy prefix
-      // Must be absolute URL so the about:blank iframe loads from our origin
-      // where the service worker is registered
-      var proxyUrl = new URL(scramjetController.encodeUrl(url), location.origin).href;
+      var proxyUrl = encodeProxyUrl(url);
+      console.log("Proxy URL encoded:", url, "->", proxyUrl);
+      if (frame) frame.src = proxyUrl;
+      toast("Loaded via Scramjet proxy");
+    } catch (err) {
+      console.error("Scramjet proxy error:", err);
+      toast("Proxy error: " + (err.message || err));
+      // Still show the browser but with direct URL as last resort
+      if (frame) frame.src = url;
+    }
+  }
+
+  async function openInBlankProxy(url) {
+    try {
+      await ensureScramjetReady();
+      var proxyUrl = encodeProxyUrl(url);
 
       var win = window.open("about:blank", "_blank");
       if (!win) {
@@ -643,6 +707,9 @@
       var cloakIcon = ($$("link[rel='icon']")[0] || {}).href ||
         "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
 
+      // Write a cloaked page with proxied iframe
+      // The iframe src points to our origin where the SW is registered,
+      // so Scramjet will intercept the request
       win.document.write(
         '<!DOCTYPE html><html><head>' +
         '<title>' + cloakTitle + '</title>' +
@@ -655,31 +722,83 @@
         '</body></html>'
       );
       win.document.close();
-      try { win.document.querySelector("iframe").focus(); } catch (_) {}
-      toast("Opened via Scramjet proxy");
+      toast("Opened via Scramjet proxy in new tab");
     } catch (err) {
       console.error("Scramjet proxy error:", err);
-      toast("Proxy failed: " + (err.message || err) + ". Opening directly.");
-      openInBlank(url);
+      toast("Proxy failed: " + (err.message || err));
+      // Fallback: open in built-in browser instead
+      openInBuiltInProxy(url);
     }
   }
 
-  // ---- Proxy Page ----
+  // ---- Proxy Page (built-in browser) ----
   (function initProxyPage() {
     var proxyInput = $("#proxy-url-input");
     var proxyBtn = $("#proxy-go-btn");
+    var backBtn = $("#proxy-back");
+    var fwdBtn = $("#proxy-forward");
+    var reloadBtn = $("#proxy-reload");
+    var fullscreenBtn = $("#proxy-fullscreen");
+    var popoutBtn = $("#proxy-popout");
+    var closeBtn = $("#proxy-close");
+    var frame = $("#proxy-frame");
+    var addressBar = $("#proxy-address-bar");
     if (!proxyInput || !proxyBtn) return;
 
     function launchProxy() {
       var url = proxyInput.value.trim();
       if (!url) { toast("Enter a URL"); return; }
       if (!/^https?:\/\//i.test(url)) url = "https://" + url;
-      openInBlankProxy(url);
+      openInBuiltInProxy(url);
     }
 
     proxyBtn.addEventListener("click", launchProxy);
     proxyInput.addEventListener("keydown", function (e) {
       if (e.key === "Enter") launchProxy();
+    });
+
+    // Toolbar buttons
+    if (backBtn) backBtn.addEventListener("click", function () {
+      if (frame && frame.contentWindow) {
+        try { frame.contentWindow.history.back(); } catch (_) {}
+      }
+    });
+    if (fwdBtn) fwdBtn.addEventListener("click", function () {
+      if (frame && frame.contentWindow) {
+        try { frame.contentWindow.history.forward(); } catch (_) {}
+      }
+    });
+    if (reloadBtn) reloadBtn.addEventListener("click", function () {
+      if (frame && frame.contentWindow) {
+        try { frame.contentWindow.location.reload(); } catch (_) {}
+      }
+    });
+    if (fullscreenBtn) fullscreenBtn.addEventListener("click", function () {
+      var browser = $("#proxy-browser");
+      if (!browser) return;
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        browser.requestFullscreen().catch(function () {
+          toast("Fullscreen not supported");
+        });
+      }
+    });
+    if (popoutBtn) popoutBtn.addEventListener("click", function () {
+      if (_currentProxyUrl) {
+        openInBlankProxy(_currentProxyUrl);
+      } else {
+        toast("Nothing to pop out");
+      }
+    });
+    if (closeBtn) closeBtn.addEventListener("click", function () {
+      var landing = $("#proxy-landing");
+      var browser = $("#proxy-browser");
+      if (frame) frame.src = "about:blank";
+      if (browser) browser.style.display = "none";
+      if (landing) landing.style.display = "";
+      _currentProxyUrl = null;
+      if (addressBar) addressBar.value = "";
     });
   })();
 
@@ -1082,10 +1201,10 @@
     if (link) link.href = "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
   }
 
-  // ---- Apps: open in about:blank via Scramjet proxy ----
+  // ---- Apps: open in built-in proxy browser ----
   $$(".app-card").forEach((card) => {
     card.addEventListener("click", () => {
-      openInBlankProxy(card.dataset.url);
+      openInBuiltInProxy(card.dataset.url);
     });
   });
 

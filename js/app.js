@@ -528,6 +528,7 @@
         ShrimpTools.translator();
         ShrimpTools.essayWriter();
         ShrimpTools.humanizer();
+        ShrimpTools.sourceResearch();
       } else if (page === "reference") {
         ShrimpTools.formulas();
         ShrimpTools.periodicTable();
@@ -546,6 +547,7 @@
       } else if (page === "library") {
         ShrimpTools.sourceFinder();
         ShrimpTools.vocabulary();
+        ShrimpTools.researchAssistant();
       } else if (page === "learn") {
         ShrimpTools.learn();
       }

@@ -411,6 +411,7 @@
           <button class="tool-tab" data-tool="translator">Translator</button>
           <button class="tool-tab" data-tool="essay-writer">AI Essay Writer</button>
           <button class="tool-tab" data-tool="humanizer">AI Humanizer</button>
+          <button class="tool-tab" data-tool="source-research">Source Research</button>
         </div>
 
         <!-- Text Tools -->
@@ -654,6 +655,15 @@
             </div>
             <button id="essay-generate-btn" class="btn">Generate Essay</button>
           </div>
+          <div class="essay-sources-section">
+            <label class="essay-sources-label">Source URLs <span class="essay-sources-hint">(optional — paste URLs the AI should reference)</span></label>
+            <textarea id="essay-sources-input" class="essay-sources-textarea" rows="3" placeholder="Paste source URLs, one per line..."></textarea>
+            <div class="essay-sources-actions">
+              <button id="essay-fetch-sources-btn" class="btn btn-secondary">Fetch Sources</button>
+              <span id="essay-sources-status" class="essay-sources-status"></span>
+            </div>
+            <div id="essay-sources-list" class="essay-sources-list"></div>
+          </div>
           <div id="essay-loading" class="essay-loading" style="display:none">
             <span>Generating your essay</span><span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
           </div>
@@ -663,6 +673,38 @@
               <button id="essay-copy-btn" class="btn btn-secondary" style="font-size:0.75rem;padding:4px 12px">Copy</button>
             </div>
             <textarea id="essay-output" class="essay-output" rows="18" placeholder="Your essay will appear here..."></textarea>
+            <button id="essay-continue-btn" class="btn btn-secondary" style="margin-top:10px;display:none">Continue Writing</button>
+          </div>
+        </div>
+
+        <!-- Source Research -->
+        <div id="tool-source-research" class="tool-panel">
+          <p class="ra-desc">Research sources for your essay — search by topic or paste a URL to analyze. Selected sources feed directly into the AI Essay Writer.</p>
+
+          <div class="sr-url-row">
+            <input type="text" id="sr-url-input" placeholder="Paste a URL to analyze...">
+            <button id="sr-url-btn" class="btn btn-secondary">Analyze URL</button>
+          </div>
+          <div id="sr-url-result"></div>
+
+          <div class="sr-search-row">
+            <input type="text" id="sr-search-input" placeholder="Search for sources on a topic...">
+            <button id="sr-search-btn" class="btn">Search Sources</button>
+          </div>
+
+          <div id="sr-loading" class="essay-loading" style="display:none">
+            <span>Searching</span><span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+          </div>
+
+          <div id="sr-results" style="display:none">
+            <h4 class="ra-section-header">Search Results</h4>
+            <div id="sr-results-list"></div>
+          </div>
+
+          <div id="sr-selected" class="sr-selected-section" style="display:none">
+            <h4 class="ra-section-header">Selected Sources (<span id="sr-selected-count">0</span>)</h4>
+            <div id="sr-selected-list"></div>
+            <button id="sr-go-to-writer" class="btn" style="margin-top:12px">Go to AI Essay Writer</button>
           </div>
         </div>
 
@@ -1343,6 +1385,7 @@
         <p class="page-desc">Search credible sources and build your vocabulary.</p>
         <div class="tool-tabs">
           <button class="tool-tab active" data-tool="source-finder">Source Finder</button>
+          <button class="tool-tab" data-tool="research-assistant">Research Assistant</button>
           <button class="tool-tab" data-tool="vocabulary">Vocabulary</button>
         </div>
 
@@ -1353,19 +1396,68 @@
             <button id="source-search-btn" class="btn">Search</button>
           </div>
           <div id="source-loading" class="source-loading" style="display:none">Searching the web...</div>
-          <div id="source-results" class="source-results-grid three-col" style="display:none">
+          <div id="source-results" class="source-results-grid four-col" style="display:none">
             <div class="source-column">
               <h3 class="source-column-header">Web Results</h3>
               <div id="source-web-col"></div>
             </div>
             <div class="source-column">
-              <h3 class="source-column-header">Academic <span class="source-badge-info">(.edu / .gov / .org)</span></h3>
+              <h3 class="source-column-header">Academic <span class="source-badge-info">(.edu / .gov / scholars)</span></h3>
               <div id="source-academic-col"></div>
+            </div>
+            <div class="source-column">
+              <h3 class="source-column-header">Wikipedia</h3>
+              <div id="source-wiki-col"></div>
             </div>
             <div class="source-column">
               <h3 class="source-column-header">Books <span class="source-badge-info">(Open Library)</span></h3>
               <div id="source-books-col"></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Research Assistant -->
+        <div id="tool-research-assistant" class="tool-panel">
+          <p class="ra-desc">Enter a topic and get a structured research brief with sources ranked by credibility.</p>
+
+          <div class="ra-url-row">
+            <input type="text" id="ra-url-input" placeholder="Paste a URL to analyze a specific page...">
+            <button id="ra-url-btn" class="btn btn-secondary">Analyze URL</button>
+          </div>
+          <div id="ra-url-result" class="ra-url-result" style="display:none"></div>
+
+          <div class="source-search-container">
+            <input type="text" id="ra-search-input" placeholder="Enter a research topic... (e.g. Climate Change Effects)">
+            <button id="ra-search-btn" class="btn">Research</button>
+          </div>
+          <div id="ra-loading" class="source-loading" style="display:none">Researching your topic...</div>
+          <div id="ra-results" style="display:none">
+            <div class="ra-section" id="ra-overview">
+              <h3 class="ra-section-header">Topic Overview</h3>
+              <div id="ra-overview-content"></div>
+            </div>
+            <div class="ra-section" id="ra-findings">
+              <h3 class="ra-section-header">Key Findings from Credible Sources</h3>
+              <div id="ra-findings-content"></div>
+            </div>
+            <div id="ra-deep-dive-section" style="display:none">
+              <button id="ra-deep-dive-btn" class="btn" style="margin-bottom:16px">Deep Dive — Fetch & Summarize Top Sources</button>
+              <div id="ra-deep-loading" class="source-loading" style="display:none">Fetching and summarizing sources... this may take a moment.</div>
+              <div id="ra-deep-summary" class="ra-section" style="display:none">
+                <h3 class="ra-section-header">Deep Dive Summary</h3>
+                <div id="ra-deep-summary-content"></div>
+              </div>
+              <div id="ra-deep-findings" style="display:none"></div>
+            </div>
+            <div class="ra-section" id="ra-papers">
+              <h3 class="ra-section-header">Academic Papers</h3>
+              <div id="ra-papers-content"></div>
+            </div>
+            <div class="ra-section" id="ra-all-sources">
+              <h3 class="ra-section-header">All Sources (Ranked by Credibility)</h3>
+              <div id="ra-sources-content"></div>
+            </div>
+            <button id="ra-copy-btn" class="btn" style="margin-top:16px">Copy Research Brief</button>
           </div>
         </div>
 

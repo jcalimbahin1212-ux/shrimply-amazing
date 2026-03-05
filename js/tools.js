@@ -1603,6 +1603,148 @@
   }
 
   // ============================================================
+  //  SHARED: Search utilities (used by Source Finder + Research Assistant)
+  // ============================================================
+
+  var searxInstances = [
+    "https://searx.be",
+    "https://search.sapti.me",
+    "https://searx.tiekoetter.com",
+    "https://search.nikisoft.one",
+    "https://searx.oxen.ai",
+    "https://search.ononoki.org"
+  ];
+
+  function fetchWithTimeout(url, ms) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, ms);
+    return fetch(url, { signal: controller.signal }).finally(function () { clearTimeout(timer); });
+  }
+
+  function trySearx(query, idx) {
+    if (idx >= searxInstances.length) return Promise.resolve(null);
+    var url = searxInstances[idx] + "/search?q=" + encodeURIComponent(query) + "&format=json&categories=general&language=en";
+    return fetchWithTimeout(url, 8000)
+      .then(function (r) { return r.json(); })
+      .catch(function () { return trySearx(query, idx + 1); });
+  }
+
+  function extractDomain(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return ""; }
+  }
+
+  // Known credible domains by tier
+  var tier1Domains = ["cdc.gov", "nih.gov", "nasa.gov", "epa.gov", "ed.gov", "usda.gov",
+    "noaa.gov", "fda.gov", "who.int", "census.gov", "bls.gov", "nist.gov", "irs.gov",
+    "whitehouse.gov", "congress.gov", "supremecourt.gov", "state.gov", "defense.gov"];
+  var tier2Domains = ["nature.com", "science.org", "sciencedirect.com", "jstor.org",
+    "springer.com", "wiley.com", "pubmed.ncbi.nlm.nih.gov", "scholar.google.com",
+    "arxiv.org", "researchgate.net", "ieee.org", "acm.org", "plos.org",
+    "frontiersin.org", "mdpi.com", "cambridge.org", "oxford.ac.uk"];
+  var tier3Domains = ["bbc.com", "bbc.co.uk", "reuters.com", "apnews.com", "npr.org",
+    "pbs.org", "smithsonianmag.com", "nationalgeographic.com", "scientificamerican.com",
+    "theconversation.com", "britannica.com", "khanacademy.org", "ted.com"];
+
+  function getCredibilityTier(url) {
+    var domain = extractDomain(url);
+    if (!domain) return 4;
+    // Tier 1: government / military
+    if (/\.(gov|mil)$/i.test(domain)) return 1;
+    for (var i = 0; i < tier1Domains.length; i++) {
+      if (domain === tier1Domains[i] || domain.endsWith("." + tier1Domains[i])) return 1;
+    }
+    // Tier 2: education / academic publishers
+    if (/\.edu$/i.test(domain)) return 2;
+    for (var i = 0; i < tier2Domains.length; i++) {
+      if (domain === tier2Domains[i] || domain.endsWith("." + tier2Domains[i])) return 2;
+    }
+    // Tier 3: credible orgs / news
+    if (/\.org$/i.test(domain)) return 3;
+    for (var i = 0; i < tier3Domains.length; i++) {
+      if (domain === tier3Domains[i] || domain.endsWith("." + tier3Domains[i])) return 3;
+    }
+    return 4;
+  }
+
+  var tierLabels = { 1: "Gov/Official", 2: "Academic", 3: "Credible Org", 4: "Web" };
+  var tierClasses = { 1: "cred-tier-1", 2: "cred-tier-2", 3: "cred-tier-3", 4: "cred-tier-4" };
+
+  function credBadgeHTML(tier) {
+    return '<span class="cred-badge ' + tierClasses[tier] + '">' + tierLabels[tier] + '</span>';
+  }
+
+  function searchWikipedia(query) {
+    var url = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" +
+      encodeURIComponent(query) + "&srlimit=10&format=json&origin=*";
+    return fetchWithTimeout(url, 8000)
+      .then(function (r) { return r.json(); })
+      .catch(function () { return null; });
+  }
+
+  function searchSemanticScholar(query) {
+    var url = "https://api.semanticscholar.org/graph/v1/paper/search?query=" +
+      encodeURIComponent(query) + "&limit=10&fields=title,url,abstract,year,authors";
+    return fetchWithTimeout(url, 8000)
+      .then(function (r) { return r.json(); })
+      .catch(function () { return null; });
+  }
+
+  function escapeHTML(str) {
+    if (!str) return "";
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // ---- URL content fetching (CORS proxy + text extraction) ----
+
+  var _pageCache = {};
+
+  function fetchPageContent(url) {
+    if (_pageCache[url]) return Promise.resolve(_pageCache[url]);
+    var proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+    return fetchWithTimeout(proxyUrl, 15000)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.contents) return null;
+        var html = data.contents;
+        var titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+        var title = titleMatch ? titleMatch[1].trim() : "";
+        var cleaned = html
+          .replace(/<script[\s\S]*?<\/script>/gi, "")
+          .replace(/<style[\s\S]*?<\/style>/gi, "")
+          .replace(/<nav[\s\S]*?<\/nav>/gi, "")
+          .replace(/<header[\s\S]*?<\/header>/gi, "")
+          .replace(/<footer[\s\S]*?<\/footer>/gi, "")
+          .replace(/<aside[\s\S]*?<\/aside>/gi, "");
+        var text = cleaned.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        if (text.length > 3000) text = text.substring(0, 3000) + "...";
+        var result = { url: url, title: title, text: text };
+        _pageCache[url] = result;
+        return result;
+      })
+      .catch(function () { return null; });
+  }
+
+  function summarizeText(text, topic) {
+    var prompt = "Summarize the following text in 2-3 concise sentences, focusing on information relevant to '" +
+      topic + "'. Only provide the summary, nothing else.\n\nText:\n" + text;
+    return fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
+      .then(function (r) { return r.text(); })
+      .then(function (t) { return t.trim(); })
+      .catch(function () { return "Summary unavailable."; });
+  }
+
+  function fetchAndSummarize(url, topic) {
+    return fetchPageContent(url).then(function (page) {
+      if (!page || !page.text || page.text.length < 50) {
+        return { url: url, title: "", text: "", summary: "Could not fetch this page." };
+      }
+      return summarizeText(page.text, topic).then(function (summary) {
+        return { url: url, title: page.title, text: page.text, summary: summary };
+      });
+    });
+  }
+
+  // ============================================================
   //  13. SOURCE FINDER
   // ============================================================
   function _initSourceFinder() {
@@ -1612,45 +1754,34 @@
     var resultsEl = $("#source-results");
     var webCol = $("#source-web-col");
     var academicCol = $("#source-academic-col");
+    var wikiCol = $("#source-wiki-col");
     var booksCol = $("#source-books-col");
-
-    // SearXNG public instances (fallback chain)
-    var searxInstances = [
-      "https://searx.be",
-      "https://search.sapti.me",
-      "https://searx.tiekoetter.com"
-    ];
-
-    function fetchWithTimeout(url, ms) {
-      var controller = new AbortController();
-      var timer = setTimeout(function() { controller.abort(); }, ms);
-      return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
-    }
-
-    function trySearx(query, idx) {
-      if (idx >= searxInstances.length) return Promise.resolve(null);
-      var url = searxInstances[idx] + "/search?q=" + encodeURIComponent(query) + "&format=json&categories=general&language=en";
-      return fetchWithTimeout(url, 8000)
-        .then(function(r) { return r.json(); })
-        .catch(function() { return trySearx(query, idx + 1); });
-    }
-
-    function extractDomain(url) {
-      try { return new URL(url).hostname.replace(/^www\./, ""); } catch(e) { return ""; }
-    }
-
-    function isAcademic(url) {
-      var domain = extractDomain(url);
-      return /\.(edu|gov|org)$/i.test(domain);
-    }
 
     function renderCard(item) {
       var domain = extractDomain(item.url || "");
+      var tier = getCredibilityTier(item.url || "");
       return '<div class="source-card">' +
-        '<div class="source-title">' + (item.title || "Untitled") + '</div>' +
-        (domain ? '<div class="source-domain">' + domain + '</div>' : '') +
-        '<div class="source-snippet">' + (item.content || "") + '</div>' +
-        '<a href="' + item.url + '" target="_blank" rel="noopener" class="source-link">Visit Source</a>' +
+        credBadgeHTML(tier) +
+        '<div class="source-title">' + escapeHTML(item.title || "Untitled") + '</div>' +
+        (domain ? '<div class="source-domain">' + escapeHTML(domain) + '</div>' : '') +
+        '<div class="source-snippet">' + escapeHTML(item.content || "") + '</div>' +
+        '<a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" class="source-link">Visit Source</a>' +
+        '</div>';
+    }
+
+    function renderScholarCard(paper) {
+      var authors = "";
+      if (paper.authors && paper.authors.length > 0) {
+        authors = paper.authors.slice(0, 3).map(function (a) { return a.name; }).join(", ");
+        if (paper.authors.length > 3) authors += " et al.";
+      }
+      var abstract = paper.abstract ? paper.abstract.substring(0, 200) + (paper.abstract.length > 200 ? "..." : "") : "";
+      return '<div class="source-card">' +
+        credBadgeHTML(2) +
+        '<div class="source-title">' + escapeHTML(paper.title || "Untitled") + '</div>' +
+        (authors ? '<div class="source-meta">' + escapeHTML(authors) + (paper.year ? ' (' + paper.year + ')' : '') + '</div>' : '') +
+        (abstract ? '<div class="source-snippet">' + escapeHTML(abstract) + '</div>' : '') +
+        (paper.url ? '<a href="' + escapeHTML(paper.url) + '" target="_blank" rel="noopener" class="source-link">View Paper</a>' : '') +
         '</div>';
     }
 
@@ -1670,25 +1801,31 @@
       resultsEl.style.display = "none";
       webCol.innerHTML = "";
       academicCol.innerHTML = "";
+      if (wikiCol) wikiCol.innerHTML = "";
       booksCol.innerHTML = "";
 
       var bookUrl = "https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=15";
       var searxPromise = trySearx(q, 0);
-      var bookPromise = fetch(bookUrl).then(function(r) { return r.json(); }).catch(function() { return null; });
+      var bookPromise = fetch(bookUrl).then(function (r) { return r.json(); }).catch(function () { return null; });
+      var wikiPromise = searchWikipedia(q);
+      var scholarPromise = searchSemanticScholar(q);
 
-      Promise.all([searxPromise, bookPromise]).then(function(results) {
+      Promise.all([searxPromise, bookPromise, wikiPromise, scholarPromise]).then(function (results) {
         loadingEl.style.display = "none";
         resultsEl.style.display = "";
 
         var searxData = results[0];
         var bookData = results[1];
+        var wikiData = results[2];
+        var scholarData = results[3];
 
         // Split SearXNG results into web and academic
         var webResults = [];
         var academicResults = [];
         if (searxData && searxData.results && searxData.results.length > 0) {
-          searxData.results.forEach(function(item) {
-            if (isAcademic(item.url)) {
+          searxData.results.forEach(function (item) {
+            var tier = getCredibilityTier(item.url);
+            if (tier <= 3) {
               academicResults.push(item);
             } else {
               webResults.push(item);
@@ -1696,30 +1833,58 @@
           });
         }
 
-        // Render web results
+        // Render web results (max 15)
         if (webResults.length > 0) {
           webCol.innerHTML = webResults.slice(0, 15).map(renderCard).join("");
         } else {
           webCol.innerHTML = '<p style="color:var(--text-dim)">No web results found.</p>';
         }
 
-        // Render academic results
+        // Render academic results from SearXNG + Semantic Scholar
+        var academicHTML = "";
         if (academicResults.length > 0) {
-          academicCol.innerHTML = academicResults.slice(0, 15).map(renderCard).join("");
+          academicHTML += academicResults.slice(0, 10).map(renderCard).join("");
+        }
+        if (scholarData && scholarData.data && scholarData.data.length > 0) {
+          academicHTML += '<div class="source-subsection-label">Semantic Scholar Papers</div>';
+          academicHTML += scholarData.data.slice(0, 10).map(renderScholarCard).join("");
+        }
+        if (academicHTML) {
+          academicCol.innerHTML = academicHTML;
         } else {
           academicCol.innerHTML = '<p style="color:var(--text-dim)">No academic sources found. Try more specific keywords.</p>';
         }
 
-        // Render books
+        // Render Wikipedia results
+        if (wikiCol) {
+          if (wikiData && wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
+            wikiCol.innerHTML = wikiData.query.search.map(function (item) {
+              var wikiUrl = "https://en.wikipedia.org/wiki/" + encodeURIComponent(item.title.replace(/ /g, "_"));
+              // Strip HTML tags from snippet
+              var snippet = (item.snippet || "").replace(/<[^>]+>/g, "");
+              return '<div class="source-card">' +
+                credBadgeHTML(3) +
+                '<div class="source-title">' + escapeHTML(item.title) + '</div>' +
+                '<div class="source-domain">en.wikipedia.org</div>' +
+                '<div class="source-snippet">' + escapeHTML(snippet) + '</div>' +
+                '<a href="' + wikiUrl + '" target="_blank" rel="noopener" class="source-link">Read on Wikipedia</a>' +
+                '</div>';
+            }).join("");
+          } else {
+            wikiCol.innerHTML = '<p style="color:var(--text-dim)">No Wikipedia articles found.</p>';
+          }
+        }
+
+        // Render books from Open Library
         if (bookData && bookData.docs && bookData.docs.length > 0) {
-          booksCol.innerHTML = bookData.docs.map(function(doc) {
+          booksCol.innerHTML = bookData.docs.slice(0, 15).map(function (doc) {
             var link = "https://openlibrary.org" + doc.key;
             var authors = doc.author_name ? doc.author_name.join(", ") : "Unknown author";
             var year = doc.first_publish_year || "Unknown year";
             return '<div class="source-card">' +
-              '<div class="source-title">' + doc.title + '</div>' +
-              '<div class="source-meta">By ' + authors + ' (' + year + ')</div>' +
-              '<a href="' + link + '" target="_blank" rel="noopener" class="source-link">View on OpenLibrary</a>' +
+              '<div class="source-title">' + escapeHTML(doc.title) + '</div>' +
+              '<div class="source-meta">By ' + escapeHTML(authors) + ' (' + year + ')</div>' +
+              '<a href="' + escapeHTML(link) + '" target="_blank" rel="noopener" class="source-link">View on OpenLibrary</a>' +
               '</div>';
           }).join("");
         } else {
@@ -1727,14 +1892,14 @@
         }
 
         toast("Found sources!");
-      }).catch(function() {
+      }).catch(function () {
         loadingEl.style.display = "none";
         toast("Error searching sources");
       });
     }
 
     searchBtn.addEventListener("click", search);
-    searchInput.addEventListener("keydown", function(e) {
+    searchInput.addEventListener("keydown", function (e) {
       if (e.key === "Enter") search();
     });
   }
@@ -1909,6 +2074,373 @@
 
     // Initial render
     renderSavedWords();
+  }
+
+  // ============================================================
+  //  14b. RESEARCH ASSISTANT
+  // ============================================================
+  function _initResearchAssistant() {
+    var searchInput = $("#ra-search-input");
+    var searchBtn = $("#ra-search-btn");
+    var loadingEl = $("#ra-loading");
+    var resultsEl = $("#ra-results");
+    var overviewContent = $("#ra-overview-content");
+    var findingsContent = $("#ra-findings-content");
+    var papersContent = $("#ra-papers-content");
+    var sourcesContent = $("#ra-sources-content");
+    var copyBtn = $("#ra-copy-btn");
+
+    // URL analysis elements
+    var urlInput = $("#ra-url-input");
+    var urlBtn = $("#ra-url-btn");
+    var urlResult = $("#ra-url-result");
+
+    // Deep dive elements
+    var deepDiveSection = $("#ra-deep-dive-section");
+    var deepDiveBtn = $("#ra-deep-dive-btn");
+    var deepLoading = $("#ra-deep-loading");
+    var deepSummary = $("#ra-deep-summary");
+    var deepSummaryContent = $("#ra-deep-summary-content");
+    var deepFindings = $("#ra-deep-findings");
+
+    var lastBrief = null;
+    var lastCredibleResults = [];
+
+    function getWikiSummary(query) {
+      var directUrl = "https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(query);
+      return fetchWithTimeout(directUrl, 8000)
+        .then(function (r) {
+          if (r.ok) return r.json();
+          return searchWikipedia(query).then(function (data) {
+            if (data && data.query && data.query.search && data.query.search.length > 0) {
+              var title = data.query.search[0].title;
+              var fallbackUrl = "https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title);
+              return fetchWithTimeout(fallbackUrl, 8000).then(function (r2) {
+                return r2.ok ? r2.json() : null;
+              });
+            }
+            return null;
+          });
+        })
+        .catch(function () { return null; });
+    }
+
+    function research() {
+      var q = searchInput.value.trim();
+      if (!q) { toast("Enter a research topic"); return; }
+
+      loadingEl.style.display = "";
+      resultsEl.style.display = "none";
+      overviewContent.innerHTML = "";
+      findingsContent.innerHTML = "";
+      papersContent.innerHTML = "";
+      sourcesContent.innerHTML = "";
+      lastBrief = null;
+      lastCredibleResults = [];
+      if (deepDiveSection) deepDiveSection.style.display = "none";
+      if (deepSummary) deepSummary.style.display = "none";
+      if (deepFindings) { deepFindings.style.display = "none"; deepFindings.innerHTML = ""; }
+
+      var wikiPromise = getWikiSummary(q);
+      var searxPromise = trySearx(q, 0);
+      var scholarPromise = searchSemanticScholar(q);
+
+      Promise.all([wikiPromise, searxPromise, scholarPromise]).then(function (results) {
+        loadingEl.style.display = "none";
+        resultsEl.style.display = "";
+
+        var wikiSummary = results[0];
+        var searxData = results[1];
+        var scholarData = results[2];
+
+        var brief = { topic: q, overview: "", findings: [], papers: [], allSources: [], deepSummaries: null, synthesizedSummary: "" };
+
+        // --- Topic Overview from Wikipedia ---
+        if (wikiSummary && wikiSummary.extract) {
+          var overviewHTML = '<div class="ra-overview-block">';
+          if (wikiSummary.thumbnail && wikiSummary.thumbnail.source) {
+            overviewHTML += '<img class="ra-overview-thumb" src="' + escapeHTML(wikiSummary.thumbnail.source) + '" alt="' + escapeHTML(wikiSummary.title || q) + '">';
+          }
+          overviewHTML += '<p class="ra-overview-text">' + escapeHTML(wikiSummary.extract) + '</p>';
+          if (wikiSummary.content_urls && wikiSummary.content_urls.desktop) {
+            overviewHTML += '<a href="' + escapeHTML(wikiSummary.content_urls.desktop.page) + '" target="_blank" rel="noopener" class="source-link">Read full article on Wikipedia</a>';
+          }
+          overviewHTML += '</div>';
+          overviewContent.innerHTML = overviewHTML;
+          brief.overview = wikiSummary.extract;
+        } else {
+          overviewContent.innerHTML = '<p style="color:var(--text-dim)">No Wikipedia article found for this topic. Try different keywords.</p>';
+        }
+
+        // --- Process SearXNG results with credibility tiers ---
+        var allWebResults = [];
+        if (searxData && searxData.results && searxData.results.length > 0) {
+          searxData.results.forEach(function (item) {
+            var tier = getCredibilityTier(item.url);
+            allWebResults.push({
+              title: item.title || "Untitled",
+              url: item.url || "",
+              snippet: item.content || "",
+              domain: extractDomain(item.url || ""),
+              tier: tier
+            });
+          });
+        }
+
+        allWebResults.sort(function (a, b) { return a.tier - b.tier; });
+
+        var credibleResults = allWebResults.filter(function (r) { return r.tier <= 3; });
+        if (credibleResults.length > 0) {
+          findingsContent.innerHTML = credibleResults.slice(0, 10).map(function (item) {
+            return '<div class="ra-finding-card">' +
+              credBadgeHTML(item.tier) +
+              '<div class="ra-finding-body">' +
+              '<div class="source-title">' + escapeHTML(item.title) + '</div>' +
+              '<div class="source-domain">' + escapeHTML(item.domain) + '</div>' +
+              '<div class="source-snippet">' + escapeHTML(item.snippet) + '</div>' +
+              '<a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" class="source-link">Visit Source</a>' +
+              '</div></div>';
+          }).join("");
+          brief.findings = credibleResults.slice(0, 10);
+        } else {
+          findingsContent.innerHTML = '<p style="color:var(--text-dim)">No credible sources (gov/edu/org) found. Try broader keywords.</p>';
+        }
+
+        // Show Deep Dive button if we have credible results
+        lastCredibleResults = credibleResults.slice(0, 5);
+        if (lastCredibleResults.length > 0 && deepDiveSection) {
+          deepDiveSection.style.display = "";
+          if (deepSummary) deepSummary.style.display = "none";
+          if (deepFindings) { deepFindings.style.display = "none"; deepFindings.innerHTML = ""; }
+          if (deepSummaryContent) deepSummaryContent.innerHTML = "";
+        }
+
+        // --- Academic Papers from Semantic Scholar ---
+        if (scholarData && scholarData.data && scholarData.data.length > 0) {
+          papersContent.innerHTML = scholarData.data.map(function (paper) {
+            var authors = "";
+            if (paper.authors && paper.authors.length > 0) {
+              authors = paper.authors.slice(0, 3).map(function (a) { return a.name; }).join(", ");
+              if (paper.authors.length > 3) authors += " et al.";
+            }
+            var abstract = paper.abstract ? paper.abstract.substring(0, 250) + (paper.abstract.length > 250 ? "..." : "") : "";
+            return '<div class="ra-paper-card">' +
+              credBadgeHTML(2) +
+              '<div class="ra-paper-body">' +
+              '<div class="source-title">' + escapeHTML(paper.title || "Untitled") + '</div>' +
+              (authors ? '<div class="source-meta">' + escapeHTML(authors) + (paper.year ? ' (' + paper.year + ')' : '') + '</div>' : '') +
+              (abstract ? '<div class="source-snippet">' + escapeHTML(abstract) + '</div>' : '') +
+              (paper.url ? '<a href="' + escapeHTML(paper.url) + '" target="_blank" rel="noopener" class="source-link">View Paper</a>' : '') +
+              '</div></div>';
+          }).join("");
+          brief.papers = scholarData.data;
+        } else {
+          papersContent.innerHTML = '<p style="color:var(--text-dim)">No academic papers found.</p>';
+        }
+
+        // --- All Sources Ranked ---
+        var combined = allWebResults.slice();
+        if (scholarData && scholarData.data) {
+          scholarData.data.forEach(function (paper) {
+            combined.push({
+              title: paper.title || "Untitled",
+              url: paper.url || "",
+              snippet: paper.abstract ? paper.abstract.substring(0, 150) + "..." : "",
+              domain: extractDomain(paper.url || ""),
+              tier: 2
+            });
+          });
+        }
+        combined.sort(function (a, b) { return a.tier - b.tier; });
+
+        if (combined.length > 0) {
+          var groupedHTML = "";
+          var currentTier = 0;
+          combined.forEach(function (item) {
+            if (item.tier !== currentTier) {
+              currentTier = item.tier;
+              groupedHTML += '<div class="ra-tier-header">' + credBadgeHTML(currentTier) + ' ' + tierLabels[currentTier] + ' Sources</div>';
+            }
+            groupedHTML += '<div class="ra-ranked-source">' +
+              '<a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" class="ra-ranked-title">' + escapeHTML(item.title) + '</a>' +
+              '<span class="ra-ranked-domain">' + escapeHTML(item.domain) + '</span>' +
+              '</div>';
+          });
+          sourcesContent.innerHTML = groupedHTML;
+        } else {
+          sourcesContent.innerHTML = '<p style="color:var(--text-dim)">No sources found.</p>';
+        }
+
+        brief.allSources = combined;
+        lastBrief = brief;
+        toast("Research brief ready!");
+      }).catch(function () {
+        loadingEl.style.display = "none";
+        toast("Error researching topic");
+      });
+    }
+
+    // --- URL Direct Analysis ---
+    if (urlBtn) {
+      urlBtn.addEventListener("click", function () {
+        var url = urlInput.value.trim();
+        if (!url) { toast("Paste a URL to analyze"); return; }
+        if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+
+        urlResult.style.display = "";
+        urlResult.innerHTML = '<div class="source-loading">Fetching and analyzing page...</div>';
+
+        fetchAndSummarize(url, searchInput.value.trim() || "general analysis").then(function (result) {
+          if (!result || result.summary === "Could not fetch this page.") {
+            urlResult.innerHTML = '<div class="ra-section"><p style="color:var(--text-dim)">Could not fetch this page. The site may block external access.</p></div>';
+            return;
+          }
+          urlResult.innerHTML =
+            '<div class="ra-section">' +
+            '<h3 class="ra-section-header">Page Analysis</h3>' +
+            '<div class="ra-url-title">' + escapeHTML(result.title || url) + '</div>' +
+            '<div class="source-domain">' + escapeHTML(extractDomain(url)) + ' ' + credBadgeHTML(getCredibilityTier(url)) + '</div>' +
+            '<div class="ra-url-summary">' + escapeHTML(result.summary) + '</div>' +
+            '<details class="ra-url-details"><summary>View extracted text</summary>' +
+            '<div class="ra-url-excerpt">' + escapeHTML(result.text.substring(0, 1500)) + '</div>' +
+            '</details>' +
+            '<a href="' + escapeHTML(url) + '" target="_blank" rel="noopener" class="source-link">Visit Original</a>' +
+            '</div>';
+        });
+      });
+    }
+
+    // --- Deep Dive ---
+    if (deepDiveBtn) {
+      deepDiveBtn.addEventListener("click", function () {
+        if (lastCredibleResults.length === 0) { toast("Run a search first"); return; }
+        var topic = searchInput.value.trim();
+        deepDiveBtn.disabled = true;
+        if (deepLoading) deepLoading.style.display = "";
+        if (deepSummary) deepSummary.style.display = "none";
+        if (deepFindings) { deepFindings.style.display = "none"; deepFindings.innerHTML = ""; }
+
+        var promises = lastCredibleResults.map(function (item) {
+          return fetchAndSummarize(item.url, topic);
+        });
+
+        Promise.all(promises).then(function (results) {
+          if (deepLoading) deepLoading.style.display = "none";
+          deepDiveBtn.disabled = false;
+
+          var cardsHTML = "";
+          var allSummaries = [];
+          results.forEach(function (r, i) {
+            if (!r) return;
+            var original = lastCredibleResults[i];
+            cardsHTML +=
+              '<div class="ra-deep-card">' +
+              credBadgeHTML(original.tier) +
+              '<div class="ra-finding-body">' +
+              '<div class="source-title">' + escapeHTML(r.title || original.title) + '</div>' +
+              '<div class="source-domain">' + escapeHTML(original.domain) + '</div>' +
+              '<div class="ra-deep-card-summary">' + escapeHTML(r.summary) + '</div>' +
+              '<a href="' + escapeHTML(original.url) + '" target="_blank" rel="noopener" class="source-link">Visit Source</a>' +
+              '</div></div>';
+            if (r.summary && r.summary !== "Summary unavailable." && r.summary !== "Could not fetch this page.") {
+              allSummaries.push(r.summary);
+            }
+          });
+
+          if (cardsHTML && deepFindings) {
+            deepFindings.innerHTML = '<h3 class="ra-section-header" style="margin-bottom:12px">Source Summaries</h3>' + cardsHTML;
+            deepFindings.style.display = "";
+          }
+
+          // Synthesize all summaries into one paragraph
+          if (allSummaries.length > 0) {
+            var synthPrompt = "Based on the following source summaries about '" + topic +
+              "', write a single cohesive paragraph (4-6 sentences) that synthesizes the key information. " +
+              "Only output the paragraph.\n\n" + allSummaries.join("\n\n");
+            fetch("https://text.pollinations.ai/" + encodeURIComponent(synthPrompt))
+              .then(function (r) { return r.text(); })
+              .then(function (text) {
+                if (deepSummaryContent) deepSummaryContent.innerHTML = '<p class="ra-overview-text">' + escapeHTML(text.trim()) + '</p>';
+                if (deepSummary) deepSummary.style.display = "";
+                if (lastBrief) lastBrief.synthesizedSummary = text.trim();
+              });
+          }
+
+          if (lastBrief) lastBrief.deepSummaries = results;
+          toast("Deep dive complete!");
+        });
+      });
+    }
+
+    // Copy research brief as plain text
+    if (copyBtn) {
+      copyBtn.addEventListener("click", function () {
+        if (!lastBrief) { toast("Run a search first"); return; }
+
+        var text = "RESEARCH BRIEF: " + lastBrief.topic + "\n";
+        text += "=".repeat(50) + "\n\n";
+
+        if (lastBrief.overview) {
+          text += "TOPIC OVERVIEW\n" + "-".repeat(30) + "\n" + lastBrief.overview + "\n\n";
+        }
+
+        if (lastBrief.synthesizedSummary) {
+          text += "DEEP DIVE SYNTHESIS\n" + "-".repeat(30) + "\n" + lastBrief.synthesizedSummary + "\n\n";
+        }
+
+        if (lastBrief.findings.length > 0) {
+          text += "KEY FINDINGS FROM CREDIBLE SOURCES\n" + "-".repeat(30) + "\n";
+          lastBrief.findings.forEach(function (item, idx) {
+            text += (idx + 1) + ". [" + tierLabels[item.tier] + "] " + item.title + "\n";
+            text += "   " + item.url + "\n";
+            if (item.snippet) text += "   " + item.snippet + "\n";
+            text += "\n";
+          });
+        }
+
+        if (lastBrief.deepSummaries && lastBrief.deepSummaries.length > 0) {
+          text += "DEEP DIVE SOURCE SUMMARIES\n" + "-".repeat(30) + "\n";
+          lastBrief.deepSummaries.forEach(function (item, idx) {
+            if (!item) return;
+            text += (idx + 1) + ". " + (item.title || item.url) + "\n";
+            text += "   " + item.summary + "\n\n";
+          });
+        }
+
+        if (lastBrief.papers && lastBrief.papers.length > 0) {
+          text += "ACADEMIC PAPERS\n" + "-".repeat(30) + "\n";
+          lastBrief.papers.forEach(function (paper, idx) {
+            var authors = "";
+            if (paper.authors && paper.authors.length > 0) {
+              authors = paper.authors.slice(0, 3).map(function (a) { return a.name; }).join(", ");
+              if (paper.authors.length > 3) authors += " et al.";
+            }
+            text += (idx + 1) + ". " + (paper.title || "Untitled") + "\n";
+            if (authors) text += "   Authors: " + authors + (paper.year ? " (" + paper.year + ")" : "") + "\n";
+            if (paper.url) text += "   " + paper.url + "\n";
+            text += "\n";
+          });
+        }
+
+        if (lastBrief.allSources.length > 0) {
+          text += "ALL SOURCES (RANKED)\n" + "-".repeat(30) + "\n";
+          lastBrief.allSources.forEach(function (item) {
+            text += "- [" + tierLabels[item.tier] + "] " + item.title + " — " + item.url + "\n";
+          });
+        }
+
+        navigator.clipboard.writeText(text).then(function () {
+          toast("Research brief copied to clipboard!");
+        }).catch(function () {
+          toast("Failed to copy — try again");
+        });
+      });
+    }
+
+    searchBtn.addEventListener("click", research);
+    searchInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") research();
+    });
   }
 
   // ============================================================
@@ -3110,31 +3642,102 @@
     var outputTextarea = $("#essay-output");
     var wordCountEl = $("#essay-word-count");
     var copyBtn = $("#essay-copy-btn");
+    var continueBtn = $("#essay-continue-btn");
 
-    var lengthMap = { short: "approximately 300 words", medium: "approximately 500 words", long: "approximately 800 words" };
+    // Source management
+    var sourcesInput = $("#essay-sources-input");
+    var fetchSourcesBtn = $("#essay-fetch-sources-btn");
+    var sourcesStatus = $("#essay-sources-status");
+    var sourcesList = $("#essay-sources-list");
+
+    var lengthMap = {
+      short: "approximately 300 words",
+      medium: "approximately 500 words",
+      long: "approximately 800 words"
+    };
+
+    var fetchedSources = [];
+
+    // Expose for cross-panel communication (Source Research tab)
+    window._essayWriterSources = fetchedSources;
+    window._essayAddSource = function (sourceObj) {
+      for (var i = 0; i < fetchedSources.length; i++) {
+        if (fetchedSources[i].url === sourceObj.url) return;
+      }
+      fetchedSources.push(sourceObj);
+      renderSourcesList();
+      var current = sourcesInput.value.trim();
+      if (current) {
+        sourcesInput.value = current + "\n" + sourceObj.url;
+      } else {
+        sourcesInput.value = sourceObj.url;
+      }
+    };
 
     function countWords(text) {
-      return text.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+      return text.trim().split(/\s+/).filter(function (w) { return w.length > 0; }).length;
     }
 
     function updateWordCount() {
       wordCountEl.textContent = countWords(outputTextarea.value) + " words";
     }
 
+    function renderSourcesList() {
+      if (fetchedSources.length === 0) {
+        sourcesList.innerHTML = "";
+        return;
+      }
+      sourcesList.innerHTML = fetchedSources.map(function (s, idx) {
+        return '<div class="essay-source-item">' +
+          '<div class="essay-source-item-header">' +
+          '<span class="essay-source-item-title">' + escapeHTML(s.title || s.url) + '</span>' +
+          '<button class="essay-source-remove-btn" data-idx="' + idx + '">Remove</button>' +
+          '</div>' +
+          '<div class="essay-source-item-summary">' + escapeHTML(s.summary || "Fetched.") + '</div>' +
+          '</div>';
+      }).join("");
+
+      sourcesList.querySelectorAll(".essay-source-remove-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          fetchedSources.splice(parseInt(btn.dataset.idx), 1);
+          renderSourcesList();
+        });
+      });
+    }
+
     outputTextarea.addEventListener("input", updateWordCount);
 
-    copyBtn.addEventListener("click", function() {
-      navigator.clipboard.writeText(outputTextarea.value).then(function() { toast("Copied to clipboard!"); });
+    copyBtn.addEventListener("click", function () {
+      navigator.clipboard.writeText(outputTextarea.value).then(function () { toast("Copied to clipboard!"); });
     });
 
-    generateBtn.addEventListener("click", function() {
-      var topic = topicInput.value.trim();
-      if (!topic) { toast("Enter a topic or prompt"); return; }
+    // Fetch Sources button
+    fetchSourcesBtn.addEventListener("click", function () {
+      var urls = sourcesInput.value.trim().split("\n").map(function (u) { return u.trim(); }).filter(function (u) { return u.length > 0; });
+      if (urls.length === 0) { toast("Paste at least one URL"); return; }
 
-      var essayType = typeSelect.value;
-      var length = lengthMap[lengthSelect.value] || lengthMap.medium;
-      var tone = toneSelect.value;
+      fetchSourcesBtn.disabled = true;
+      sourcesStatus.textContent = "Fetching " + urls.length + " source(s)...";
 
+      var promises = urls.map(function (url) {
+        if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+        return fetchAndSummarize(url, topicInput.value.trim() || "this topic");
+      });
+
+      Promise.all(promises).then(function (results) {
+        fetchSourcesBtn.disabled = false;
+        fetchedSources = [];
+        results.forEach(function (r) {
+          if (r) fetchedSources.push(r);
+        });
+        window._essayWriterSources = fetchedSources;
+        renderSourcesList();
+        sourcesStatus.textContent = fetchedSources.length + " of " + urls.length + " sources fetched.";
+        toast("Sources fetched!");
+      });
+    });
+
+    function buildPrompt(topic, essayType, length, tone) {
       var prompt = "Write a " + essayType + " essay about: " + topic + ". " +
         "The essay should be " + length + " long. " +
         "Use a " + tone + " tone. " +
@@ -3144,26 +3747,83 @@
         "Write it as a student would — use varied sentence structure, " +
         "natural transitions between paragraphs, and avoid sounding robotic or overly formal.";
 
+      if (fetchedSources.length > 0) {
+        prompt += "\n\nUse the following source material to support your arguments and cite them naturally in the text:\n";
+        var maxPerSource = Math.floor(6000 / fetchedSources.length);
+        fetchedSources.forEach(function (s, idx) {
+          var excerpt = s.text ? s.text.substring(0, maxPerSource) : (s.summary || "");
+          prompt += "\nSource " + (idx + 1) + " (" + s.url + "): " + excerpt + "\n";
+        });
+        prompt += "\nNaturally cite these sources by referring to the site or author when using their information.";
+      }
+
+      return prompt;
+    }
+
+    // Generate essay
+    generateBtn.addEventListener("click", function () {
+      var topic = topicInput.value.trim();
+      if (!topic) { toast("Enter a topic or prompt"); return; }
+
+      var essayType = typeSelect.value;
+      var length = lengthMap[lengthSelect.value] || lengthMap.medium;
+      var tone = toneSelect.value;
+
+      var prompt = buildPrompt(topic, essayType, length, tone);
+
       loadingEl.style.display = "";
       outputArea.style.display = "none";
       generateBtn.disabled = true;
+      if (continueBtn) continueBtn.style.display = "none";
 
       fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
-        .then(function(r) { return r.text(); })
-        .then(function(text) {
+        .then(function (r) { return r.text(); })
+        .then(function (text) {
           outputTextarea.value = text.trim();
           updateWordCount();
           outputArea.style.display = "";
+          if (continueBtn) continueBtn.style.display = "";
           toast("Essay generated!");
         })
-        .catch(function() {
+        .catch(function () {
           toast("Error generating essay. Please try again.");
         })
-        .finally(function() {
+        .finally(function () {
           loadingEl.style.display = "none";
           generateBtn.disabled = false;
         });
     });
+
+    // Continue Writing
+    if (continueBtn) {
+      continueBtn.addEventListener("click", function () {
+        var currentText = outputTextarea.value.trim();
+        if (!currentText) { toast("Generate an essay first"); return; }
+
+        var prompt = "Continue writing the following essay from where it left off. " +
+          "Maintain the same tone, style, and argument structure. " +
+          "Write at least 200 more words. Do not repeat what has already been written. " +
+          "Only output the continuation, nothing else.\n\n" + currentText;
+
+        continueBtn.disabled = true;
+        continueBtn.textContent = "Continuing...";
+
+        fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
+          .then(function (r) { return r.text(); })
+          .then(function (text) {
+            outputTextarea.value = currentText + "\n\n" + text.trim();
+            updateWordCount();
+            toast("Essay continued!");
+          })
+          .catch(function () {
+            toast("Error continuing essay. Please try again.");
+          })
+          .finally(function () {
+            continueBtn.disabled = false;
+            continueBtn.textContent = "Continue Writing";
+          });
+      });
+    }
   }
 
   // ============================================================
@@ -3475,6 +4135,188 @@
   }
 
   // ============================================================
+  //  SOURCE RESEARCH (Writer page — search + use in Essay Writer)
+  // ============================================================
+  function _initSourceResearch() {
+    var urlInput = $("#sr-url-input");
+    var urlBtn = $("#sr-url-btn");
+    var urlResult = $("#sr-url-result");
+    var searchInput = $("#sr-search-input");
+    var searchBtn = $("#sr-search-btn");
+    var loadingEl = $("#sr-loading");
+    var resultsSection = $("#sr-results");
+    var resultsList = $("#sr-results-list");
+    var selectedSection = $("#sr-selected");
+    var selectedList = $("#sr-selected-list");
+    var selectedCount = $("#sr-selected-count");
+    var goToWriter = $("#sr-go-to-writer");
+
+    if (!urlInput || !searchInput) return;
+
+    function refreshSelectedUI() {
+      var sources = window._essayWriterSources || [];
+      if (sources.length === 0) {
+        selectedSection.style.display = "none";
+        return;
+      }
+      selectedSection.style.display = "";
+      selectedCount.textContent = sources.length;
+      selectedList.innerHTML = "";
+      sources.forEach(function (s, i) {
+        var div = document.createElement("div");
+        div.className = "sr-selected-item";
+        div.innerHTML =
+          '<span class="sr-selected-title">' + escapeHTML(s.title || s.url) + '</span>' +
+          '<button class="sr-selected-remove" data-idx="' + i + '">Remove</button>';
+        selectedList.appendChild(div);
+      });
+      selectedList.addEventListener("click", function (e) {
+        if (e.target.classList.contains("sr-selected-remove")) {
+          var idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          var arr = window._essayWriterSources || [];
+          arr.splice(idx, 1);
+          refreshSelectedUI();
+        }
+      });
+    }
+
+    // Periodic refresh in case sources added from Essay Writer panel
+    setInterval(refreshSelectedUI, 3000);
+    refreshSelectedUI();
+
+    // URL Analysis
+    urlBtn.addEventListener("click", function () {
+      var url = urlInput.value.trim();
+      if (!url) { toast("Paste a URL first"); return; }
+      if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+
+      urlResult.innerHTML = '<div class="essay-loading"><span>Analyzing</span><span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div>';
+      urlBtn.disabled = true;
+
+      fetchAndSummarize(url, "general research").then(function (data) {
+        var domain = extractDomain(url);
+        var tier = getCredibilityTier(domain);
+        urlResult.innerHTML =
+          '<div class="sr-url-card">' +
+            '<div class="sr-url-card-header">' +
+              '<strong>' + escapeHTML(data.title || domain) + '</strong> ' + credBadgeHTML(tier) +
+            '</div>' +
+            '<p class="sr-url-card-summary">' + escapeHTML(data.summary) + '</p>' +
+            '<button class="btn btn-secondary sr-use-btn">Use in Essay</button>' +
+          '</div>';
+        urlResult.querySelector(".sr-use-btn").addEventListener("click", function () {
+          if (window._essayAddSource) {
+            window._essayAddSource({ url: data.url, title: data.title, summary: data.summary, text: data.text });
+            this.textContent = "Added!";
+            this.disabled = true;
+            refreshSelectedUI();
+          }
+        });
+      }).catch(function () {
+        urlResult.innerHTML = '<p style="color:var(--text-muted)">Could not fetch that URL.</p>';
+      }).finally(function () {
+        urlBtn.disabled = false;
+      });
+    });
+
+    urlInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") urlBtn.click();
+    });
+
+    // Topic Search
+    searchBtn.addEventListener("click", function () {
+      var topic = searchInput.value.trim();
+      if (!topic) { toast("Enter a topic to search"); return; }
+
+      loadingEl.style.display = "";
+      resultsSection.style.display = "none";
+      resultsList.innerHTML = "";
+      searchBtn.disabled = true;
+
+      var searxPromise = trySearx(topic + " research").then(function (r) { return r || []; });
+      var scholarPromise = searchSemanticScholar(topic).then(function (r) { return r || []; });
+
+      Promise.all([searxPromise, scholarPromise]).then(function (results) {
+        var allResults = results[0].concat(results[1]);
+
+        // Deduplicate by domain+title
+        var seen = {};
+        allResults = allResults.filter(function (r) {
+          var key = extractDomain(r.url) + "|" + (r.title || "").toLowerCase().substring(0, 50);
+          if (seen[key]) return false;
+          seen[key] = true;
+          return true;
+        });
+
+        // Sort by credibility tier
+        allResults.sort(function (a, b) {
+          return getCredibilityTier(extractDomain(a.url)) - getCredibilityTier(extractDomain(b.url));
+        });
+
+        if (allResults.length === 0) {
+          resultsList.innerHTML = '<p style="color:var(--text-muted)">No results found. Try different search terms.</p>';
+          resultsSection.style.display = "";
+          return;
+        }
+
+        allResults.forEach(function (item) {
+          var domain = extractDomain(item.url);
+          var tier = getCredibilityTier(domain);
+          var card = document.createElement("div");
+          card.className = "sr-result-card";
+          card.innerHTML =
+            '<div class="sr-result-header">' +
+              '<a href="' + escapeHTML(item.url) + '" target="_blank" class="sr-result-title">' + escapeHTML(item.title || domain) + '</a>' +
+              ' ' + credBadgeHTML(tier) +
+            '</div>' +
+            '<div class="sr-result-domain">' + escapeHTML(domain) + '</div>' +
+            (item.snippet ? '<p class="sr-result-snippet">' + escapeHTML(item.snippet) + '</p>' : '') +
+            '<div class="sr-result-actions">' +
+              '<button class="btn btn-secondary sr-fetch-btn">Fetch & Use in Essay</button>' +
+            '</div>';
+
+          card.querySelector(".sr-fetch-btn").addEventListener("click", function () {
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = "Fetching...";
+
+            fetchAndSummarize(item.url, topic).then(function (data) {
+              if (window._essayAddSource) {
+                window._essayAddSource({ url: data.url, title: data.title || item.title, summary: data.summary, text: data.text });
+                btn.textContent = "Added!";
+                btn.classList.add("sr-btn-added");
+                refreshSelectedUI();
+              }
+            }).catch(function () {
+              btn.textContent = "Failed";
+              setTimeout(function () {
+                btn.textContent = "Fetch & Use in Essay";
+                btn.disabled = false;
+              }, 2000);
+            });
+          });
+
+          resultsList.appendChild(card);
+        });
+        resultsSection.style.display = "";
+      }).finally(function () {
+        loadingEl.style.display = "none";
+        searchBtn.disabled = false;
+      });
+    });
+
+    searchInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") searchBtn.click();
+    });
+
+    // Go to AI Essay Writer tab
+    goToWriter.addEventListener("click", function () {
+      var essayTab = document.querySelector('.tool-tab[data-tool="essay-writer"]');
+      if (essayTab) essayTab.click();
+    });
+  }
+
+  // ============================================================
   //  Public API (lazy init wrappers)
   // ============================================================
   window.ShrimpTools = {
@@ -3492,6 +4334,7 @@
     studyPlanner: function () { initOnce("studyPlanner", _initStudyPlanner); },
     sourceFinder: function () { initOnce("sourceFinder", _initSourceFinder); },
     vocabulary: function () { initOnce("vocabulary", _initVocabulary); },
+    researchAssistant: function () { initOnce("researchAssistant", _initResearchAssistant); },
     essayOutliner: function () { initOnce("essayOutliner", _initEssayOutliner); },
     gradeCalc: function () { initOnce("gradeCalc", _initGradeCalc); },
     typingTest: function () { initOnce("typingTest", _initTypingTest); },
@@ -3505,5 +4348,6 @@
     essayWriter: function () { initOnce("essayWriter", _initEssayWriter); },
     humanizer: function () { initOnce("humanizer", _initHumanizer); },
     learn: function () { initOnce("learn", _initLearn); },
+    sourceResearch: function () { initOnce("sourceResearch", _initSourceResearch); },
   };
 })();

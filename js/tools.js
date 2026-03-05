@@ -113,10 +113,10 @@
               expr = result;
               renderHistory();
             } else {
-              resultEl.textContent = "Error";
+              resultEl.textContent = "error";
             }
           } catch (_) {
-            resultEl.textContent = "Error";
+            resultEl.textContent = "error";
           }
         }
       });
@@ -145,7 +145,7 @@
       history = [];
       localStorage.removeItem("shrimpify-calc-history");
       renderHistory();
-      toast("Calculator history cleared");
+      toast("calculator history cleared");
     });
 
     renderHistory();
@@ -302,20 +302,20 @@
               pomodoroCount++;
               pomodoroPhase = "break";
               elapsed = POMO_BREAK;
-              toast("Break time!");
+              toast("break time!");
             } else {
               pomodoroPhase = "work";
               elapsed = POMO_WORK;
-              toast("Back to work!");
+              toast("back to work!");
             }
-            $("#pomodoro-phase").textContent = pomodoroPhase === "work" ? "Work" : "Break";
+            $("#pomodoro-phase").textContent = pomodoroPhase === "work" ? "work" : "break";
             $("#pomodoro-count").textContent = pomodoroCount;
             updateDisplay();
             // Auto-start next phase
             start();
             return;
           }
-          toast("Timer done!");
+          toast("timer done!");
           return;
         }
         elapsed = remaining;
@@ -339,7 +339,7 @@
       if (mode === "pomodoro" && elapsed === 0) {
         pomodoroPhase = "work";
         elapsed = POMO_WORK;
-        $("#pomodoro-phase").textContent = "Work";
+        $("#pomodoro-phase").textContent = "work";
         $("#pomodoro-count").textContent = pomodoroCount;
       }
 
@@ -369,7 +369,7 @@
         pomodoroPhase = "work";
         pomodoroCount = 0;
         elapsed = 0;
-        $("#pomodoro-phase").textContent = "Work";
+        $("#pomodoro-phase").textContent = "work";
         $("#pomodoro-count").textContent = "0";
       }
     }
@@ -382,7 +382,7 @@
       laps.push(elapsed);
       const lapDiv = document.createElement("div");
       lapDiv.className = "timer-lap-item";
-      lapDiv.innerHTML = "<span>Lap " + laps.length + "</span><span>" + formatTime(elapsed, true) + "</span>";
+      lapDiv.innerHTML = "<span>lap " + laps.length + "</span><span>" + formatTime(elapsed, true) + "</span>";
       lapList.prepend(lapDiv);
     });
 
@@ -454,7 +454,7 @@
         .map(
           (r, i) =>
             "<tr>" +
-            '<td><input type="text" value="' + (r.name || "") + '" data-idx="' + i + '" data-field="name" placeholder="Class name"></td>' +
+            '<td><input type="text" value="' + (r.name || "") + '" data-idx="' + i + '" data-field="name" placeholder="class name"></td>' +
             '<td><select data-idx="' + i + '" data-field="grade">' +
             gradeOptions.replace('value="' + r.grade + '"', 'value="' + r.grade + '" selected') +
             "</select></td>" +
@@ -549,7 +549,7 @@
             break;
         }
         updateStats();
-        toast("Text transformed");
+        toast("text transformed");
       });
     });
 
@@ -561,14 +561,14 @@
       const count = (textarea.value.match(new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length;
       textarea.value = textarea.value.split(find).join(replace);
       updateStats();
-      toast("Replaced " + count + " occurrence" + (count !== 1 ? "s" : ""));
+      toast("replaced " + count + " occurrence" + (count !== 1 ? "s" : ""));
     });
 
     // Transforms
     $("#text-reverse").addEventListener("click", () => {
       textarea.value = textarea.value.split("").reverse().join("");
       updateStats();
-      toast("Text reversed");
+      toast("text reversed");
     });
 
     $("#text-remove-duplicates").addEventListener("click", () => {
@@ -576,7 +576,7 @@
       const unique = [...new Set(lines)];
       textarea.value = unique.join("\n");
       updateStats();
-      toast("Removed " + (lines.length - unique.length) + " duplicate line(s)");
+      toast("removed " + (lines.length - unique.length) + " duplicate line(s)");
     });
 
     $("#text-sort-lines").addEventListener("click", () => {
@@ -585,7 +585,7 @@
         .sort((a, b) => a.localeCompare(b))
         .join("\n");
       updateStats();
-      toast("Lines sorted A-Z");
+      toast("lines sorted A-Z");
     });
 
     updateStats();
@@ -625,51 +625,51 @@
 
       if (type === "website") {
         // MLA: Last, First. "Title." Publisher, Date, URL. Accessed Day Mon. Year.
-        mla = (last ? last + ", " + first : first || "Unknown") + '. "' + (title || "Untitled") + '." ';
+        mla = (last ? last + ", " + first : first || "unknown") + '. "' + (title || "untitled") + '." ';
         if (publisher) mla += '<i>' + publisher + '</i>, ';
         if (date) mla += date + ', ';
         if (url) mla += url + '. ';
-        if (accessed) mla += 'Accessed ' + accessed + '.';
+        if (accessed) mla += 'accessed ' + accessed + '.';
 
         // APA: Last, F. (Year). Title. Publisher. URL
         const apaInitial = first ? first.charAt(0) + "." : "";
-        apa = (last ? last + ", " + apaInitial : first || "Unknown") + " ";
+        apa = (last ? last + ", " + apaInitial : first || "unknown") + " ";
         if (date) apa += "(" + date + "). ";
         else apa += "(n.d.). ";
-        apa += "<i>" + (title || "Untitled") + "</i>. ";
+        apa += "<i>" + (title || "untitled") + "</i>. ";
         if (publisher) apa += publisher + ". ";
         if (url) apa += url;
 
         // Chicago: Last, First. "Title." Publisher. Date. URL.
-        chicago = (last ? last + ", " + first : first || "Unknown") + '. "' + (title || "Untitled") + '." ';
+        chicago = (last ? last + ", " + first : first || "unknown") + '. "' + (title || "untitled") + '." ';
         if (publisher) chicago += publisher + ". ";
         if (date) chicago += date + ". ";
         if (url) chicago += url + '.';
       } else if (type === "book") {
         // MLA: Last, First. Title. Edition. Publisher, Date.
-        mla = (last ? last + ", " + first : first || "Unknown") + ". <i>" + (title || "Untitled") + "</i>. ";
+        mla = (last ? last + ", " + first : first || "unknown") + ". <i>" + (title || "untitled") + "</i>. ";
         if (edition) mla += edition + " ed., ";
         if (publisher) mla += publisher + ", ";
         if (date) mla += date + ".";
 
         // APA: Last, F. (Year). Title (Edition). Publisher.
         const apaInitial = first ? first.charAt(0) + "." : "";
-        apa = (last ? last + ", " + apaInitial : first || "Unknown") + " ";
+        apa = (last ? last + ", " + apaInitial : first || "unknown") + " ";
         if (date) apa += "(" + date + "). ";
         else apa += "(n.d.). ";
-        apa += "<i>" + (title || "Untitled") + "</i>";
+        apa += "<i>" + (title || "untitled") + "</i>";
         if (edition) apa += " (" + edition + " ed.)";
         apa += ". ";
         if (publisher) apa += publisher + ".";
 
         // Chicago: Last, First. Title. City: Publisher, Date.
-        chicago = (last ? last + ", " + first : first || "Unknown") + ". <i>" + (title || "Untitled") + "</i>. ";
+        chicago = (last ? last + ", " + first : first || "unknown") + ". <i>" + (title || "untitled") + "</i>. ";
         if (city) chicago += city + ": ";
         if (publisher) chicago += publisher + ", ";
         if (date) chicago += date + ".";
       } else if (type === "journal") {
         // MLA: Last, First. "Title." Journal, vol. X, no. X, Date, pp. X-X.
-        mla = (last ? last + ", " + first : first || "Unknown") + '. "' + (title || "Untitled") + '." ';
+        mla = (last ? last + ", " + first : first || "unknown") + '. "' + (title || "untitled") + '." ';
         if (journal) mla += "<i>" + journal + "</i>, ";
         if (volume) mla += "vol. " + volume + ", ";
         if (date) mla += date + ", ";
@@ -677,17 +677,17 @@
 
         // APA: Last, F. (Year). Title. Journal, Volume, Pages. URL
         const apaInitial = first ? first.charAt(0) + "." : "";
-        apa = (last ? last + ", " + apaInitial : first || "Unknown") + " ";
+        apa = (last ? last + ", " + apaInitial : first || "unknown") + " ";
         if (date) apa += "(" + date + "). ";
         else apa += "(n.d.). ";
-        apa += (title || "Untitled") + ". ";
+        apa += (title || "untitled") + ". ";
         if (journal) apa += "<i>" + journal + "</i>, ";
         if (volume) apa += "<i>" + volume + "</i>, ";
         if (pages) apa += pages + ". ";
         if (url) apa += url;
 
         // Chicago: Last, First. "Title." Journal Volume (Date): Pages.
-        chicago = (last ? last + ", " + first : first || "Unknown") + '. "' + (title || "Untitled") + '." ';
+        chicago = (last ? last + ", " + first : first || "unknown") + '. "' + (title || "untitled") + '." ';
         if (journal) chicago += "<i>" + journal + "</i> ";
         if (volume) chicago += volume + " ";
         if (date) chicago += "(" + date + "): ";
@@ -698,7 +698,7 @@
       $("#cite-apa").innerHTML = apa;
       $("#cite-chicago").innerHTML = chicago;
       outputDiv.style.display = "";
-      toast("Citations generated");
+      toast("citations generated");
     });
 
     // Copy buttons
@@ -709,7 +709,7 @@
         if (!el) return;
         const text = el.textContent;
         navigator.clipboard.writeText(text).then(
-          () => toast("Copied " + format.toUpperCase() + " citation"),
+          () => toast("copied " + format.toUpperCase() + " citation"),
           () => {
             // Fallback
             const ta = document.createElement("textarea");
@@ -718,7 +718,7 @@
             ta.select();
             document.execCommand("copy");
             document.body.removeChild(ta);
-            toast("Copied " + format.toUpperCase() + " citation");
+            toast("copied " + format.toUpperCase() + " citation");
           }
         );
       });
@@ -729,13 +729,13 @@
   //  7. FORMULA SHEETS
   // ============================================================
   function _initFormulas() {
-    let currentCategory = "All";
+    let currentCategory = "all";
     let searchQuery = "";
     const searchInput = $("#formula-search");
     const catContainer = $("#formula-categories");
     const grid = $("#formula-grid");
 
-    const categories = ["All", ...new Set(FORMULAS.map((f) => f.category))];
+    const categories = ["all", ...new Set(FORMULAS.map((f) => f.category))];
 
     function renderCategories() {
       catContainer.innerHTML = categories
@@ -760,7 +760,7 @@
     function renderFormulas() {
       const q = searchQuery.toLowerCase();
       const filtered = FORMULAS.filter((f) => {
-        const matchCat = currentCategory === "All" || f.category === currentCategory;
+        const matchCat = currentCategory === "all" || f.category === currentCategory;
         const matchSearch =
           !q ||
           f.name.toLowerCase().includes(q) ||
@@ -782,7 +782,7 @@
         .join("");
 
       if (filtered.length === 0) {
-        grid.innerHTML = '<p style="color:var(--text-dim)">No formulas found.</p>';
+        grid.innerHTML = '<p style="color:var(--text-dim)">no formulas found.</p>';
       }
     }
 
@@ -866,13 +866,13 @@
         detailContent.innerHTML =
           '<h3>' + el.z + " — " + el.name + " (" + el.symbol + ")</h3>" +
           '<div class="element-detail-grid">' +
-          detailItem("Atomic Number", el.z) +
-          detailItem("Symbol", el.symbol) +
-          detailItem("Atomic Mass", el.mass + " u") +
-          detailItem("Category", el.category.replace(/-/g, " ")) +
-          detailItem("Group", el.group) +
-          detailItem("Period", el.period) +
-          detailItem("Block", el.block) +
+          detailItem("atomic number", el.z) +
+          detailItem("symbol", el.symbol) +
+          detailItem("atomic mass", el.mass + " u") +
+          detailItem("category", el.category.replace(/-/g, " ")) +
+          detailItem("group", el.group) +
+          detailItem("period", el.period) +
+          detailItem("block", el.block) +
           "</div>";
 
         detailPanel.style.display = "";
@@ -919,7 +919,7 @@
             '<div class="note-item' +
             (n.id === activeId ? " active" : "") +
             '" data-id="' + n.id + '">' +
-            '<div class="note-item-title">' + (n.title || "Untitled") + "</div>" +
+            '<div class="note-item-title">' + (n.title || "untitled") + "</div>" +
             '<div class="note-item-preview">' + (n.body || "").slice(0, 60) + "</div>" +
             "</div>"
         )
@@ -939,7 +939,7 @@
       if (note) {
         titleInput.value = note.title || "";
         bodyInput.value = note.body || "";
-        lastSaved.textContent = note.lastSaved ? "Saved " + note.lastSaved : "";
+        lastSaved.textContent = note.lastSaved ? "saved " + note.lastSaved : "";
         titleInput.disabled = false;
         bodyInput.disabled = false;
         deleteBtn.disabled = false;
@@ -962,7 +962,7 @@
         note.body = bodyInput.value;
         const now = new Date();
         note.lastSaved = now.toLocaleTimeString();
-        lastSaved.textContent = "Saved " + note.lastSaved;
+        lastSaved.textContent = "saved " + note.lastSaved;
         save();
         renderList();
       }, 500);
@@ -989,7 +989,7 @@
       save();
       renderList();
       loadNote();
-      toast("Note deleted");
+      toast("note deleted");
     });
 
     renderList();
@@ -1027,17 +1027,17 @@
     function renderDeckList() {
       var deckGrid = $("#fc-deck-list");
       if (decks.length === 0) {
-        deckGrid.innerHTML = '<p style="color:var(--text-dim)">No decks yet. Create one below!</p>';
+        deckGrid.innerHTML = '<p style="color:var(--text-dim)">no decks yet. create one below!</p>';
         return;
       }
       deckGrid.innerHTML = decks.map(function(deck) {
         return '<div class="fc-deck-card" data-id="' + deck.id + '">' +
-          '<div class="fc-deck-name">' + (deck.name || "Untitled Deck") + '</div>' +
+          '<div class="fc-deck-name">' + (deck.name || "untitled deck") + '</div>' +
           '<div class="fc-deck-count">' + deck.cards.length + ' card' + (deck.cards.length !== 1 ? 's' : '') + '</div>' +
           '<div class="fc-deck-actions">' +
-          '<button class="fc-study-deck-btn" data-id="' + deck.id + '">Study</button>' +
-          '<button class="fc-edit-deck-btn" data-id="' + deck.id + '">Edit</button>' +
-          '<button class="fc-delete-deck-btn" data-id="' + deck.id + '">Delete</button>' +
+          '<button class="fc-study-deck-btn" data-id="' + deck.id + '">study</button>' +
+          '<button class="fc-edit-deck-btn" data-id="' + deck.id + '">edit</button>' +
+          '<button class="fc-delete-deck-btn" data-id="' + deck.id + '">delete</button>' +
           '</div>' +
           '</div>';
       }).join("");
@@ -1050,7 +1050,7 @@
             currentDeckId = deck.id;
             startStudy();
           } else {
-            toast("Add some cards first!");
+            toast("add some cards first!");
           }
         });
       });
@@ -1069,7 +1069,7 @@
           decks = decks.filter(function(d) { return d.id !== btn.dataset.id; });
           saveDecks();
           renderDeckList();
-          toast("Deck deleted");
+          toast("deck deleted");
         });
       });
     }
@@ -1077,7 +1077,7 @@
     function openEditor() {
       var deck = getDeck(currentDeckId);
       if (!deck) return;
-      $("#fc-deck-title").textContent = deck.name || "Untitled Deck";
+      $("#fc-deck-title").textContent = deck.name || "untitled deck";
       renderCardList();
       showView("editor");
     }
@@ -1087,15 +1087,15 @@
       if (!deck) return;
       var cardList = $("#fc-card-list");
       if (deck.cards.length === 0) {
-        cardList.innerHTML = '<p style="color:var(--text-dim)">No cards yet. Add one above!</p>';
+        cardList.innerHTML = '<p style="color:var(--text-dim)">no cards yet. add one above!</p>';
         return;
       }
       cardList.innerHTML = deck.cards.map(function(card, idx) {
         return '<div class="fc-card-item">' +
           '<div class="fc-card-front-preview">' + card.front + '</div>' +
           '<div class="fc-card-back-preview">' + card.back + '</div>' +
-          '<span class="fc-card-status">' + (card.mastered ? "Mastered" : "") + '</span>' +
-          '<button class="fc-delete-card-btn" data-idx="' + idx + '">Delete</button>' +
+          '<span class="fc-card-status">' + (card.mastered ? "mastered" : "") + '</span>' +
+          '<button class="fc-delete-card-btn" data-idx="' + idx + '">delete</button>' +
           '</div>';
       }).join("");
 
@@ -1106,7 +1106,7 @@
             deck.cards.splice(parseInt(btn.dataset.idx), 1);
             saveDecks();
             renderCardList();
-            toast("Card deleted");
+            toast("card deleted");
           }
         });
       });
@@ -1148,7 +1148,7 @@
       if (studyIndex >= studyCards.length) {
         studyDone.style.display = "";
         studyCardArea.style.display = "none";
-        progressText.textContent = "Complete!";
+        progressText.textContent = "complete!";
         progressBar.style.width = "100%";
         return;
       }
@@ -1172,7 +1172,7 @@
       var nameInput = $("#fc-deck-name-input");
       var name = nameInput.value.trim();
       if (!name) {
-        toast("Enter a deck name");
+        toast("enter a deck name");
         return;
       }
       var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -1180,7 +1180,7 @@
       saveDecks();
       nameInput.value = "";
       renderDeckList();
-      toast("Deck created");
+      toast("deck created");
     });
 
     // Add card
@@ -1190,7 +1190,7 @@
       var front = $("#fc-card-front").value.trim();
       var back = $("#fc-card-back").value.trim();
       if (!front || !back) {
-        toast("Enter both front and back");
+        toast("enter both front and back");
         return;
       }
       deck.cards.push({ front: front, back: back, mastered: false });
@@ -1198,7 +1198,7 @@
       $("#fc-card-front").value = "";
       $("#fc-card-back").value = "";
       renderCardList();
-      toast("Card added");
+      toast("card added");
     });
 
     // Start study from editor
@@ -1207,7 +1207,7 @@
       if (deck && deck.cards.length > 0) {
         startStudy();
       } else {
-        toast("Add some cards first!");
+        toast("add some cards first!");
       }
     });
 
@@ -1298,7 +1298,7 @@
 
       if (validDecks.length === 0) {
         noDecks.style.display = "";
-        noDecks.textContent = "No decks with 4+ cards available. Create flashcard decks first!";
+        noDecks.textContent = "no decks with 4+ cards available. create flashcard decks first!";
         deckSelect.style.display = "none";
         $("#quiz-start").disabled = true;
         return;
@@ -1329,7 +1329,7 @@
       var deckId = $("#quiz-deck-select").value;
       currentDeck = decks.find(function(d) { return d.id === deckId; });
       if (!currentDeck || currentDeck.cards.length < 4) {
-        toast("Select a valid deck");
+        toast("select a valid deck");
         return;
       }
 
@@ -1354,7 +1354,7 @@
 
       var q = quizQuestions[currentQuestion];
       $("#quiz-question").textContent = q.front;
-      $("#quiz-progress").textContent = "Question " + (currentQuestion + 1) + " of " + quizQuestions.length;
+      $("#quiz-progress").textContent = "question " + (currentQuestion + 1) + " of " + quizQuestions.length;
       $("#quiz-feedback").textContent = "";
       $("#quiz-feedback").className = "quiz-feedback";
       $("#quiz-next").style.display = "none";
@@ -1411,10 +1411,10 @@
 
       if (isCorrect) {
         score++;
-        feedback.textContent = "Correct!";
+        feedback.textContent = "correct!";
         feedback.className = "quiz-feedback correct";
       } else {
-        feedback.textContent = "Wrong! The answer was: " + correctAnswer;
+        feedback.textContent = "wrong! the answer was: " + correctAnswer;
         feedback.className = "quiz-feedback incorrect";
       }
 
@@ -1424,7 +1424,7 @@
     function showResults() {
       showQuizView("results");
       var percent = Math.round((score / quizQuestions.length) * 100);
-      $("#quiz-score").innerHTML = "You scored <strong>" + score + " / " + quizQuestions.length + "</strong> (" + percent + "%)";
+      $("#quiz-score").innerHTML = "you scored <strong>" + score + " / " + quizQuestions.length + "</strong> (" + percent + "%)";
     }
 
     // Event listeners
@@ -1487,7 +1487,7 @@
     }
 
     function formatDate(dateStr) {
-      if (!dateStr) return "No due date";
+      if (!dateStr) return "no due date";
       var d = new Date(dateStr + "T00:00:00");
       var options = { weekday: "short", month: "short", day: "numeric" };
       return d.toLocaleDateString(undefined, options);
@@ -1516,7 +1516,7 @@
       var filtered = filterTasks();
 
       if (filtered.length === 0) {
-        list.innerHTML = '<p style="color:var(--text-dim)">No tasks found.</p>';
+        list.innerHTML = '<p style="color:var(--text-dim)">no tasks found.</p>';
         return;
       }
 
@@ -1528,7 +1528,7 @@
           '<span class="planner-subject-badge">' + task.subject + '</span>' +
           '<span class="planner-task-name">' + task.task + '</span>' +
           '<span class="planner-due-date">' + formatDate(task.due) + '</span>' +
-          '<button class="planner-delete-btn" data-id="' + task.id + '">Delete</button>' +
+          '<button class="planner-delete-btn" data-id="' + task.id + '">delete</button>' +
           '</div>';
       }).join("");
 
@@ -1548,7 +1548,7 @@
           tasks = tasks.filter(function(t) { return t.id !== btn.dataset.id; });
           saveTasks();
           renderTasks();
-          toast("Task deleted");
+          toast("task deleted");
         });
       });
     }
@@ -1560,7 +1560,7 @@
       var due = $("#planner-due-date").value;
 
       if (!subject || !taskName) {
-        toast("Enter subject and task");
+        toast("enter subject and task");
         return;
       }
 
@@ -1579,7 +1579,7 @@
       $("#planner-due-date").value = "";
 
       renderTasks();
-      toast("Task added");
+      toast("task added");
     });
 
     // Filter
@@ -1595,7 +1595,7 @@
       var removed = beforeCount - tasks.length;
       saveTasks();
       renderTasks();
-      toast("Cleared " + removed + " completed task" + (removed !== 1 ? "s" : ""));
+      toast("cleared " + removed + " completed task" + (removed !== 1 ? "s" : ""));
     });
 
     // Initial render
@@ -1666,7 +1666,7 @@
     return 4;
   }
 
-  var tierLabels = { 1: "Gov/Official", 2: "Academic", 3: "Credible Org", 4: "Web" };
+  var tierLabels = { 1: "gov/official", 2: "academic", 3: "credible org", 4: "web" };
   var tierClasses = { 1: "cred-tier-1", 2: "cred-tier-2", 3: "cred-tier-3", 4: "cred-tier-4" };
 
   function credBadgeHTML(tier) {
@@ -1730,13 +1730,13 @@
     return fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
       .then(function (r) { return r.text(); })
       .then(function (t) { return t.trim(); })
-      .catch(function () { return "Summary unavailable."; });
+      .catch(function () { return "summary unavailable."; });
   }
 
   function fetchAndSummarize(url, topic) {
     return fetchPageContent(url).then(function (page) {
       if (!page || !page.text || page.text.length < 50) {
-        return { url: url, title: "", text: "", summary: "Could not fetch this page." };
+        return { url: url, title: "", text: "", summary: "could not fetch this page." };
       }
       return summarizeText(page.text, topic).then(function (summary) {
         return { url: url, title: page.title, text: page.text, summary: summary };
@@ -1762,10 +1762,10 @@
       var tier = getCredibilityTier(item.url || "");
       return '<div class="source-card">' +
         credBadgeHTML(tier) +
-        '<div class="source-title">' + escapeHTML(item.title || "Untitled") + '</div>' +
+        '<div class="source-title">' + escapeHTML(item.title || "untitled") + '</div>' +
         (domain ? '<div class="source-domain">' + escapeHTML(domain) + '</div>' : '') +
         '<div class="source-snippet">' + escapeHTML(item.content || "") + '</div>' +
-        '<a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" class="source-link">Visit Source</a>' +
+        '<a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" class="source-link">visit source</a>' +
         '</div>';
     }
 
@@ -1778,10 +1778,10 @@
       var abstract = paper.abstract ? paper.abstract.substring(0, 200) + (paper.abstract.length > 200 ? "..." : "") : "";
       return '<div class="source-card">' +
         credBadgeHTML(2) +
-        '<div class="source-title">' + escapeHTML(paper.title || "Untitled") + '</div>' +
+        '<div class="source-title">' + escapeHTML(paper.title || "untitled") + '</div>' +
         (authors ? '<div class="source-meta">' + escapeHTML(authors) + (paper.year ? ' (' + paper.year + ')' : '') + '</div>' : '') +
         (abstract ? '<div class="source-snippet">' + escapeHTML(abstract) + '</div>' : '') +
-        (paper.url ? '<a href="' + escapeHTML(paper.url) + '" target="_blank" rel="noopener" class="source-link">View Paper</a>' : '') +
+        (paper.url ? '<a href="' + escapeHTML(paper.url) + '" target="_blank" rel="noopener" class="source-link">view paper</a>' : '') +
         '</div>';
     }
 
@@ -1795,7 +1795,7 @@
         return;
       }
 
-      if (!q) { toast("Enter a search term"); return; }
+      if (!q) { toast("enter a search term"); return; }
 
       loadingEl.style.display = "";
       resultsEl.style.display = "none";
@@ -1837,7 +1837,7 @@
         if (webResults.length > 0) {
           webCol.innerHTML = webResults.slice(0, 15).map(renderCard).join("");
         } else {
-          webCol.innerHTML = '<p style="color:var(--text-dim)">No web results found.</p>';
+          webCol.innerHTML = '<p style="color:var(--text-dim)">no web results found.</p>';
         }
 
         // Render academic results from SearXNG + Semantic Scholar
@@ -1846,13 +1846,13 @@
           academicHTML += academicResults.slice(0, 10).map(renderCard).join("");
         }
         if (scholarData && scholarData.data && scholarData.data.length > 0) {
-          academicHTML += '<div class="source-subsection-label">Semantic Scholar Papers</div>';
+          academicHTML += '<div class="source-subsection-label">Semantic Scholar papers</div>';
           academicHTML += scholarData.data.slice(0, 10).map(renderScholarCard).join("");
         }
         if (academicHTML) {
           academicCol.innerHTML = academicHTML;
         } else {
-          academicCol.innerHTML = '<p style="color:var(--text-dim)">No academic sources found. Try more specific keywords.</p>';
+          academicCol.innerHTML = '<p style="color:var(--text-dim)">no academic sources found. try more specific keywords.</p>';
         }
 
         // Render Wikipedia results
@@ -1867,11 +1867,11 @@
                 '<div class="source-title">' + escapeHTML(item.title) + '</div>' +
                 '<div class="source-domain">en.wikipedia.org</div>' +
                 '<div class="source-snippet">' + escapeHTML(snippet) + '</div>' +
-                '<a href="' + wikiUrl + '" target="_blank" rel="noopener" class="source-link">Read on Wikipedia</a>' +
+                '<a href="' + wikiUrl + '" target="_blank" rel="noopener" class="source-link">read on Wikipedia</a>' +
                 '</div>';
             }).join("");
           } else {
-            wikiCol.innerHTML = '<p style="color:var(--text-dim)">No Wikipedia articles found.</p>';
+            wikiCol.innerHTML = '<p style="color:var(--text-dim)">no Wikipedia articles found.</p>';
           }
         }
 
@@ -1879,22 +1879,22 @@
         if (bookData && bookData.docs && bookData.docs.length > 0) {
           booksCol.innerHTML = bookData.docs.slice(0, 15).map(function (doc) {
             var link = "https://openlibrary.org" + doc.key;
-            var authors = doc.author_name ? doc.author_name.join(", ") : "Unknown author";
-            var year = doc.first_publish_year || "Unknown year";
+            var authors = doc.author_name ? doc.author_name.join(", ") : "unknown author";
+            var year = doc.first_publish_year || "unknown year";
             return '<div class="source-card">' +
               '<div class="source-title">' + escapeHTML(doc.title) + '</div>' +
-              '<div class="source-meta">By ' + escapeHTML(authors) + ' (' + year + ')</div>' +
-              '<a href="' + escapeHTML(link) + '" target="_blank" rel="noopener" class="source-link">View on OpenLibrary</a>' +
+              '<div class="source-meta">by ' + escapeHTML(authors) + ' (' + year + ')</div>' +
+              '<a href="' + escapeHTML(link) + '" target="_blank" rel="noopener" class="source-link">view on OpenLibrary</a>' +
               '</div>';
           }).join("");
         } else {
-          booksCol.innerHTML = '<p style="color:var(--text-dim)">No books found.</p>';
+          booksCol.innerHTML = '<p style="color:var(--text-dim)">no books found.</p>';
         }
 
-        toast("Found sources!");
+        toast("found sources!");
       }).catch(function () {
         loadingEl.style.display = "none";
-        toast("Error searching sources");
+        toast("error searching sources");
       });
     }
 
@@ -1932,13 +1932,13 @@
     function renderSavedWords() {
       var words = getSavedWords();
       if (words.length === 0) {
-        wordList.innerHTML = '<p style="color:var(--text-dim)">No saved words yet.</p>';
+        wordList.innerHTML = '<p style="color:var(--text-dim)">no saved words yet.</p>';
         return;
       }
       wordList.innerHTML = words.map(function(w, idx) {
         return '<div class="vocab-saved-item">' +
           '<span class="vocab-saved-word">' + w.word + '</span>' +
-          '<button class="vocab-delete-word" data-idx="' + idx + '">Delete</button>' +
+          '<button class="vocab-delete-word" data-idx="' + idx + '">delete</button>' +
           '</div>';
       }).join("");
 
@@ -1948,7 +1948,7 @@
           words.splice(parseInt(btn.dataset.idx), 1);
           saveWords(words);
           renderSavedWords();
-          toast("Word removed");
+          toast("word removed");
         });
       });
     }
@@ -1956,7 +1956,7 @@
     function lookup() {
       var word = searchInput.value.trim().toLowerCase();
       if (!word) {
-        toast("Enter a word");
+        toast("enter a word");
         return;
       }
 
@@ -1977,7 +1977,7 @@
         .then(function(data) {
           if (loadingEl) loadingEl.style.display = "none";
           if (!data || data.length === 0) {
-            toast("Word not found");
+            toast("word not found");
             return;
           }
 
@@ -2019,7 +2019,7 @@
         })
         .catch(function() {
           if (loadingEl) loadingEl.style.display = "none";
-          toast("Word not found");
+          toast("word not found");
         });
     }
 
@@ -2033,7 +2033,7 @@
 
     saveBtn.addEventListener("click", function() {
       if (!currentWord) {
-        toast("Look up a word first");
+        toast("look up a word first");
         return;
       }
 
@@ -2043,7 +2043,7 @@
       });
 
       if (exists) {
-        toast("Word already saved");
+        toast("word already saved");
         return;
       }
 
@@ -2063,13 +2063,13 @@
       words.push(simplified);
       saveWords(words);
       renderSavedWords();
-      toast("Word saved!");
+      toast("word saved!");
     });
 
     clearBtn.addEventListener("click", function() {
       localStorage.removeItem("shrimpify-vocab-list");
       renderSavedWords();
-      toast("Word list cleared");
+      toast("word list cleared");
     });
 
     // Initial render
@@ -2127,7 +2127,7 @@
 
     function research() {
       var q = searchInput.value.trim();
-      if (!q) { toast("Enter a research topic"); return; }
+      if (!q) { toast("enter a research topic"); return; }
 
       loadingEl.style.display = "";
       resultsEl.style.display = "none";
@@ -2163,13 +2163,13 @@
           }
           overviewHTML += '<p class="ra-overview-text">' + escapeHTML(wikiSummary.extract) + '</p>';
           if (wikiSummary.content_urls && wikiSummary.content_urls.desktop) {
-            overviewHTML += '<a href="' + escapeHTML(wikiSummary.content_urls.desktop.page) + '" target="_blank" rel="noopener" class="source-link">Read full article on Wikipedia</a>';
+            overviewHTML += '<a href="' + escapeHTML(wikiSummary.content_urls.desktop.page) + '" target="_blank" rel="noopener" class="source-link">read full article on Wikipedia</a>';
           }
           overviewHTML += '</div>';
           overviewContent.innerHTML = overviewHTML;
           brief.overview = wikiSummary.extract;
         } else {
-          overviewContent.innerHTML = '<p style="color:var(--text-dim)">No Wikipedia article found for this topic. Try different keywords.</p>';
+          overviewContent.innerHTML = '<p style="color:var(--text-dim)">no Wikipedia article found for this topic. try different keywords.</p>';
         }
 
         // --- Process SearXNG results with credibility tiers ---
@@ -2178,7 +2178,7 @@
           searxData.results.forEach(function (item) {
             var tier = getCredibilityTier(item.url);
             allWebResults.push({
-              title: item.title || "Untitled",
+              title: item.title || "untitled",
               url: item.url || "",
               snippet: item.content || "",
               domain: extractDomain(item.url || ""),
@@ -2198,12 +2198,12 @@
               '<div class="source-title">' + escapeHTML(item.title) + '</div>' +
               '<div class="source-domain">' + escapeHTML(item.domain) + '</div>' +
               '<div class="source-snippet">' + escapeHTML(item.snippet) + '</div>' +
-              '<a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" class="source-link">Visit Source</a>' +
+              '<a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" class="source-link">visit source</a>' +
               '</div></div>';
           }).join("");
           brief.findings = credibleResults.slice(0, 10);
         } else {
-          findingsContent.innerHTML = '<p style="color:var(--text-dim)">No credible sources (gov/edu/org) found. Try broader keywords.</p>';
+          findingsContent.innerHTML = '<p style="color:var(--text-dim)">no credible sources (gov/edu/org) found. try broader keywords.</p>';
         }
 
         // Show Deep Dive button if we have credible results
@@ -2227,15 +2227,15 @@
             return '<div class="ra-paper-card">' +
               credBadgeHTML(2) +
               '<div class="ra-paper-body">' +
-              '<div class="source-title">' + escapeHTML(paper.title || "Untitled") + '</div>' +
+              '<div class="source-title">' + escapeHTML(paper.title || "untitled") + '</div>' +
               (authors ? '<div class="source-meta">' + escapeHTML(authors) + (paper.year ? ' (' + paper.year + ')' : '') + '</div>' : '') +
               (abstract ? '<div class="source-snippet">' + escapeHTML(abstract) + '</div>' : '') +
-              (paper.url ? '<a href="' + escapeHTML(paper.url) + '" target="_blank" rel="noopener" class="source-link">View Paper</a>' : '') +
+              (paper.url ? '<a href="' + escapeHTML(paper.url) + '" target="_blank" rel="noopener" class="source-link">view paper</a>' : '') +
               '</div></div>';
           }).join("");
           brief.papers = scholarData.data;
         } else {
-          papersContent.innerHTML = '<p style="color:var(--text-dim)">No academic papers found.</p>';
+          papersContent.innerHTML = '<p style="color:var(--text-dim)">no academic papers found.</p>';
         }
 
         // --- All Sources Ranked ---
@@ -2243,7 +2243,7 @@
         if (scholarData && scholarData.data) {
           scholarData.data.forEach(function (paper) {
             combined.push({
-              title: paper.title || "Untitled",
+              title: paper.title || "untitled",
               url: paper.url || "",
               snippet: paper.abstract ? paper.abstract.substring(0, 150) + "..." : "",
               domain: extractDomain(paper.url || ""),
@@ -2259,7 +2259,7 @@
           combined.forEach(function (item) {
             if (item.tier !== currentTier) {
               currentTier = item.tier;
-              groupedHTML += '<div class="ra-tier-header">' + credBadgeHTML(currentTier) + ' ' + tierLabels[currentTier] + ' Sources</div>';
+              groupedHTML += '<div class="ra-tier-header">' + credBadgeHTML(currentTier) + ' ' + tierLabels[currentTier] + ' sources</div>';
             }
             groupedHTML += '<div class="ra-ranked-source">' +
               '<a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" class="ra-ranked-title">' + escapeHTML(item.title) + '</a>' +
@@ -2268,15 +2268,15 @@
           });
           sourcesContent.innerHTML = groupedHTML;
         } else {
-          sourcesContent.innerHTML = '<p style="color:var(--text-dim)">No sources found.</p>';
+          sourcesContent.innerHTML = '<p style="color:var(--text-dim)">no sources found.</p>';
         }
 
         brief.allSources = combined;
         lastBrief = brief;
-        toast("Research brief ready!");
+        toast("research brief ready!");
       }).catch(function () {
         loadingEl.style.display = "none";
-        toast("Error researching topic");
+        toast("error researching topic");
       });
     }
 
@@ -2284,27 +2284,27 @@
     if (urlBtn) {
       urlBtn.addEventListener("click", function () {
         var url = urlInput.value.trim();
-        if (!url) { toast("Paste a URL to analyze"); return; }
+        if (!url) { toast("paste a URL to analyze"); return; }
         if (!/^https?:\/\//i.test(url)) url = "https://" + url;
 
         urlResult.style.display = "";
-        urlResult.innerHTML = '<div class="source-loading">Fetching and analyzing page...</div>';
+        urlResult.innerHTML = '<div class="source-loading">fetching and analyzing page...</div>';
 
         fetchAndSummarize(url, searchInput.value.trim() || "general analysis").then(function (result) {
-          if (!result || result.summary === "Could not fetch this page.") {
-            urlResult.innerHTML = '<div class="ra-section"><p style="color:var(--text-dim)">Could not fetch this page. The site may block external access.</p></div>';
+          if (!result || result.summary === "could not fetch this page.") {
+            urlResult.innerHTML = '<div class="ra-section"><p style="color:var(--text-dim)">could not fetch this page. the site may block external access.</p></div>';
             return;
           }
           urlResult.innerHTML =
             '<div class="ra-section">' +
-            '<h3 class="ra-section-header">Page Analysis</h3>' +
+            '<h3 class="ra-section-header">page analysis</h3>' +
             '<div class="ra-url-title">' + escapeHTML(result.title || url) + '</div>' +
             '<div class="source-domain">' + escapeHTML(extractDomain(url)) + ' ' + credBadgeHTML(getCredibilityTier(url)) + '</div>' +
             '<div class="ra-url-summary">' + escapeHTML(result.summary) + '</div>' +
-            '<details class="ra-url-details"><summary>View extracted text</summary>' +
+            '<details class="ra-url-details"><summary>view extracted text</summary>' +
             '<div class="ra-url-excerpt">' + escapeHTML(result.text.substring(0, 1500)) + '</div>' +
             '</details>' +
-            '<a href="' + escapeHTML(url) + '" target="_blank" rel="noopener" class="source-link">Visit Original</a>' +
+            '<a href="' + escapeHTML(url) + '" target="_blank" rel="noopener" class="source-link">visit original</a>' +
             '</div>';
         });
       });
@@ -2313,7 +2313,7 @@
     // --- Deep Dive ---
     if (deepDiveBtn) {
       deepDiveBtn.addEventListener("click", function () {
-        if (lastCredibleResults.length === 0) { toast("Run a search first"); return; }
+        if (lastCredibleResults.length === 0) { toast("run a search first"); return; }
         var topic = searchInput.value.trim();
         deepDiveBtn.disabled = true;
         if (deepLoading) deepLoading.style.display = "";
@@ -2340,15 +2340,15 @@
               '<div class="source-title">' + escapeHTML(r.title || original.title) + '</div>' +
               '<div class="source-domain">' + escapeHTML(original.domain) + '</div>' +
               '<div class="ra-deep-card-summary">' + escapeHTML(r.summary) + '</div>' +
-              '<a href="' + escapeHTML(original.url) + '" target="_blank" rel="noopener" class="source-link">Visit Source</a>' +
+              '<a href="' + escapeHTML(original.url) + '" target="_blank" rel="noopener" class="source-link">visit source</a>' +
               '</div></div>';
-            if (r.summary && r.summary !== "Summary unavailable." && r.summary !== "Could not fetch this page.") {
+            if (r.summary && r.summary !== "summary unavailable." && r.summary !== "could not fetch this page.") {
               allSummaries.push(r.summary);
             }
           });
 
           if (cardsHTML && deepFindings) {
-            deepFindings.innerHTML = '<h3 class="ra-section-header" style="margin-bottom:12px">Source Summaries</h3>' + cardsHTML;
+            deepFindings.innerHTML = '<h3 class="ra-section-header" style="margin-bottom:12px">source summaries</h3>' + cardsHTML;
             deepFindings.style.display = "";
           }
 
@@ -2367,7 +2367,7 @@
           }
 
           if (lastBrief) lastBrief.deepSummaries = results;
-          toast("Deep dive complete!");
+          toast("deep dive complete!");
         });
       });
     }
@@ -2375,21 +2375,21 @@
     // Copy research brief as plain text
     if (copyBtn) {
       copyBtn.addEventListener("click", function () {
-        if (!lastBrief) { toast("Run a search first"); return; }
+        if (!lastBrief) { toast("run a search first"); return; }
 
-        var text = "RESEARCH BRIEF: " + lastBrief.topic + "\n";
+        var text = "research brief: " + lastBrief.topic + "\n";
         text += "=".repeat(50) + "\n\n";
 
         if (lastBrief.overview) {
-          text += "TOPIC OVERVIEW\n" + "-".repeat(30) + "\n" + lastBrief.overview + "\n\n";
+          text += "topic overview\n" + "-".repeat(30) + "\n" + lastBrief.overview + "\n\n";
         }
 
         if (lastBrief.synthesizedSummary) {
-          text += "DEEP DIVE SYNTHESIS\n" + "-".repeat(30) + "\n" + lastBrief.synthesizedSummary + "\n\n";
+          text += "deep dive synthesis\n" + "-".repeat(30) + "\n" + lastBrief.synthesizedSummary + "\n\n";
         }
 
         if (lastBrief.findings.length > 0) {
-          text += "KEY FINDINGS FROM CREDIBLE SOURCES\n" + "-".repeat(30) + "\n";
+          text += "key findings from credible sources\n" + "-".repeat(30) + "\n";
           lastBrief.findings.forEach(function (item, idx) {
             text += (idx + 1) + ". [" + tierLabels[item.tier] + "] " + item.title + "\n";
             text += "   " + item.url + "\n";
@@ -2399,7 +2399,7 @@
         }
 
         if (lastBrief.deepSummaries && lastBrief.deepSummaries.length > 0) {
-          text += "DEEP DIVE SOURCE SUMMARIES\n" + "-".repeat(30) + "\n";
+          text += "deep dive source summaries\n" + "-".repeat(30) + "\n";
           lastBrief.deepSummaries.forEach(function (item, idx) {
             if (!item) return;
             text += (idx + 1) + ". " + (item.title || item.url) + "\n";
@@ -2408,31 +2408,31 @@
         }
 
         if (lastBrief.papers && lastBrief.papers.length > 0) {
-          text += "ACADEMIC PAPERS\n" + "-".repeat(30) + "\n";
+          text += "academic papers\n" + "-".repeat(30) + "\n";
           lastBrief.papers.forEach(function (paper, idx) {
             var authors = "";
             if (paper.authors && paper.authors.length > 0) {
               authors = paper.authors.slice(0, 3).map(function (a) { return a.name; }).join(", ");
               if (paper.authors.length > 3) authors += " et al.";
             }
-            text += (idx + 1) + ". " + (paper.title || "Untitled") + "\n";
-            if (authors) text += "   Authors: " + authors + (paper.year ? " (" + paper.year + ")" : "") + "\n";
+            text += (idx + 1) + ". " + (paper.title || "untitled") + "\n";
+            if (authors) text += "   authors: " + authors + (paper.year ? " (" + paper.year + ")" : "") + "\n";
             if (paper.url) text += "   " + paper.url + "\n";
             text += "\n";
           });
         }
 
         if (lastBrief.allSources.length > 0) {
-          text += "ALL SOURCES (RANKED)\n" + "-".repeat(30) + "\n";
+          text += "all sources (ranked)\n" + "-".repeat(30) + "\n";
           lastBrief.allSources.forEach(function (item) {
             text += "- [" + tierLabels[item.tier] + "] " + item.title + " — " + item.url + "\n";
           });
         }
 
         navigator.clipboard.writeText(text).then(function () {
-          toast("Research brief copied to clipboard!");
+          toast("research brief copied to clipboard!");
         }).catch(function () {
-          toast("Failed to copy — try again");
+          toast("failed to copy — try again");
         });
       });
     }
@@ -2476,9 +2476,9 @@
       }
       container.innerHTML = bodies.map(function(body, idx) {
         return '<div class="outline-body-item">' +
-          '<label>Body Paragraph ' + (idx + 1) + '</label>' +
-          '<textarea class="outline-body-textarea" data-idx="' + idx + '" rows="3" placeholder="Enter body paragraph ' + (idx + 1) + ' content...">' + body + '</textarea>' +
-          '<button class="outline-remove-body" data-idx="' + idx + '">Remove</button>' +
+          '<label>body paragraph ' + (idx + 1) + '</label>' +
+          '<textarea class="outline-body-textarea" data-idx="' + idx + '" rows="3" placeholder="enter body paragraph ' + (idx + 1) + ' content...">' + body + '</textarea>' +
+          '<button class="outline-remove-body" data-idx="' + idx + '">remove</button>' +
           '</div>';
       }).join("");
 
@@ -2495,7 +2495,7 @@
           }
           saveOutline(outline);
           renderBodyParagraphs(outline.bodies);
-          toast("Paragraph removed");
+          toast("paragraph removed");
         });
       });
     }
@@ -2535,21 +2535,21 @@
     // Export
     $("#outline-export").addEventListener("click", function() {
       var outline = collectOutline();
-      var text = "ESSAY OUTLINE\n";
+      var text = "essay outline\n";
       text += "=============\n\n";
-      text += "THESIS STATEMENT:\n";
+      text += "thesis statement:\n";
       text += (outline.thesis || "(empty)") + "\n\n";
-      text += "INTRODUCTION:\n";
+      text += "introduction:\n";
       text += (outline.intro || "(empty)") + "\n\n";
       outline.bodies.forEach(function(body, idx) {
-        text += "BODY PARAGRAPH " + (idx + 1) + ":\n";
+        text += "body paragraph " + (idx + 1) + ":\n";
         text += (body || "(empty)") + "\n\n";
       });
-      text += "CONCLUSION:\n";
+      text += "conclusion:\n";
       text += (outline.conclusion || "(empty)") + "\n";
 
       navigator.clipboard.writeText(text).then(function() {
-        toast("Outline copied to clipboard!");
+        toast("outline copied to clipboard!");
       }).catch(function() {
         var ta = document.createElement("textarea");
         ta.value = text;
@@ -2557,7 +2557,7 @@
         ta.select();
         document.execCommand("copy");
         document.body.removeChild(ta);
-        toast("Outline copied to clipboard!");
+        toast("outline copied to clipboard!");
       });
     });
 
@@ -2568,7 +2568,7 @@
       $("#outline-intro").value = "";
       $("#outline-conclusion").value = "";
       renderBodyParagraphs([""]);
-      toast("Outline cleared");
+      toast("outline cleared");
     });
 
     // Initial load
@@ -2589,7 +2589,7 @@
       if (isNaN(current) || isNaN(weight) || isNaN(target) || weight <= 0) {
         var r = $("#gc-result"); r.style.display = "block";
         r.className = "gc-result gc-impossible";
-        r.innerHTML = "Please fill in all fields with valid numbers.";
+        r.innerHTML = "please fill in all fields with valid numbers.";
         return;
       }
       var needed = (target - current * (1 - weight)) / weight;
@@ -2597,13 +2597,13 @@
       r.style.display = "block";
       if (needed <= 0) {
         r.className = "gc-result gc-safe";
-        r.innerHTML = "You're safe! You could score <span class='gc-score'>0%</span> and still hit your target.";
+        r.innerHTML = "you're safe! you could score <span class='gc-score'>0%</span> and still hit your target.";
       } else if (needed > 100) {
         r.className = "gc-result gc-impossible";
-        r.innerHTML = "You'd need <span class='gc-score'>" + needed.toFixed(1) + "%</span> — that's mathematically impossible. Aim for a lower target.";
+        r.innerHTML = "you'd need <span class='gc-score'>" + needed.toFixed(1) + "%</span> — that's mathematically impossible. aim for a lower target.";
       } else {
         r.className = "gc-result gc-possible";
-        r.innerHTML = "You need at least <span class='gc-score'>" + needed.toFixed(1) + "%</span> on the final.";
+        r.innerHTML = "you need at least <span class='gc-score'>" + needed.toFixed(1) + "%</span> on the final.";
       }
     });
 
@@ -2618,7 +2618,7 @@
       tbody.innerHTML = "";
       semesterRows.forEach(function(row, i) {
         var tr = document.createElement("tr");
-        tr.innerHTML = '<td><input type="text" value="' + row.cat + '" data-i="' + i + '" data-f="cat" placeholder="Homework"></td>' +
+        tr.innerHTML = '<td><input type="text" value="' + row.cat + '" data-i="' + i + '" data-f="cat" placeholder="homework"></td>' +
           '<td><input type="number" value="' + row.grade + '" data-i="' + i + '" data-f="grade" step="0.1" placeholder="95"></td>' +
           '<td><input type="number" value="' + row.weight + '" data-i="' + i + '" data-f="weight" step="0.1" placeholder="30"></td>' +
           '<td><button class="gpa-remove-btn" data-i="' + i + '">x</button></td>';
@@ -2649,16 +2649,16 @@
         var avg = weighted / totalWeight;
         res.style.display = "block";
         res.className = "gc-result gc-possible";
-        res.innerHTML = "Semester grade: <span class='gc-score'>" + avg.toFixed(1) + "%</span>" +
+        res.innerHTML = "semester grade: <span class='gc-score'>" + avg.toFixed(1) + "%</span>" +
           (totalWeight < 100 ? " <span style='font-size:0.8rem;color:var(--text-dim)'>(weights total " + totalWeight.toFixed(0) + "%)</span>" : "");
       } else {
         res.style.display = "none";
       }
     }
     $("#gc-add-category").addEventListener("click", function() { addSemesterRow(); });
-    addSemesterRow("Homework", "", "");
-    addSemesterRow("Tests", "", "");
-    addSemesterRow("Final Exam", "", "");
+    addSemesterRow("homework", "", "");
+    addSemesterRow("tests", "", "");
+    addSemesterRow("final exam", "", "");
   }
 
   // ============================================================
@@ -2977,7 +2977,7 @@
 
     // Coin Flip
     $("#rp-flip-btn").addEventListener("click", function() {
-      var result = Math.random() < 0.5 ? "Heads" : "Tails";
+      var result = Math.random() < 0.5 ? "heads" : "tails";
       var el = $("#rp-coin-result");
       el.textContent = result;
       el.style.animation = "none";
@@ -3172,7 +3172,7 @@
       schedule = {};
       saveSchedule();
       renderGrid();
-      toast("Schedule cleared");
+      toast("schedule cleared");
     });
 
     loadSchedule();
@@ -3252,8 +3252,8 @@
 
     // Pause
     $("#tts-pause").addEventListener("click", function() {
-      if (synth.speaking && !synth.paused) { synth.pause(); this.textContent = "Resume"; }
-      else if (synth.paused) { synth.resume(); this.textContent = "Pause"; }
+      if (synth.speaking && !synth.paused) { synth.pause(); this.textContent = "resume"; }
+      else if (synth.paused) { synth.resume(); this.textContent = "pause"; }
     });
 
     // Stop
@@ -3261,7 +3261,7 @@
       synth.cancel();
       speaking = false;
       $("#tts-highlight").classList.remove("active");
-      $("#tts-pause").textContent = "Pause";
+      $("#tts-pause").textContent = "pause";
     });
   }
 
@@ -3353,10 +3353,10 @@
       var timerVal = parseInt($("#fs-timer").value);
       if (timerVal > 0) {
         clearTimeout(stopTimer);
-        stopTimer = setTimeout(function() { stopSound(); toast("Focus sounds auto-stopped"); }, timerVal * 60000);
-        $("#fs-status").textContent = "Playing " + type + " noise — auto-stop in " + timerVal + "m";
+        stopTimer = setTimeout(function() { stopSound(); toast("focus sounds auto-stopped"); }, timerVal * 60000);
+        $("#fs-status").textContent = "playing " + type + " noise — auto-stop in " + timerVal + "m";
       } else {
-        $("#fs-status").textContent = "Playing " + type + " noise";
+        $("#fs-status").textContent = "playing " + type + " noise";
       }
     }
 
@@ -3415,7 +3415,7 @@
       var text = inputEl.value.trim();
       if (!text) { outputEl.textContent = ''; statusEl.textContent = ''; return; }
       if (text.length > MAX_CHARS) {
-        statusEl.textContent = 'Text exceeds ' + MAX_CHARS + ' character limit';
+        statusEl.textContent = 'text exceeds ' + MAX_CHARS + ' character limit';
         statusEl.className = 'translator-status error';
         return;
       }
@@ -3423,13 +3423,13 @@
       var toLang = toSelect.value;
       if (fromLang === toLang && fromLang !== 'auto') {
         outputEl.textContent = text;
-        statusEl.textContent = 'Same language selected';
+        statusEl.textContent = 'same language selected';
         return;
       }
       var langPair = (fromLang === 'auto' ? '' : fromLang) + '|' + toLang;
       var url = 'https://api.mymemory.translated.net/get?q=' +
         encodeURIComponent(text) + '&langpair=' + langPair;
-      statusEl.textContent = 'Translating...';
+      statusEl.textContent = 'translating...';
       statusEl.className = 'translator-status';
       translateBtn.disabled = true;
       fetch(url)
@@ -3440,16 +3440,16 @@
             outputEl.textContent = data.responseData.translatedText;
             statusEl.textContent = '';
             if (fromLang === 'auto' && data.responseData.detectedLanguage) {
-              detectedLang.textContent = 'Detected: ' + data.responseData.detectedLanguage;
+              detectedLang.textContent = 'detected: ' + data.responseData.detectedLanguage;
             } else { detectedLang.textContent = ''; }
           } else {
-            statusEl.textContent = data.responseDetails || 'Translation failed';
+            statusEl.textContent = data.responseDetails || 'translation failed';
             statusEl.className = 'translator-status error';
           }
         })
         .catch(function() {
           translateBtn.disabled = false;
-          statusEl.textContent = 'Network error';
+          statusEl.textContent = 'network error';
           statusEl.className = 'translator-status error';
         });
     }
@@ -3485,7 +3485,7 @@
       var text = outputEl.textContent;
       if (!text) return;
       navigator.clipboard.writeText(text).then(function() {
-        statusEl.textContent = 'Copied!';
+        statusEl.textContent = 'copied!';
         setTimeout(function() { statusEl.textContent = ''; }, 1500);
       });
     });
@@ -3517,7 +3517,7 @@
       tabsEl.innerHTML = ANATOMY_SYSTEMS.map(function(sys, i) {
         return '<button class="anatomy-system-tab' +
           (i === currentSystem ? ' active' : '') +
-          '" data-idx="' + i + '">' + sys.name.replace(' System', '') + '</button>';
+          '" data-idx="' + i + '">' + sys.name.replace(' system', '') + '</button>';
       }).join('');
       tabsEl.querySelectorAll('.anatomy-system-tab').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -3691,9 +3691,9 @@
         return '<div class="essay-source-item">' +
           '<div class="essay-source-item-header">' +
           '<span class="essay-source-item-title">' + escapeHTML(s.title || s.url) + '</span>' +
-          '<button class="essay-source-remove-btn" data-idx="' + idx + '">Remove</button>' +
+          '<button class="essay-source-remove-btn" data-idx="' + idx + '">remove</button>' +
           '</div>' +
-          '<div class="essay-source-item-summary">' + escapeHTML(s.summary || "Fetched.") + '</div>' +
+          '<div class="essay-source-item-summary">' + escapeHTML(s.summary || "fetched.") + '</div>' +
           '</div>';
       }).join("");
 
@@ -3708,16 +3708,16 @@
     outputTextarea.addEventListener("input", updateWordCount);
 
     copyBtn.addEventListener("click", function () {
-      navigator.clipboard.writeText(outputTextarea.value).then(function () { toast("Copied to clipboard!"); });
+      navigator.clipboard.writeText(outputTextarea.value).then(function () { toast("copied to clipboard!"); });
     });
 
     // Fetch Sources button
     fetchSourcesBtn.addEventListener("click", function () {
       var urls = sourcesInput.value.trim().split("\n").map(function (u) { return u.trim(); }).filter(function (u) { return u.length > 0; });
-      if (urls.length === 0) { toast("Paste at least one URL"); return; }
+      if (urls.length === 0) { toast("paste at least one URL"); return; }
 
       fetchSourcesBtn.disabled = true;
-      sourcesStatus.textContent = "Fetching " + urls.length + " source(s)...";
+      sourcesStatus.textContent = "fetching " + urls.length + " source(s)...";
 
       var promises = urls.map(function (url) {
         if (!/^https?:\/\//i.test(url)) url = "https://" + url;
@@ -3733,7 +3733,7 @@
         window._essayWriterSources = fetchedSources;
         renderSourcesList();
         sourcesStatus.textContent = fetchedSources.length + " of " + urls.length + " sources fetched.";
-        toast("Sources fetched!");
+        toast("sources fetched!");
       });
     });
 
@@ -3763,7 +3763,7 @@
     // Generate essay
     generateBtn.addEventListener("click", function () {
       var topic = topicInput.value.trim();
-      if (!topic) { toast("Enter a topic or prompt"); return; }
+      if (!topic) { toast("enter a topic or prompt"); return; }
 
       var essayType = typeSelect.value;
       var length = lengthMap[lengthSelect.value] || lengthMap.medium;
@@ -3783,10 +3783,10 @@
           updateWordCount();
           outputArea.style.display = "";
           if (continueBtn) continueBtn.style.display = "";
-          toast("Essay generated!");
+          toast("essay generated!");
         })
         .catch(function () {
-          toast("Error generating essay. Please try again.");
+          toast("error generating essay. please try again.");
         })
         .finally(function () {
           loadingEl.style.display = "none";
@@ -3798,7 +3798,7 @@
     if (continueBtn) {
       continueBtn.addEventListener("click", function () {
         var currentText = outputTextarea.value.trim();
-        if (!currentText) { toast("Generate an essay first"); return; }
+        if (!currentText) { toast("generate an essay first"); return; }
 
         var prompt = "Continue writing the following essay from where it left off. " +
           "Maintain the same tone, style, and argument structure. " +
@@ -3806,21 +3806,21 @@
           "Only output the continuation, nothing else.\n\n" + currentText;
 
         continueBtn.disabled = true;
-        continueBtn.textContent = "Continuing...";
+        continueBtn.textContent = "continuing...";
 
         fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
           .then(function (r) { return r.text(); })
           .then(function (text) {
             outputTextarea.value = currentText + "\n\n" + text.trim();
             updateWordCount();
-            toast("Essay continued!");
+            toast("essay continued!");
           })
           .catch(function () {
-            toast("Error continuing essay. Please try again.");
+            toast("error continuing essay. please try again.");
           })
           .finally(function () {
             continueBtn.disabled = false;
-            continueBtn.textContent = "Continue Writing";
+            continueBtn.textContent = "continue writing";
           });
       });
     }
@@ -3847,12 +3847,12 @@
     });
 
     copyBtn.addEventListener("click", function() {
-      navigator.clipboard.writeText(outputTextarea.value).then(function() { toast("Copied to clipboard!"); });
+      navigator.clipboard.writeText(outputTextarea.value).then(function() { toast("copied to clipboard!"); });
     });
 
     goBtn.addEventListener("click", function() {
       var text = inputTextarea.value.trim();
-      if (!text) { toast("Paste some text to humanize"); return; }
+      if (!text) { toast("paste some text to humanize"); return; }
 
       var prompt = "Rewrite the following text to sound completely natural and human-written. " +
         "Make it sound like a real student wrote it: use contractions (don't, it's, they're), " +
@@ -3872,10 +3872,10 @@
         .then(function(result) {
           outputTextarea.value = result.trim();
           outputCount.textContent = countWords(result.trim()) + " words";
-          toast("Text humanized!");
+          toast("text humanized!");
         })
         .catch(function() {
-          toast("Error humanizing text. Please try again.");
+          toast("error humanizing text. please try again.");
         })
         .finally(function() {
           loadingEl.style.display = "none";
@@ -3899,7 +3899,7 @@
 
     var catalog = window.LESSON_CATALOG || [];
     var currentSubject = 0;
-    var currentCat = "All";
+    var currentCat = "all";
     var currentLesson = null;
     var quizState = { idx: 0, correct: 0, answered: false };
     var PROGRESS_KEY = "shrimpify-learn-progress";
@@ -3927,7 +3927,7 @@
         btn.innerHTML = '<span class="learn-subject-icon">' + subj.icon + '</span> ' + subj.name;
         btn.addEventListener("click", function() {
           currentSubject = i;
-          currentCat = "All";
+          currentCat = "all";
           renderSubjects();
           renderCats();
           renderGrid();
@@ -3941,7 +3941,7 @@
       catBar.innerHTML = "";
       var subject = catalog[currentSubject];
       if (!subject) return;
-      var cats = ["All"];
+      var cats = ["all"];
       subject.lessons.forEach(function(l) {
         if (cats.indexOf(l.cat) === -1) cats.push(l.cat);
       });
@@ -3964,11 +3964,11 @@
       var subject = catalog[currentSubject];
       if (!subject) return;
       var lessons = subject.lessons;
-      if (currentCat !== "All") {
+      if (currentCat !== "all") {
         lessons = lessons.filter(function(l) { return l.cat === currentCat; });
       }
       if (lessons.length === 0) {
-        grid.innerHTML = '<p class="learn-empty">No lessons in this category yet.</p>';
+        grid.innerHTML = '<p class="learn-empty">no lessons in this category yet.</p>';
         return;
       }
       lessons.forEach(function(lesson) {
@@ -4010,7 +4010,7 @@
       lessonView.style.display = "none";
       quizView.style.display = "";
       $("#learn-quiz-results").style.display = "none";
-      $("#learn-quiz-title").textContent = lesson.title + " \u2014 Quiz";
+      $("#learn-quiz-title").textContent = lesson.title + " \u2014 quiz";
       renderQuestion();
     }
 
@@ -4020,7 +4020,7 @@
       var q = lesson.quiz[quizState.idx];
       var total = lesson.quiz.length;
 
-      $("#learn-quiz-progress").textContent = "Question " + (quizState.idx + 1) + " of " + total;
+      $("#learn-quiz-progress").textContent = "question " + (quizState.idx + 1) + " of " + total;
       $("#learn-quiz-question").textContent = q.q;
       var choicesEl = $("#learn-quiz-choices");
       choicesEl.innerHTML = "";
@@ -4049,7 +4049,7 @@
       var feedbackEl = $("#learn-quiz-feedback");
       feedbackEl.style.display = "";
       feedbackEl.className = "learn-quiz-feedback " + (correct ? "correct" : "wrong");
-      feedbackEl.textContent = correct ? "Correct!" : "Incorrect. The answer is: " + q.options[q.answer];
+      feedbackEl.textContent = correct ? "correct!" : "incorrect. the answer is: " + q.options[q.answer];
 
       var choiceBtns = $$("#learn-quiz-choices .learn-quiz-choice");
       choiceBtns.forEach(function(btn, i) {
@@ -4083,10 +4083,10 @@
       resultsEl.style.display = "";
       $("#learn-quiz-score").textContent = pct;
       var summary = quizState.correct + " out of " + total + " correct. ";
-      if (pct === 100) summary += "Perfect score!";
-      else if (pct >= 75) summary += "Great job!";
-      else if (pct >= 50) summary += "Good effort \u2014 review and try again!";
-      else summary += "Keep studying \u2014 you'll get it!";
+      if (pct === 100) summary += "perfect score!";
+      else if (pct >= 75) summary += "great job!";
+      else if (pct >= 50) summary += "good effort \u2014 review and try again!";
+      else summary += "keep studying \u2014 you'll get it!";
       $("#learn-quiz-summary").textContent = summary;
     }
 
@@ -4135,7 +4135,7 @@
   }
 
   // ============================================================
-  //  SOURCE RESEARCH (Writer page — search + use in Essay Writer)
+  //  SOURCE RESEARCH (Writer page — integrated with Essay Writer)
   // ============================================================
   function _initSourceResearch() {
     var urlInput = $("#sr-url-input");
@@ -4144,176 +4144,549 @@
     var searchInput = $("#sr-search-input");
     var searchBtn = $("#sr-search-btn");
     var loadingEl = $("#sr-loading");
-    var resultsSection = $("#sr-results");
+    var resultsEl = $("#sr-results");
     var resultsList = $("#sr-results-list");
     var selectedSection = $("#sr-selected");
     var selectedList = $("#sr-selected-list");
     var selectedCount = $("#sr-selected-count");
-    var goToWriter = $("#sr-go-to-writer");
+    var goToWriterBtn = $("#sr-go-to-writer");
 
-    if (!urlInput || !searchInput) return;
-
-    function refreshSelectedUI() {
+    function renderSelected() {
       var sources = window._essayWriterSources || [];
       if (sources.length === 0) {
-        selectedSection.style.display = "none";
+        if (selectedSection) selectedSection.style.display = "none";
         return;
       }
-      selectedSection.style.display = "";
-      selectedCount.textContent = sources.length;
-      selectedList.innerHTML = "";
-      sources.forEach(function (s, i) {
-        var div = document.createElement("div");
-        div.className = "sr-selected-item";
-        div.innerHTML =
-          '<span class="sr-selected-title">' + escapeHTML(s.title || s.url) + '</span>' +
-          '<button class="sr-selected-remove" data-idx="' + i + '">Remove</button>';
-        selectedList.appendChild(div);
-      });
-      selectedList.addEventListener("click", function (e) {
-        if (e.target.classList.contains("sr-selected-remove")) {
-          var idx = parseInt(e.target.getAttribute("data-idx"), 10);
-          var arr = window._essayWriterSources || [];
-          arr.splice(idx, 1);
-          refreshSelectedUI();
+      if (selectedSection) selectedSection.style.display = "";
+      if (selectedCount) selectedCount.textContent = sources.length;
+      if (selectedList) {
+        selectedList.innerHTML = sources.map(function (s) {
+          return '<div class="essay-source-item">' +
+            '<div class="essay-source-item-title">' + escapeHTML(s.title || s.url) + '</div>' +
+            '<div class="essay-source-item-summary">' + escapeHTML(s.summary || "fetched.") + '</div>' +
+            '</div>';
+        }).join("");
+      }
+    }
+
+    // URL analysis
+    if (urlBtn) {
+      urlBtn.addEventListener("click", function () {
+        var url = urlInput.value.trim();
+        if (!url) { toast("paste a URL"); return; }
+        if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+
+        if (urlResult) {
+          urlResult.style.display = "";
+          urlResult.innerHTML = '<div class="source-loading">fetching page...</div>';
         }
+
+        fetchAndSummarize(url, searchInput.value.trim() || "general").then(function (result) {
+          if (!urlResult) return;
+          if (!result || result.summary === "could not fetch this page.") {
+            urlResult.innerHTML = '<div class="ra-section"><p style="color:var(--text-dim)">could not fetch this page.</p></div>';
+            return;
+          }
+          urlResult.innerHTML =
+            '<div class="sr-result-card">' +
+            '<div class="sr-result-header">' +
+            '<div style="flex:1;min-width:0">' +
+            '<div class="source-title">' + escapeHTML(result.title || url) + '</div>' +
+            '<div class="source-domain">' + escapeHTML(extractDomain(url)) + ' ' + credBadgeHTML(getCredibilityTier(url)) + '</div>' +
+            '<div class="ra-deep-card-summary">' + escapeHTML(result.summary) + '</div>' +
+            '</div>' +
+            '<button class="btn btn-secondary sr-use-btn" style="flex-shrink:0;font-size:0.75rem;padding:6px 14px">use in essay</button>' +
+            '</div></div>';
+
+          urlResult.querySelector(".sr-use-btn").addEventListener("click", function () {
+            if (typeof window._essayAddSource === "function") {
+              window._essayAddSource(result);
+              renderSelected();
+              toast("source added to essay!");
+            } else {
+              toast("open AI essay writer first");
+            }
+          });
+        });
       });
     }
 
-    // Periodic refresh in case sources added from Essay Writer panel
-    setInterval(refreshSelectedUI, 3000);
-    refreshSelectedUI();
+    // Topic search
+    function search() {
+      var q = searchInput.value.trim();
+      if (!q) { toast("enter a search term"); return; }
 
-    // URL Analysis
-    urlBtn.addEventListener("click", function () {
-      var url = urlInput.value.trim();
-      if (!url) { toast("Paste a URL first"); return; }
-      if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+      if (loadingEl) loadingEl.style.display = "";
+      if (resultsEl) resultsEl.style.display = "none";
+      if (resultsList) resultsList.innerHTML = "";
 
-      urlResult.innerHTML = '<div class="essay-loading"><span>Analyzing</span><span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div>';
-      urlBtn.disabled = true;
-
-      fetchAndSummarize(url, "general research").then(function (data) {
-        var domain = extractDomain(url);
-        var tier = getCredibilityTier(domain);
-        urlResult.innerHTML =
-          '<div class="sr-url-card">' +
-            '<div class="sr-url-card-header">' +
-              '<strong>' + escapeHTML(data.title || domain) + '</strong> ' + credBadgeHTML(tier) +
-            '</div>' +
-            '<p class="sr-url-card-summary">' + escapeHTML(data.summary) + '</p>' +
-            '<button class="btn btn-secondary sr-use-btn">Use in Essay</button>' +
-          '</div>';
-        urlResult.querySelector(".sr-use-btn").addEventListener("click", function () {
-          if (window._essayAddSource) {
-            window._essayAddSource({ url: data.url, title: data.title, summary: data.summary, text: data.text });
-            this.textContent = "Added!";
-            this.disabled = true;
-            refreshSelectedUI();
-          }
-        });
-      }).catch(function () {
-        urlResult.innerHTML = '<p style="color:var(--text-muted)">Could not fetch that URL.</p>';
-      }).finally(function () {
-        urlBtn.disabled = false;
-      });
-    });
-
-    urlInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") urlBtn.click();
-    });
-
-    // Topic Search
-    searchBtn.addEventListener("click", function () {
-      var topic = searchInput.value.trim();
-      if (!topic) { toast("Enter a topic to search"); return; }
-
-      loadingEl.style.display = "";
-      resultsSection.style.display = "none";
-      resultsList.innerHTML = "";
-      searchBtn.disabled = true;
-
-      var searxPromise = trySearx(topic + " research").then(function (r) { return r || []; });
-      var scholarPromise = searchSemanticScholar(topic).then(function (r) { return r || []; });
+      var searxPromise = trySearx(q, 0);
+      var scholarPromise = searchSemanticScholar(q);
 
       Promise.all([searxPromise, scholarPromise]).then(function (results) {
-        var allResults = results[0].concat(results[1]);
+        if (loadingEl) loadingEl.style.display = "none";
+        if (resultsEl) resultsEl.style.display = "";
 
-        // Deduplicate by domain+title
-        var seen = {};
-        allResults = allResults.filter(function (r) {
-          var key = extractDomain(r.url) + "|" + (r.title || "").toLowerCase().substring(0, 50);
-          if (seen[key]) return false;
-          seen[key] = true;
-          return true;
-        });
+        var searxData = results[0];
+        var scholarData = results[1];
 
-        // Sort by credibility tier
-        allResults.sort(function (a, b) {
-          return getCredibilityTier(extractDomain(a.url)) - getCredibilityTier(extractDomain(b.url));
-        });
+        var allResults = [];
+
+        if (searxData && searxData.results) {
+          searxData.results.forEach(function (item) {
+            allResults.push({
+              title: item.title || "untitled",
+              url: item.url || "",
+              snippet: item.content || "",
+              domain: extractDomain(item.url || ""),
+              tier: getCredibilityTier(item.url || "")
+            });
+          });
+        }
+
+        if (scholarData && scholarData.data) {
+          scholarData.data.forEach(function (paper) {
+            var authors = "";
+            if (paper.authors && paper.authors.length > 0) {
+              authors = paper.authors.slice(0, 3).map(function (a) { return a.name; }).join(", ");
+            }
+            allResults.push({
+              title: paper.title || "untitled",
+              url: paper.url || "",
+              snippet: (paper.abstract || "").substring(0, 250),
+              domain: extractDomain(paper.url || ""),
+              tier: 2,
+              authors: authors,
+              year: paper.year
+            });
+          });
+        }
+
+        allResults.sort(function (a, b) { return a.tier - b.tier; });
 
         if (allResults.length === 0) {
-          resultsList.innerHTML = '<p style="color:var(--text-muted)">No results found. Try different search terms.</p>';
-          resultsSection.style.display = "";
+          if (resultsList) resultsList.innerHTML = '<p style="color:var(--text-dim)">no sources found. try different keywords.</p>';
           return;
         }
 
-        allResults.forEach(function (item) {
-          var domain = extractDomain(item.url);
-          var tier = getCredibilityTier(domain);
-          var card = document.createElement("div");
-          card.className = "sr-result-card";
-          card.innerHTML =
-            '<div class="sr-result-header">' +
-              '<a href="' + escapeHTML(item.url) + '" target="_blank" class="sr-result-title">' + escapeHTML(item.title || domain) + '</a>' +
-              ' ' + credBadgeHTML(tier) +
-            '</div>' +
-            '<div class="sr-result-domain">' + escapeHTML(domain) + '</div>' +
-            (item.snippet ? '<p class="sr-result-snippet">' + escapeHTML(item.snippet) + '</p>' : '') +
-            '<div class="sr-result-actions">' +
-              '<button class="btn btn-secondary sr-fetch-btn">Fetch & Use in Essay</button>' +
-            '</div>';
+        if (resultsList) {
+          resultsList.innerHTML = allResults.slice(0, 20).map(function (item, idx) {
+            return '<div class="sr-result-card" data-idx="' + idx + '">' +
+              '<div class="sr-result-header">' +
+              '<div style="flex:1;min-width:0">' +
+              credBadgeHTML(item.tier) +
+              '<div class="source-title">' + escapeHTML(item.title) + '</div>' +
+              '<div class="source-domain">' + escapeHTML(item.domain) + '</div>' +
+              (item.authors ? '<div class="source-meta">' + escapeHTML(item.authors) + (item.year ? ' (' + item.year + ')' : '') + '</div>' : '') +
+              '<div class="source-snippet">' + escapeHTML(item.snippet) + '</div>' +
+              '</div>' +
+              '<div class="sr-result-actions">' +
+              '<button class="btn btn-secondary sr-fetch-use-btn" data-url="' + escapeHTML(item.url) + '" style="font-size:0.72rem;padding:5px 12px;white-space:nowrap">fetch & use in essay</button>' +
+              '<a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" class="source-link">visit</a>' +
+              '</div>' +
+              '</div>';
+          }).join("");
 
-          card.querySelector(".sr-fetch-btn").addEventListener("click", function () {
-            var btn = this;
-            btn.disabled = true;
-            btn.textContent = "Fetching...";
+          resultsList.querySelectorAll(".sr-fetch-use-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var sourceUrl = btn.dataset.url;
+              if (!sourceUrl) return;
+              btn.disabled = true;
+              btn.textContent = "fetching...";
 
-            fetchAndSummarize(item.url, topic).then(function (data) {
-              if (window._essayAddSource) {
-                window._essayAddSource({ url: data.url, title: data.title || item.title, summary: data.summary, text: data.text });
-                btn.textContent = "Added!";
-                btn.classList.add("sr-btn-added");
-                refreshSelectedUI();
-              }
-            }).catch(function () {
-              btn.textContent = "Failed";
-              setTimeout(function () {
-                btn.textContent = "Fetch & Use in Essay";
-                btn.disabled = false;
-              }, 2000);
+              fetchAndSummarize(sourceUrl, q).then(function (result) {
+                if (result && typeof window._essayAddSource === "function") {
+                  window._essayAddSource(result);
+                  renderSelected();
+                  btn.textContent = "added!";
+                  toast("source added to essay!");
+                } else {
+                  btn.textContent = "failed";
+                  toast("could not fetch this page.");
+                }
+                setTimeout(function () { btn.disabled = false; btn.textContent = "fetch & use in essay"; }, 2000);
+              });
             });
           });
+        }
 
-          resultsList.appendChild(card);
-        });
-        resultsSection.style.display = "";
-      }).finally(function () {
-        loadingEl.style.display = "none";
-        searchBtn.disabled = false;
+        toast("found " + allResults.length + " sources!");
+      }).catch(function () {
+        if (loadingEl) loadingEl.style.display = "none";
+        toast("error searching sources");
       });
+    }
+
+    if (searchBtn) {
+      searchBtn.addEventListener("click", search);
+    }
+    if (searchInput) {
+      searchInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") search();
+      });
+    }
+
+    // "Go to AI Essay Writer" button
+    if (goToWriterBtn) {
+      goToWriterBtn.addEventListener("click", function () {
+        var writerTab = document.querySelector('#page-writer .tool-tab[data-tool="essay-writer"]');
+        if (writerTab) writerTab.click();
+      });
+    }
+
+    // Refresh selected list periodically
+    setInterval(renderSelected, 2000);
+    renderSelected();
+  }
+
+  // ============================================================
+  //  GRAPHER
+  // ============================================================
+  function _initGrapher() {
+    const canvas = $("#graph-canvas");
+    const ctx = canvas.getContext("2d");
+    const coordsEl = $("#graph-coords");
+    const fnList = $("#graph-fn-list");
+    const addFnBtn = $("#graph-add-fn");
+    const plotBtn = $("#graph-plot-btn");
+    const resetBtn = $("#graph-reset-btn");
+    const saveBtn = $("#graph-save-btn");
+    const xMinIn = $("#graph-x-min");
+    const xMaxIn = $("#graph-x-max");
+    const yMinIn = $("#graph-y-min");
+    const yMaxIn = $("#graph-y-max");
+
+    const COLORS = ["#4dabf7", "#ff6b6b", "#69db7c", "#ffa94d", "#9775fa", "#f06595", "#ffd43b", "#20c997"];
+    let functions = [{ expr: "", color: COLORS[0] }];
+    let view = { xMin: -10, xMax: 10, yMin: -10, yMax: 10 };
+    let dragging = false;
+    let dragStart = { x: 0, y: 0 };
+    let dragViewStart = { xMin: 0, xMax: 0, yMin: 0, yMax: 0 };
+
+    function resize() {
+      const wrap = canvas.parentElement;
+      canvas.width = wrap.clientWidth;
+      canvas.height = wrap.clientHeight;
+    }
+
+    // Safe math evaluation
+    function evalExpr(exprStr, x) {
+      try {
+        const s = exprStr
+          .replace(/\bsin\b/g, "Math.sin")
+          .replace(/\bcos\b/g, "Math.cos")
+          .replace(/\btan\b/g, "Math.tan")
+          .replace(/\basin\b/g, "Math.asin")
+          .replace(/\bacos\b/g, "Math.acos")
+          .replace(/\batan\b/g, "Math.atan")
+          .replace(/\bsqrt\b/g, "Math.sqrt")
+          .replace(/\bcbrt\b/g, "Math.cbrt")
+          .replace(/\blogs?\b/g, "Math.log10")
+          .replace(/\bln\b/g, "Math.log")
+          .replace(/\babs\b/g, "Math.abs")
+          .replace(/\bceil\b/g, "Math.ceil")
+          .replace(/\bfloor\b/g, "Math.floor")
+          .replace(/\bround\b/g, "Math.round")
+          .replace(/\bexp\b/g, "Math.exp")
+          .replace(/\bpi\b/gi, "Math.PI")
+          .replace(/\be\b/g, "Math.E")
+          .replace(/\^/g, "**");
+        return new Function("x", "return " + s)(x);
+      } catch (_) {
+        return NaN;
+      }
+    }
+
+    function toCanvasX(x) {
+      return (x - view.xMin) / (view.xMax - view.xMin) * canvas.width;
+    }
+    function toCanvasY(y) {
+      return canvas.height - (y - view.yMin) / (view.yMax - view.yMin) * canvas.height;
+    }
+    function fromCanvasX(cx) {
+      return view.xMin + cx / canvas.width * (view.xMax - view.xMin);
+    }
+    function fromCanvasY(cy) {
+      return view.yMax - cy / canvas.height * (view.yMax - view.yMin);
+    }
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0e0e0e";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Determine grid spacing
+      function niceStep(range) {
+        const rough = range / 10;
+        const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+        const norm = rough / pow;
+        if (norm < 1.5) return pow;
+        if (norm < 3.5) return 2 * pow;
+        if (norm < 7.5) return 5 * pow;
+        return 10 * pow;
+      }
+
+      const xStep = niceStep(view.xMax - view.xMin);
+      const yStep = niceStep(view.yMax - view.yMin);
+
+      ctx.strokeStyle = "#1a1a1a";
+      ctx.lineWidth = 1;
+      ctx.font = "11px monospace";
+      ctx.fillStyle = "#555";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+
+      // Vertical grid lines
+      let xStart = Math.ceil(view.xMin / xStep) * xStep;
+      for (let x = xStart; x <= view.xMax; x += xStep) {
+        const cx = toCanvasX(x);
+        ctx.beginPath();
+        ctx.moveTo(cx, 0);
+        ctx.lineTo(cx, canvas.height);
+        ctx.strokeStyle = Math.abs(x) < xStep * 0.01 ? "#333" : "#1a1a1a";
+        ctx.lineWidth = Math.abs(x) < xStep * 0.01 ? 2 : 1;
+        ctx.stroke();
+        if (Math.abs(x) > xStep * 0.01) {
+          const label = Math.abs(x) < 0.001 ? x.toExponential(1) : +x.toFixed(6);
+          ctx.fillText(label, cx, toCanvasY(0) + 4);
+        }
+      }
+
+      // Horizontal grid lines
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      let yStart = Math.ceil(view.yMin / yStep) * yStep;
+      for (let y = yStart; y <= view.yMax; y += yStep) {
+        const cy = toCanvasY(y);
+        ctx.beginPath();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(canvas.width, cy);
+        ctx.strokeStyle = Math.abs(y) < yStep * 0.01 ? "#333" : "#1a1a1a";
+        ctx.lineWidth = Math.abs(y) < yStep * 0.01 ? 2 : 1;
+        ctx.stroke();
+        if (Math.abs(y) > yStep * 0.01) {
+          const label = Math.abs(y) < 0.001 ? y.toExponential(1) : +y.toFixed(6);
+          ctx.fillText(label, toCanvasX(0) - 4, cy);
+        }
+      }
+
+      // Axes
+      ctx.strokeStyle = "#555";
+      ctx.lineWidth = 1.5;
+      const originX = toCanvasX(0);
+      const originY = toCanvasY(0);
+      if (originX >= 0 && originX <= canvas.width) {
+        ctx.beginPath();
+        ctx.moveTo(originX, 0);
+        ctx.lineTo(originX, canvas.height);
+        ctx.stroke();
+      }
+      if (originY >= 0 && originY <= canvas.height) {
+        ctx.beginPath();
+        ctx.moveTo(0, originY);
+        ctx.lineTo(canvas.width, originY);
+        ctx.stroke();
+      }
+
+      // Origin label
+      ctx.fillStyle = "#555";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "top";
+      ctx.fillText("0", originX - 4, originY + 4);
+    }
+
+    function drawFunctions() {
+      const step = (view.xMax - view.xMin) / canvas.width;
+      functions.forEach(function (fn) {
+        if (!fn.expr.trim()) return;
+        ctx.strokeStyle = fn.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        let started = false;
+        for (let px = 0; px <= canvas.width; px++) {
+          const x = fromCanvasX(px);
+          const y = evalExpr(fn.expr, x);
+          if (!isFinite(y) || isNaN(y)) {
+            started = false;
+            continue;
+          }
+          const cy = toCanvasY(y);
+          if (cy < -2000 || cy > canvas.height + 2000) {
+            started = false;
+            continue;
+          }
+          if (!started) {
+            ctx.moveTo(px, cy);
+            started = true;
+          } else {
+            ctx.lineTo(px, cy);
+          }
+        }
+        ctx.stroke();
+      });
+    }
+
+    function plot() {
+      resize();
+      drawGrid();
+      drawFunctions();
+    }
+
+    function syncInputs() {
+      xMinIn.value = view.xMin;
+      xMaxIn.value = view.xMax;
+      yMinIn.value = view.yMin;
+      yMaxIn.value = view.yMax;
+    }
+
+    function renderFnList() {
+      fnList.innerHTML = "";
+      functions.forEach(function (fn, i) {
+        const row = document.createElement("div");
+        row.className = "graph-fn-row";
+        row.innerHTML =
+          '<span class="graph-fn-color" style="background:' + fn.color + '"></span>' +
+          '<input type="text" class="graph-fn-input" placeholder="e.g. sin(x)" data-index="' + i + '" value="' + escapeHTML(fn.expr) + '">' +
+          '<button class="graph-fn-remove btn btn-secondary" data-index="' + i + '">&times;</button>';
+        fnList.appendChild(row);
+      });
+      // Bind input events
+      fnList.querySelectorAll(".graph-fn-input").forEach(function (inp) {
+        inp.addEventListener("input", function () {
+          functions[+inp.dataset.index].expr = inp.value;
+          plot();
+        });
+        inp.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") { e.preventDefault(); plot(); }
+        });
+      });
+      fnList.querySelectorAll(".graph-fn-remove").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          if (functions.length <= 1) {
+            functions[0].expr = "";
+            renderFnList();
+            plot();
+            return;
+          }
+          functions.splice(+btn.dataset.index, 1);
+          renderFnList();
+          plot();
+        });
+      });
+    }
+
+    addFnBtn.addEventListener("click", function () {
+      if (functions.length >= 8) { toast("maximum 8 functions"); return; }
+      functions.push({ expr: "", color: COLORS[functions.length % COLORS.length] });
+      renderFnList();
+      // Focus the new input
+      var inputs = fnList.querySelectorAll(".graph-fn-input");
+      if (inputs.length) inputs[inputs.length - 1].focus();
     });
 
-    searchInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") searchBtn.click();
+    plotBtn.addEventListener("click", function () {
+      view.xMin = +xMinIn.value || -10;
+      view.xMax = +xMaxIn.value || 10;
+      view.yMin = +yMinIn.value || -10;
+      view.yMax = +yMaxIn.value || 10;
+      plot();
     });
 
-    // Go to AI Essay Writer tab
-    goToWriter.addEventListener("click", function () {
-      var essayTab = document.querySelector('.tool-tab[data-tool="essay-writer"]');
-      if (essayTab) essayTab.click();
+    resetBtn.addEventListener("click", function () {
+      view = { xMin: -10, xMax: 10, yMin: -10, yMax: 10 };
+      syncInputs();
+      plot();
     });
+
+    saveBtn.addEventListener("click", function () {
+      const link = document.createElement("a");
+      link.download = "graph.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+
+    // Mouse interactions — pan and zoom
+    canvas.addEventListener("mousedown", function (e) {
+      dragging = true;
+      dragStart = { x: e.offsetX, y: e.offsetY };
+      dragViewStart = { xMin: view.xMin, xMax: view.xMax, yMin: view.yMin, yMax: view.yMax };
+      canvas.style.cursor = "grabbing";
+    });
+    canvas.addEventListener("mousemove", function (e) {
+      const mx = fromCanvasX(e.offsetX);
+      const my = fromCanvasY(e.offsetY);
+      coordsEl.textContent = "(" + mx.toFixed(2) + ", " + my.toFixed(2) + ")";
+
+      if (dragging) {
+        const dx = (e.offsetX - dragStart.x) / canvas.width * (dragViewStart.xMax - dragViewStart.xMin);
+        const dy = (e.offsetY - dragStart.y) / canvas.height * (dragViewStart.yMax - dragViewStart.yMin);
+        view.xMin = dragViewStart.xMin - dx;
+        view.xMax = dragViewStart.xMax - dx;
+        view.yMin = dragViewStart.yMin + dy;
+        view.yMax = dragViewStart.yMax + dy;
+        syncInputs();
+        plot();
+      }
+    });
+    canvas.addEventListener("mouseup", function () {
+      dragging = false;
+      canvas.style.cursor = "crosshair";
+    });
+    canvas.addEventListener("mouseleave", function () {
+      dragging = false;
+      canvas.style.cursor = "crosshair";
+      coordsEl.textContent = "";
+    });
+
+    canvas.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      const factor = e.deltaY > 0 ? 1.15 : 1 / 1.15;
+      const mx = fromCanvasX(e.offsetX);
+      const my = fromCanvasY(e.offsetY);
+      view.xMin = mx + (view.xMin - mx) * factor;
+      view.xMax = mx + (view.xMax - mx) * factor;
+      view.yMin = my + (view.yMin - my) * factor;
+      view.yMax = my + (view.yMax - my) * factor;
+      syncInputs();
+      plot();
+    }, { passive: false });
+
+    // Touch support for mobile pan
+    let touchStart = null;
+    let touchViewStart = null;
+    canvas.addEventListener("touchstart", function (e) {
+      if (e.touches.length === 1) {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        touchStart = { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+        touchViewStart = { xMin: view.xMin, xMax: view.xMax, yMin: view.yMin, yMax: view.yMax };
+      }
+    }, { passive: false });
+    canvas.addEventListener("touchmove", function (e) {
+      if (e.touches.length === 1 && touchStart) {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const tx = e.touches[0].clientX - rect.left;
+        const ty = e.touches[0].clientY - rect.top;
+        const dx = (tx - touchStart.x) / canvas.width * (touchViewStart.xMax - touchViewStart.xMin);
+        const dy = (ty - touchStart.y) / canvas.height * (touchViewStart.yMax - touchViewStart.yMin);
+        view.xMin = touchViewStart.xMin - dx;
+        view.xMax = touchViewStart.xMax - dx;
+        view.yMin = touchViewStart.yMin + dy;
+        view.yMax = touchViewStart.yMax + dy;
+        syncInputs();
+        plot();
+      }
+    }, { passive: false });
+    canvas.addEventListener("touchend", function () {
+      touchStart = null;
+    });
+
+    // Observe resize
+    new ResizeObserver(function () { plot(); }).observe(canvas.parentElement);
+
+    renderFnList();
+    plot();
   }
 
   // ============================================================
@@ -4349,5 +4722,6 @@
     humanizer: function () { initOnce("humanizer", _initHumanizer); },
     learn: function () { initOnce("learn", _initLearn); },
     sourceResearch: function () { initOnce("sourceResearch", _initSourceResearch); },
+    grapher: function () { initOnce("grapher", _initGrapher); },
   };
 })();

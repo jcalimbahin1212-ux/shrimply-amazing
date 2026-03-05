@@ -13,271 +13,271 @@ const GRADE_POINTS = {
 
 // ---- Unit Conversion Data ----
 const UNITS = {
-  Length: {
+  length: {
     units: {
-      "Meter": 1, "Kilometer": 1000, "Centimeter": 0.01, "Millimeter": 0.001,
-      "Mile": 1609.344, "Yard": 0.9144, "Foot": 0.3048, "Inch": 0.0254
+      "meter": 1, "kilometer": 1000, "centimeter": 0.01, "millimeter": 0.001,
+      "mile": 1609.344, "yard": 0.9144, "foot": 0.3048, "inch": 0.0254
     }
   },
-  Weight: {
+  weight: {
     units: {
-      "Kilogram": 1, "Gram": 0.001, "Milligram": 0.000001,
-      "Pound": 0.453592, "Ounce": 0.0283495, "Ton (US)": 907.185, "Metric Ton": 1000
+      "kilogram": 1, "gram": 0.001, "milligram": 0.000001,
+      "pound": 0.453592, "ounce": 0.0283495, "ton (US)": 907.185, "metric ton": 1000
     }
   },
-  Temperature: {
+  temperature: {
     units: {
-      "Celsius": {
+      "celsius": {
         toBase: function (v) { return v; },
         fromBase: function (v) { return v; }
       },
-      "Fahrenheit": {
+      "fahrenheit": {
         toBase: function (v) { return (v - 32) * 5 / 9; },
         fromBase: function (v) { return v * 9 / 5 + 32; }
       },
-      "Kelvin": {
+      "kelvin": {
         toBase: function (v) { return v - 273.15; },
         fromBase: function (v) { return v + 273.15; }
       }
     }
   },
-  Volume: {
+  volume: {
     units: {
-      "Liter": 1, "Milliliter": 0.001, "Gallon": 3.78541, "Quart": 0.946353,
-      "Pint": 0.473176, "Cup": 0.236588, "Fluid Ounce": 0.0295735,
-      "Tablespoon": 0.0147868, "Teaspoon": 0.00492892
+      "liter": 1, "milliliter": 0.001, "gallon": 3.78541, "quart": 0.946353,
+      "pint": 0.473176, "cup": 0.236588, "fluid ounce": 0.0295735,
+      "tablespoon": 0.0147868, "teaspoon": 0.00492892
     }
   },
-  Speed: {
+  speed: {
     units: {
-      "m/s": 1, "km/h": 0.277778, "mph": 0.44704, "Knot": 0.514444, "ft/s": 0.3048
+      "m/s": 1, "km/h": 0.277778, "mph": 0.44704, "knot": 0.514444, "ft/s": 0.3048
     }
   },
-  Time: {
+  time: {
     units: {
-      "Second": 1, "Millisecond": 0.001, "Minute": 60, "Hour": 3600,
-      "Day": 86400, "Week": 604800, "Month": 2629800, "Year": 31557600
+      "second": 1, "millisecond": 0.001, "minute": 60, "hour": 3600,
+      "day": 86400, "week": 604800, "month": 2629800, "year": 31557600
     }
   },
-  Data: {
+  data: {
     units: {
-      "Byte": 1, "Kilobyte": 1024, "Megabyte": 1048576,
-      "Gigabyte": 1073741824, "Terabyte": 1099511627776, "Bit": 0.125
+      "byte": 1, "kilobyte": 1024, "megabyte": 1048576,
+      "gigabyte": 1073741824, "terabyte": 1099511627776, "bit": 0.125
     }
   }
 };
 
 // ---- Formula Sheets ----
 const FORMULAS = [
-  // Algebra
-  { category: "Algebra", name: "Quadratic Formula", formula: "x = (-b +/- sqrt(b^2 - 4ac)) / 2a", desc: "Solves ax^2 + bx + c = 0" },
-  { category: "Algebra", name: "Slope", formula: "m = (y2 - y1) / (x2 - x1)", desc: "Slope of a line through two points" },
-  { category: "Algebra", name: "Slope-Intercept Form", formula: "y = mx + b", desc: "Line with slope m and y-intercept b" },
-  { category: "Algebra", name: "Point-Slope Form", formula: "y - y1 = m(x - x1)", desc: "Line through (x1,y1) with slope m" },
-  { category: "Algebra", name: "Standard Form (Line)", formula: "Ax + By = C", desc: "Standard form of a linear equation" },
-  { category: "Algebra", name: "Distance Formula", formula: "d = sqrt((x2-x1)^2 + (y2-y1)^2)", desc: "Distance between two points" },
-  { category: "Algebra", name: "Midpoint Formula", formula: "M = ((x1+x2)/2, (y1+y2)/2)", desc: "Midpoint of a line segment" },
-  { category: "Algebra", name: "Difference of Squares", formula: "a^2 - b^2 = (a+b)(a-b)", desc: "Factoring pattern" },
-  { category: "Algebra", name: "Perfect Square Trinomial", formula: "a^2 +/- 2ab + b^2 = (a +/- b)^2", desc: "Factoring pattern" },
-  { category: "Algebra", name: "Simple Interest", formula: "I = Prt", desc: "P=principal, r=rate, t=time" },
-  { category: "Algebra", name: "Compound Interest", formula: "A = P(1 + r/n)^(nt)", desc: "n=compounds per year, t=years" },
-  { category: "Algebra", name: "Logarithm Product Rule", formula: "log(ab) = log(a) + log(b)", desc: "Product rule for logarithms" },
-  { category: "Algebra", name: "Logarithm Power Rule", formula: "log(a^n) = n * log(a)", desc: "Power rule for logarithms" },
-  // Geometry
-  { category: "Geometry", name: "Rectangle Area", formula: "A = l * w", desc: "Length times width" },
-  { category: "Geometry", name: "Rectangle Perimeter", formula: "P = 2l + 2w", desc: "Sum of all sides" },
-  { category: "Geometry", name: "Triangle Area", formula: "A = (1/2) * b * h", desc: "Base times height divided by 2" },
-  { category: "Geometry", name: "Circle Area", formula: "A = pi * r^2", desc: "Pi times radius squared" },
-  { category: "Geometry", name: "Circle Circumference", formula: "C = 2 * pi * r", desc: "2 pi times radius" },
-  { category: "Geometry", name: "Pythagorean Theorem", formula: "a^2 + b^2 = c^2", desc: "Right triangle side relationship" },
-  { category: "Geometry", name: "Volume of Sphere", formula: "V = (4/3) * pi * r^3", desc: "Four-thirds pi r cubed" },
-  { category: "Geometry", name: "Volume of Cylinder", formula: "V = pi * r^2 * h", desc: "Pi r squared times height" },
-  { category: "Geometry", name: "Volume of Cone", formula: "V = (1/3) * pi * r^2 * h", desc: "One-third pi r squared h" },
-  { category: "Geometry", name: "Volume of Rectangular Prism", formula: "V = l * w * h", desc: "Length times width times height" },
-  { category: "Geometry", name: "Surface Area of Sphere", formula: "SA = 4 * pi * r^2", desc: "4 pi r squared" },
-  { category: "Geometry", name: "Surface Area of Cylinder", formula: "SA = 2*pi*r^2 + 2*pi*r*h", desc: "Two circles plus lateral area" },
-  { category: "Geometry", name: "Trapezoid Area", formula: "A = (1/2)(b1 + b2) * h", desc: "Average of bases times height" },
-  // Trigonometry
-  { category: "Trigonometry", name: "Sine", formula: "sin(A) = opposite / hypotenuse", desc: "SOH in SOH-CAH-TOA" },
-  { category: "Trigonometry", name: "Cosine", formula: "cos(A) = adjacent / hypotenuse", desc: "CAH in SOH-CAH-TOA" },
-  { category: "Trigonometry", name: "Tangent", formula: "tan(A) = opposite / adjacent", desc: "TOA in SOH-CAH-TOA" },
-  { category: "Trigonometry", name: "Pythagorean Identity", formula: "sin^2(x) + cos^2(x) = 1", desc: "Fundamental trig identity" },
-  { category: "Trigonometry", name: "Law of Sines", formula: "a/sin(A) = b/sin(B) = c/sin(C)", desc: "Relates sides to opposite angles" },
-  { category: "Trigonometry", name: "Law of Cosines", formula: "c^2 = a^2 + b^2 - 2ab*cos(C)", desc: "Generalized Pythagorean theorem" },
-  { category: "Trigonometry", name: "Double Angle (sin)", formula: "sin(2x) = 2*sin(x)*cos(x)", desc: "Sine double angle formula" },
-  { category: "Trigonometry", name: "Double Angle (cos)", formula: "cos(2x) = cos^2(x) - sin^2(x)", desc: "Cosine double angle formula" },
-  { category: "Trigonometry", name: "Radians to Degrees", formula: "degrees = radians * (180/pi)", desc: "Converting radians to degrees" },
-  // Physics
-  { category: "Physics", name: "Velocity", formula: "v = d / t", desc: "Distance divided by time" },
-  { category: "Physics", name: "Acceleration", formula: "a = (v_f - v_i) / t", desc: "Change in velocity over time" },
-  { category: "Physics", name: "Newton's Second Law", formula: "F = m * a", desc: "Force equals mass times acceleration" },
-  { category: "Physics", name: "Weight", formula: "W = m * g", desc: "Mass times gravitational acceleration (9.8 m/s^2)" },
-  { category: "Physics", name: "Kinetic Energy", formula: "KE = (1/2) * m * v^2", desc: "Energy of motion" },
-  { category: "Physics", name: "Potential Energy", formula: "PE = m * g * h", desc: "Energy due to height" },
-  { category: "Physics", name: "Work", formula: "W = F * d * cos(theta)", desc: "Force times displacement" },
-  { category: "Physics", name: "Power", formula: "P = W / t", desc: "Work done per unit time" },
-  { category: "Physics", name: "Momentum", formula: "p = m * v", desc: "Mass times velocity" },
-  { category: "Physics", name: "Impulse", formula: "J = F * t = delta(p)", desc: "Force times time equals change in momentum" },
-  { category: "Physics", name: "Ohm's Law", formula: "V = I * R", desc: "Voltage = current times resistance" },
-  { category: "Physics", name: "Wave Speed", formula: "v = f * lambda", desc: "Frequency times wavelength" },
-  { category: "Physics", name: "Density", formula: "rho = m / V", desc: "Mass per unit volume" },
-  // Chemistry
-  { category: "Chemistry", name: "Density", formula: "D = m / V", desc: "Mass divided by volume" },
-  { category: "Chemistry", name: "Molarity", formula: "M = mol / L", desc: "Moles of solute per liter of solution" },
-  { category: "Chemistry", name: "Ideal Gas Law", formula: "PV = nRT", desc: "P=pressure, V=volume, n=moles, R=8.314, T=temp(K)" },
-  { category: "Chemistry", name: "pH", formula: "pH = -log[H+]", desc: "Negative log of hydrogen ion concentration" },
-  { category: "Chemistry", name: "Dilution", formula: "M1*V1 = M2*V2", desc: "Concentration times volume before = after" },
-  { category: "Chemistry", name: "Percent Composition", formula: "% = (mass of element / molar mass) * 100", desc: "Mass percent of an element in a compound" },
-  { category: "Chemistry", name: "Moles from Mass", formula: "n = m / M", desc: "Mass divided by molar mass" },
-  { category: "Chemistry", name: "Avogadro's Number", formula: "1 mol = 6.022 * 10^23 particles", desc: "Number of particles in one mole" },
-  // Biology
-  { category: "Biology", name: "Hardy-Weinberg Equation", formula: "p^2 + 2pq + q^2 = 1", desc: "Allele frequency in a population at equilibrium" },
-  { category: "Biology", name: "Allele Frequency", formula: "p + q = 1", desc: "Sum of dominant (p) and recessive (q) allele frequencies" },
-  { category: "Biology", name: "Population Growth", formula: "dN/dt = rN", desc: "Exponential growth: r=rate, N=population size" },
-  { category: "Biology", name: "Logistic Growth", formula: "dN/dt = rN((K-N)/K)", desc: "Growth limited by carrying capacity K" },
-  { category: "Biology", name: "Photosynthesis", formula: "6CO2 + 6H2O -> C6H12O6 + 6O2", desc: "Light energy converts CO2 and water to glucose and oxygen" },
-  { category: "Biology", name: "Cellular Respiration", formula: "C6H12O6 + 6O2 -> 6CO2 + 6H2O + ATP", desc: "Glucose broken down for energy" },
-  { category: "Biology", name: "BMI", formula: "BMI = mass(kg) / height(m)^2", desc: "Body mass index" },
-  { category: "Biology", name: "Surface Area:Volume", formula: "SA:V = surface area / volume", desc: "Decreases as cell size increases, limits cell size" },
-  { category: "Biology", name: "Water Potential", formula: "Psi = Psi_s + Psi_p", desc: "Solute potential plus pressure potential" },
-  { category: "Biology", name: "Simpson's Diversity Index", formula: "D = 1 - Sum(n/N)^2", desc: "n=individuals of one species, N=total individuals" },
-  // Statistics
-  { category: "Statistics", name: "Mean", formula: "x_bar = Sum(x) / n", desc: "Sum of values divided by count" },
-  { category: "Statistics", name: "Standard Deviation", formula: "sigma = sqrt(Sum(x - x_bar)^2 / n)", desc: "Spread of data around the mean" },
-  { category: "Statistics", name: "Variance", formula: "sigma^2 = Sum(x - x_bar)^2 / n", desc: "Square of standard deviation" },
-  { category: "Statistics", name: "Z-Score", formula: "z = (x - mu) / sigma", desc: "How many standard deviations from the mean" },
-  { category: "Statistics", name: "Probability (OR)", formula: "P(A or B) = P(A) + P(B) - P(A and B)", desc: "Addition rule for probability" },
-  { category: "Statistics", name: "Probability (AND)", formula: "P(A and B) = P(A) * P(B|A)", desc: "Multiplication rule for probability" },
-  { category: "Statistics", name: "Combinations", formula: "C(n,r) = n! / (r!(n-r)!)", desc: "Number of ways to choose r items from n" },
-  { category: "Statistics", name: "Permutations", formula: "P(n,r) = n! / (n-r)!", desc: "Number of ordered arrangements of r items from n" },
-  { category: "Statistics", name: "Linear Regression", formula: "y_hat = a + bx", desc: "Predicted value from slope b and intercept a" },
-  { category: "Statistics", name: "Correlation Coefficient", formula: "r = Sum((x-x_bar)(y-y_bar)) / sqrt(Sum(x-x_bar)^2 * Sum(y-y_bar)^2)", desc: "Strength of linear relationship, -1 to 1" },
+  // algebra
+  { category: "algebra", name: "quadratic formula", formula: "x = (-b +/- sqrt(b^2 - 4ac)) / 2a", desc: "solves ax^2 + bx + c = 0" },
+  { category: "algebra", name: "slope", formula: "m = (y2 - y1) / (x2 - x1)", desc: "slope of a line through two points" },
+  { category: "algebra", name: "slope-intercept form", formula: "y = mx + b", desc: "line with slope m and y-intercept b" },
+  { category: "algebra", name: "point-slope form", formula: "y - y1 = m(x - x1)", desc: "line through (x1,y1) with slope m" },
+  { category: "algebra", name: "standard form (line)", formula: "Ax + By = C", desc: "standard form of a linear equation" },
+  { category: "algebra", name: "distance formula", formula: "d = sqrt((x2-x1)^2 + (y2-y1)^2)", desc: "distance between two points" },
+  { category: "algebra", name: "midpoint formula", formula: "M = ((x1+x2)/2, (y1+y2)/2)", desc: "midpoint of a line segment" },
+  { category: "algebra", name: "difference of squares", formula: "a^2 - b^2 = (a+b)(a-b)", desc: "factoring pattern" },
+  { category: "algebra", name: "perfect square trinomial", formula: "a^2 +/- 2ab + b^2 = (a +/- b)^2", desc: "factoring pattern" },
+  { category: "algebra", name: "simple interest", formula: "I = Prt", desc: "P=principal, r=rate, t=time" },
+  { category: "algebra", name: "compound interest", formula: "A = P(1 + r/n)^(nt)", desc: "n=compounds per year, t=years" },
+  { category: "algebra", name: "logarithm product rule", formula: "log(ab) = log(a) + log(b)", desc: "product rule for logarithms" },
+  { category: "algebra", name: "logarithm power rule", formula: "log(a^n) = n * log(a)", desc: "power rule for logarithms" },
+  // geometry
+  { category: "geometry", name: "rectangle area", formula: "A = l * w", desc: "length times width" },
+  { category: "geometry", name: "rectangle perimeter", formula: "P = 2l + 2w", desc: "sum of all sides" },
+  { category: "geometry", name: "triangle area", formula: "A = (1/2) * b * h", desc: "base times height divided by 2" },
+  { category: "geometry", name: "circle area", formula: "A = pi * r^2", desc: "pi times radius squared" },
+  { category: "geometry", name: "circle circumference", formula: "C = 2 * pi * r", desc: "2 pi times radius" },
+  { category: "geometry", name: "Pythagorean theorem", formula: "a^2 + b^2 = c^2", desc: "right triangle side relationship" },
+  { category: "geometry", name: "volume of sphere", formula: "V = (4/3) * pi * r^3", desc: "four-thirds pi r cubed" },
+  { category: "geometry", name: "volume of cylinder", formula: "V = pi * r^2 * h", desc: "pi r squared times height" },
+  { category: "geometry", name: "volume of cone", formula: "V = (1/3) * pi * r^2 * h", desc: "one-third pi r squared h" },
+  { category: "geometry", name: "volume of rectangular prism", formula: "V = l * w * h", desc: "length times width times height" },
+  { category: "geometry", name: "surface area of sphere", formula: "SA = 4 * pi * r^2", desc: "4 pi r squared" },
+  { category: "geometry", name: "surface area of cylinder", formula: "SA = 2*pi*r^2 + 2*pi*r*h", desc: "two circles plus lateral area" },
+  { category: "geometry", name: "trapezoid area", formula: "A = (1/2)(b1 + b2) * h", desc: "average of bases times height" },
+  // trigonometry
+  { category: "trigonometry", name: "sine", formula: "sin(A) = opposite / hypotenuse", desc: "SOH in SOH-CAH-TOA" },
+  { category: "trigonometry", name: "cosine", formula: "cos(A) = adjacent / hypotenuse", desc: "CAH in SOH-CAH-TOA" },
+  { category: "trigonometry", name: "tangent", formula: "tan(A) = opposite / adjacent", desc: "TOA in SOH-CAH-TOA" },
+  { category: "trigonometry", name: "Pythagorean identity", formula: "sin^2(x) + cos^2(x) = 1", desc: "fundamental trig identity" },
+  { category: "trigonometry", name: "law of sines", formula: "a/sin(A) = b/sin(B) = c/sin(C)", desc: "relates sides to opposite angles" },
+  { category: "trigonometry", name: "law of cosines", formula: "c^2 = a^2 + b^2 - 2ab*cos(C)", desc: "generalized Pythagorean theorem" },
+  { category: "trigonometry", name: "double angle (sin)", formula: "sin(2x) = 2*sin(x)*cos(x)", desc: "sine double angle formula" },
+  { category: "trigonometry", name: "double angle (cos)", formula: "cos(2x) = cos^2(x) - sin^2(x)", desc: "cosine double angle formula" },
+  { category: "trigonometry", name: "radians to degrees", formula: "degrees = radians * (180/pi)", desc: "converting radians to degrees" },
+  // physics
+  { category: "physics", name: "velocity", formula: "v = d / t", desc: "distance divided by time" },
+  { category: "physics", name: "acceleration", formula: "a = (v_f - v_i) / t", desc: "change in velocity over time" },
+  { category: "physics", name: "Newton's second law", formula: "F = m * a", desc: "force equals mass times acceleration" },
+  { category: "physics", name: "weight", formula: "W = m * g", desc: "mass times gravitational acceleration (9.8 m/s^2)" },
+  { category: "physics", name: "kinetic energy", formula: "KE = (1/2) * m * v^2", desc: "energy of motion" },
+  { category: "physics", name: "potential energy", formula: "PE = m * g * h", desc: "energy due to height" },
+  { category: "physics", name: "work", formula: "W = F * d * cos(theta)", desc: "force times displacement" },
+  { category: "physics", name: "power", formula: "P = W / t", desc: "work done per unit time" },
+  { category: "physics", name: "momentum", formula: "p = m * v", desc: "mass times velocity" },
+  { category: "physics", name: "impulse", formula: "J = F * t = delta(p)", desc: "force times time equals change in momentum" },
+  { category: "physics", name: "Ohm's law", formula: "V = I * R", desc: "voltage = current times resistance" },
+  { category: "physics", name: "wave speed", formula: "v = f * lambda", desc: "frequency times wavelength" },
+  { category: "physics", name: "density", formula: "rho = m / V", desc: "mass per unit volume" },
+  // chemistry
+  { category: "chemistry", name: "density", formula: "D = m / V", desc: "mass divided by volume" },
+  { category: "chemistry", name: "molarity", formula: "M = mol / L", desc: "moles of solute per liter of solution" },
+  { category: "chemistry", name: "ideal gas law", formula: "PV = nRT", desc: "P=pressure, V=volume, n=moles, R=8.314, T=temp(K)" },
+  { category: "chemistry", name: "pH", formula: "pH = -log[H+]", desc: "negative log of hydrogen ion concentration" },
+  { category: "chemistry", name: "dilution", formula: "M1*V1 = M2*V2", desc: "concentration times volume before = after" },
+  { category: "chemistry", name: "percent composition", formula: "% = (mass of element / molar mass) * 100", desc: "mass percent of an element in a compound" },
+  { category: "chemistry", name: "moles from mass", formula: "n = m / M", desc: "mass divided by molar mass" },
+  { category: "chemistry", name: "Avogadro's number", formula: "1 mol = 6.022 * 10^23 particles", desc: "number of particles in one mole" },
+  // biology
+  { category: "biology", name: "Hardy-Weinberg equation", formula: "p^2 + 2pq + q^2 = 1", desc: "allele frequency in a population at equilibrium" },
+  { category: "biology", name: "allele frequency", formula: "p + q = 1", desc: "sum of dominant (p) and recessive (q) allele frequencies" },
+  { category: "biology", name: "population growth", formula: "dN/dt = rN", desc: "exponential growth: r=rate, N=population size" },
+  { category: "biology", name: "logistic growth", formula: "dN/dt = rN((K-N)/K)", desc: "growth limited by carrying capacity K" },
+  { category: "biology", name: "photosynthesis", formula: "6CO2 + 6H2O -> C6H12O6 + 6O2", desc: "light energy converts CO2 and water to glucose and oxygen" },
+  { category: "biology", name: "cellular respiration", formula: "C6H12O6 + 6O2 -> 6CO2 + 6H2O + ATP", desc: "glucose broken down for energy" },
+  { category: "biology", name: "BMI", formula: "BMI = mass(kg) / height(m)^2", desc: "body mass index" },
+  { category: "biology", name: "surface area:volume", formula: "SA:V = surface area / volume", desc: "decreases as cell size increases, limits cell size" },
+  { category: "biology", name: "water potential", formula: "Psi = Psi_s + Psi_p", desc: "solute potential plus pressure potential" },
+  { category: "biology", name: "Simpson's diversity index", formula: "D = 1 - Sum(n/N)^2", desc: "n=individuals of one species, N=total individuals" },
+  // statistics
+  { category: "statistics", name: "mean", formula: "x_bar = Sum(x) / n", desc: "sum of values divided by count" },
+  { category: "statistics", name: "standard deviation", formula: "sigma = sqrt(Sum(x - x_bar)^2 / n)", desc: "spread of data around the mean" },
+  { category: "statistics", name: "variance", formula: "sigma^2 = Sum(x - x_bar)^2 / n", desc: "square of standard deviation" },
+  { category: "statistics", name: "z-score", formula: "z = (x - mu) / sigma", desc: "how many standard deviations from the mean" },
+  { category: "statistics", name: "probability (OR)", formula: "P(A or B) = P(A) + P(B) - P(A and B)", desc: "addition rule for probability" },
+  { category: "statistics", name: "probability (AND)", formula: "P(A and B) = P(A) * P(B|A)", desc: "multiplication rule for probability" },
+  { category: "statistics", name: "combinations", formula: "C(n,r) = n! / (r!(n-r)!)", desc: "number of ways to choose r items from n" },
+  { category: "statistics", name: "permutations", formula: "P(n,r) = n! / (n-r)!", desc: "number of ordered arrangements of r items from n" },
+  { category: "statistics", name: "linear regression", formula: "y_hat = a + bx", desc: "predicted value from slope b and intercept a" },
+  { category: "statistics", name: "correlation coefficient", formula: "r = Sum((x-x_bar)(y-y_bar)) / sqrt(Sum(x-x_bar)^2 * Sum(y-y_bar)^2)", desc: "strength of linear relationship, -1 to 1" },
 ];
 
 // ---- Periodic Table Elements ----
 const ELEMENTS = [
-  { z: 1, symbol: "H", name: "Hydrogen", mass: 1.008, category: "nonmetal", group: 1, period: 1, block: "s" },
-  { z: 2, symbol: "He", name: "Helium", mass: 4.003, category: "noble-gas", group: 18, period: 1, block: "s" },
-  { z: 3, symbol: "Li", name: "Lithium", mass: 6.941, category: "alkali-metal", group: 1, period: 2, block: "s" },
-  { z: 4, symbol: "Be", name: "Beryllium", mass: 9.012, category: "alkaline-earth", group: 2, period: 2, block: "s" },
-  { z: 5, symbol: "B", name: "Boron", mass: 10.81, category: "metalloid", group: 13, period: 2, block: "p" },
-  { z: 6, symbol: "C", name: "Carbon", mass: 12.011, category: "nonmetal", group: 14, period: 2, block: "p" },
-  { z: 7, symbol: "N", name: "Nitrogen", mass: 14.007, category: "nonmetal", group: 15, period: 2, block: "p" },
-  { z: 8, symbol: "O", name: "Oxygen", mass: 15.999, category: "nonmetal", group: 16, period: 2, block: "p" },
-  { z: 9, symbol: "F", name: "Fluorine", mass: 18.998, category: "halogen", group: 17, period: 2, block: "p" },
-  { z: 10, symbol: "Ne", name: "Neon", mass: 20.180, category: "noble-gas", group: 18, period: 2, block: "p" },
-  { z: 11, symbol: "Na", name: "Sodium", mass: 22.990, category: "alkali-metal", group: 1, period: 3, block: "s" },
-  { z: 12, symbol: "Mg", name: "Magnesium", mass: 24.305, category: "alkaline-earth", group: 2, period: 3, block: "s" },
-  { z: 13, symbol: "Al", name: "Aluminium", mass: 26.982, category: "post-transition", group: 13, period: 3, block: "p" },
-  { z: 14, symbol: "Si", name: "Silicon", mass: 28.086, category: "metalloid", group: 14, period: 3, block: "p" },
-  { z: 15, symbol: "P", name: "Phosphorus", mass: 30.974, category: "nonmetal", group: 15, period: 3, block: "p" },
-  { z: 16, symbol: "S", name: "Sulfur", mass: 32.065, category: "nonmetal", group: 16, period: 3, block: "p" },
-  { z: 17, symbol: "Cl", name: "Chlorine", mass: 35.453, category: "halogen", group: 17, period: 3, block: "p" },
-  { z: 18, symbol: "Ar", name: "Argon", mass: 39.948, category: "noble-gas", group: 18, period: 3, block: "p" },
-  { z: 19, symbol: "K", name: "Potassium", mass: 39.098, category: "alkali-metal", group: 1, period: 4, block: "s" },
-  { z: 20, symbol: "Ca", name: "Calcium", mass: 40.078, category: "alkaline-earth", group: 2, period: 4, block: "s" },
-  { z: 21, symbol: "Sc", name: "Scandium", mass: 44.956, category: "transition-metal", group: 3, period: 4, block: "d" },
-  { z: 22, symbol: "Ti", name: "Titanium", mass: 47.867, category: "transition-metal", group: 4, period: 4, block: "d" },
-  { z: 23, symbol: "V", name: "Vanadium", mass: 50.942, category: "transition-metal", group: 5, period: 4, block: "d" },
-  { z: 24, symbol: "Cr", name: "Chromium", mass: 51.996, category: "transition-metal", group: 6, period: 4, block: "d" },
-  { z: 25, symbol: "Mn", name: "Manganese", mass: 54.938, category: "transition-metal", group: 7, period: 4, block: "d" },
-  { z: 26, symbol: "Fe", name: "Iron", mass: 55.845, category: "transition-metal", group: 8, period: 4, block: "d" },
-  { z: 27, symbol: "Co", name: "Cobalt", mass: 58.933, category: "transition-metal", group: 9, period: 4, block: "d" },
-  { z: 28, symbol: "Ni", name: "Nickel", mass: 58.693, category: "transition-metal", group: 10, period: 4, block: "d" },
-  { z: 29, symbol: "Cu", name: "Copper", mass: 63.546, category: "transition-metal", group: 11, period: 4, block: "d" },
-  { z: 30, symbol: "Zn", name: "Zinc", mass: 65.38, category: "transition-metal", group: 12, period: 4, block: "d" },
-  { z: 31, symbol: "Ga", name: "Gallium", mass: 69.723, category: "post-transition", group: 13, period: 4, block: "p" },
-  { z: 32, symbol: "Ge", name: "Germanium", mass: 72.630, category: "metalloid", group: 14, period: 4, block: "p" },
-  { z: 33, symbol: "As", name: "Arsenic", mass: 74.922, category: "metalloid", group: 15, period: 4, block: "p" },
-  { z: 34, symbol: "Se", name: "Selenium", mass: 78.971, category: "nonmetal", group: 16, period: 4, block: "p" },
-  { z: 35, symbol: "Br", name: "Bromine", mass: 79.904, category: "halogen", group: 17, period: 4, block: "p" },
-  { z: 36, symbol: "Kr", name: "Krypton", mass: 83.798, category: "noble-gas", group: 18, period: 4, block: "p" },
-  { z: 37, symbol: "Rb", name: "Rubidium", mass: 85.468, category: "alkali-metal", group: 1, period: 5, block: "s" },
-  { z: 38, symbol: "Sr", name: "Strontium", mass: 87.62, category: "alkaline-earth", group: 2, period: 5, block: "s" },
-  { z: 39, symbol: "Y", name: "Yttrium", mass: 88.906, category: "transition-metal", group: 3, period: 5, block: "d" },
-  { z: 40, symbol: "Zr", name: "Zirconium", mass: 91.224, category: "transition-metal", group: 4, period: 5, block: "d" },
-  { z: 41, symbol: "Nb", name: "Niobium", mass: 92.906, category: "transition-metal", group: 5, period: 5, block: "d" },
-  { z: 42, symbol: "Mo", name: "Molybdenum", mass: 95.95, category: "transition-metal", group: 6, period: 5, block: "d" },
-  { z: 43, symbol: "Tc", name: "Technetium", mass: 98, category: "transition-metal", group: 7, period: 5, block: "d" },
-  { z: 44, symbol: "Ru", name: "Ruthenium", mass: 101.07, category: "transition-metal", group: 8, period: 5, block: "d" },
-  { z: 45, symbol: "Rh", name: "Rhodium", mass: 102.91, category: "transition-metal", group: 9, period: 5, block: "d" },
-  { z: 46, symbol: "Pd", name: "Palladium", mass: 106.42, category: "transition-metal", group: 10, period: 5, block: "d" },
-  { z: 47, symbol: "Ag", name: "Silver", mass: 107.87, category: "transition-metal", group: 11, period: 5, block: "d" },
-  { z: 48, symbol: "Cd", name: "Cadmium", mass: 112.41, category: "transition-metal", group: 12, period: 5, block: "d" },
-  { z: 49, symbol: "In", name: "Indium", mass: 114.82, category: "post-transition", group: 13, period: 5, block: "p" },
-  { z: 50, symbol: "Sn", name: "Tin", mass: 118.71, category: "post-transition", group: 14, period: 5, block: "p" },
-  { z: 51, symbol: "Sb", name: "Antimony", mass: 121.76, category: "metalloid", group: 15, period: 5, block: "p" },
-  { z: 52, symbol: "Te", name: "Tellurium", mass: 127.60, category: "metalloid", group: 16, period: 5, block: "p" },
-  { z: 53, symbol: "I", name: "Iodine", mass: 126.90, category: "halogen", group: 17, period: 5, block: "p" },
-  { z: 54, symbol: "Xe", name: "Xenon", mass: 131.29, category: "noble-gas", group: 18, period: 5, block: "p" },
-  { z: 55, symbol: "Cs", name: "Cesium", mass: 132.91, category: "alkali-metal", group: 1, period: 6, block: "s" },
-  { z: 56, symbol: "Ba", name: "Barium", mass: 137.33, category: "alkaline-earth", group: 2, period: 6, block: "s" },
+  { z: 1, symbol: "H", name: "hydrogen", mass: 1.008, category: "nonmetal", group: 1, period: 1, block: "s" },
+  { z: 2, symbol: "He", name: "helium", mass: 4.003, category: "noble-gas", group: 18, period: 1, block: "s" },
+  { z: 3, symbol: "Li", name: "lithium", mass: 6.941, category: "alkali-metal", group: 1, period: 2, block: "s" },
+  { z: 4, symbol: "Be", name: "beryllium", mass: 9.012, category: "alkaline-earth", group: 2, period: 2, block: "s" },
+  { z: 5, symbol: "B", name: "boron", mass: 10.81, category: "metalloid", group: 13, period: 2, block: "p" },
+  { z: 6, symbol: "C", name: "carbon", mass: 12.011, category: "nonmetal", group: 14, period: 2, block: "p" },
+  { z: 7, symbol: "N", name: "nitrogen", mass: 14.007, category: "nonmetal", group: 15, period: 2, block: "p" },
+  { z: 8, symbol: "O", name: "oxygen", mass: 15.999, category: "nonmetal", group: 16, period: 2, block: "p" },
+  { z: 9, symbol: "F", name: "fluorine", mass: 18.998, category: "halogen", group: 17, period: 2, block: "p" },
+  { z: 10, symbol: "Ne", name: "neon", mass: 20.180, category: "noble-gas", group: 18, period: 2, block: "p" },
+  { z: 11, symbol: "Na", name: "sodium", mass: 22.990, category: "alkali-metal", group: 1, period: 3, block: "s" },
+  { z: 12, symbol: "Mg", name: "magnesium", mass: 24.305, category: "alkaline-earth", group: 2, period: 3, block: "s" },
+  { z: 13, symbol: "Al", name: "aluminium", mass: 26.982, category: "post-transition", group: 13, period: 3, block: "p" },
+  { z: 14, symbol: "Si", name: "silicon", mass: 28.086, category: "metalloid", group: 14, period: 3, block: "p" },
+  { z: 15, symbol: "P", name: "phosphorus", mass: 30.974, category: "nonmetal", group: 15, period: 3, block: "p" },
+  { z: 16, symbol: "S", name: "sulfur", mass: 32.065, category: "nonmetal", group: 16, period: 3, block: "p" },
+  { z: 17, symbol: "Cl", name: "chlorine", mass: 35.453, category: "halogen", group: 17, period: 3, block: "p" },
+  { z: 18, symbol: "Ar", name: "argon", mass: 39.948, category: "noble-gas", group: 18, period: 3, block: "p" },
+  { z: 19, symbol: "K", name: "potassium", mass: 39.098, category: "alkali-metal", group: 1, period: 4, block: "s" },
+  { z: 20, symbol: "Ca", name: "calcium", mass: 40.078, category: "alkaline-earth", group: 2, period: 4, block: "s" },
+  { z: 21, symbol: "Sc", name: "scandium", mass: 44.956, category: "transition-metal", group: 3, period: 4, block: "d" },
+  { z: 22, symbol: "Ti", name: "titanium", mass: 47.867, category: "transition-metal", group: 4, period: 4, block: "d" },
+  { z: 23, symbol: "V", name: "vanadium", mass: 50.942, category: "transition-metal", group: 5, period: 4, block: "d" },
+  { z: 24, symbol: "Cr", name: "chromium", mass: 51.996, category: "transition-metal", group: 6, period: 4, block: "d" },
+  { z: 25, symbol: "Mn", name: "manganese", mass: 54.938, category: "transition-metal", group: 7, period: 4, block: "d" },
+  { z: 26, symbol: "Fe", name: "iron", mass: 55.845, category: "transition-metal", group: 8, period: 4, block: "d" },
+  { z: 27, symbol: "Co", name: "cobalt", mass: 58.933, category: "transition-metal", group: 9, period: 4, block: "d" },
+  { z: 28, symbol: "Ni", name: "nickel", mass: 58.693, category: "transition-metal", group: 10, period: 4, block: "d" },
+  { z: 29, symbol: "Cu", name: "copper", mass: 63.546, category: "transition-metal", group: 11, period: 4, block: "d" },
+  { z: 30, symbol: "Zn", name: "zinc", mass: 65.38, category: "transition-metal", group: 12, period: 4, block: "d" },
+  { z: 31, symbol: "Ga", name: "gallium", mass: 69.723, category: "post-transition", group: 13, period: 4, block: "p" },
+  { z: 32, symbol: "Ge", name: "germanium", mass: 72.630, category: "metalloid", group: 14, period: 4, block: "p" },
+  { z: 33, symbol: "As", name: "arsenic", mass: 74.922, category: "metalloid", group: 15, period: 4, block: "p" },
+  { z: 34, symbol: "Se", name: "selenium", mass: 78.971, category: "nonmetal", group: 16, period: 4, block: "p" },
+  { z: 35, symbol: "Br", name: "bromine", mass: 79.904, category: "halogen", group: 17, period: 4, block: "p" },
+  { z: 36, symbol: "Kr", name: "krypton", mass: 83.798, category: "noble-gas", group: 18, period: 4, block: "p" },
+  { z: 37, symbol: "Rb", name: "rubidium", mass: 85.468, category: "alkali-metal", group: 1, period: 5, block: "s" },
+  { z: 38, symbol: "Sr", name: "strontium", mass: 87.62, category: "alkaline-earth", group: 2, period: 5, block: "s" },
+  { z: 39, symbol: "Y", name: "yttrium", mass: 88.906, category: "transition-metal", group: 3, period: 5, block: "d" },
+  { z: 40, symbol: "Zr", name: "zirconium", mass: 91.224, category: "transition-metal", group: 4, period: 5, block: "d" },
+  { z: 41, symbol: "Nb", name: "niobium", mass: 92.906, category: "transition-metal", group: 5, period: 5, block: "d" },
+  { z: 42, symbol: "Mo", name: "molybdenum", mass: 95.95, category: "transition-metal", group: 6, period: 5, block: "d" },
+  { z: 43, symbol: "Tc", name: "technetium", mass: 98, category: "transition-metal", group: 7, period: 5, block: "d" },
+  { z: 44, symbol: "Ru", name: "ruthenium", mass: 101.07, category: "transition-metal", group: 8, period: 5, block: "d" },
+  { z: 45, symbol: "Rh", name: "rhodium", mass: 102.91, category: "transition-metal", group: 9, period: 5, block: "d" },
+  { z: 46, symbol: "Pd", name: "palladium", mass: 106.42, category: "transition-metal", group: 10, period: 5, block: "d" },
+  { z: 47, symbol: "Ag", name: "silver", mass: 107.87, category: "transition-metal", group: 11, period: 5, block: "d" },
+  { z: 48, symbol: "Cd", name: "cadmium", mass: 112.41, category: "transition-metal", group: 12, period: 5, block: "d" },
+  { z: 49, symbol: "In", name: "indium", mass: 114.82, category: "post-transition", group: 13, period: 5, block: "p" },
+  { z: 50, symbol: "Sn", name: "tin", mass: 118.71, category: "post-transition", group: 14, period: 5, block: "p" },
+  { z: 51, symbol: "Sb", name: "antimony", mass: 121.76, category: "metalloid", group: 15, period: 5, block: "p" },
+  { z: 52, symbol: "Te", name: "tellurium", mass: 127.60, category: "metalloid", group: 16, period: 5, block: "p" },
+  { z: 53, symbol: "I", name: "iodine", mass: 126.90, category: "halogen", group: 17, period: 5, block: "p" },
+  { z: 54, symbol: "Xe", name: "xenon", mass: 131.29, category: "noble-gas", group: 18, period: 5, block: "p" },
+  { z: 55, symbol: "Cs", name: "cesium", mass: 132.91, category: "alkali-metal", group: 1, period: 6, block: "s" },
+  { z: 56, symbol: "Ba", name: "barium", mass: 137.33, category: "alkaline-earth", group: 2, period: 6, block: "s" },
   // Lanthanides (z 57-71)
-  { z: 57, symbol: "La", name: "Lanthanum", mass: 138.91, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 58, symbol: "Ce", name: "Cerium", mass: 140.12, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 59, symbol: "Pr", name: "Praseodymium", mass: 140.91, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 60, symbol: "Nd", name: "Neodymium", mass: 144.24, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 61, symbol: "Pm", name: "Promethium", mass: 145, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 62, symbol: "Sm", name: "Samarium", mass: 150.36, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 63, symbol: "Eu", name: "Europium", mass: 151.96, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 64, symbol: "Gd", name: "Gadolinium", mass: 157.25, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 65, symbol: "Tb", name: "Terbium", mass: 158.93, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 66, symbol: "Dy", name: "Dysprosium", mass: 162.50, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 67, symbol: "Ho", name: "Holmium", mass: 164.93, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 68, symbol: "Er", name: "Erbium", mass: 167.26, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 69, symbol: "Tm", name: "Thulium", mass: 168.93, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 70, symbol: "Yb", name: "Ytterbium", mass: 173.05, category: "lanthanide", group: 3, period: 6, block: "f" },
-  { z: 71, symbol: "Lu", name: "Lutetium", mass: 174.97, category: "lanthanide", group: 3, period: 6, block: "d" },
+  { z: 57, symbol: "La", name: "lanthanum", mass: 138.91, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 58, symbol: "Ce", name: "cerium", mass: 140.12, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 59, symbol: "Pr", name: "praseodymium", mass: 140.91, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 60, symbol: "Nd", name: "neodymium", mass: 144.24, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 61, symbol: "Pm", name: "promethium", mass: 145, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 62, symbol: "Sm", name: "samarium", mass: 150.36, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 63, symbol: "Eu", name: "europium", mass: 151.96, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 64, symbol: "Gd", name: "gadolinium", mass: 157.25, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 65, symbol: "Tb", name: "terbium", mass: 158.93, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 66, symbol: "Dy", name: "dysprosium", mass: 162.50, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 67, symbol: "Ho", name: "holmium", mass: 164.93, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 68, symbol: "Er", name: "erbium", mass: 167.26, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 69, symbol: "Tm", name: "thulium", mass: 168.93, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 70, symbol: "Yb", name: "ytterbium", mass: 173.05, category: "lanthanide", group: 3, period: 6, block: "f" },
+  { z: 71, symbol: "Lu", name: "lutetium", mass: 174.97, category: "lanthanide", group: 3, period: 6, block: "d" },
   // Period 6 continued
-  { z: 72, symbol: "Hf", name: "Hafnium", mass: 178.49, category: "transition-metal", group: 4, period: 6, block: "d" },
-  { z: 73, symbol: "Ta", name: "Tantalum", mass: 180.95, category: "transition-metal", group: 5, period: 6, block: "d" },
-  { z: 74, symbol: "W", name: "Tungsten", mass: 183.84, category: "transition-metal", group: 6, period: 6, block: "d" },
-  { z: 75, symbol: "Re", name: "Rhenium", mass: 186.21, category: "transition-metal", group: 7, period: 6, block: "d" },
-  { z: 76, symbol: "Os", name: "Osmium", mass: 190.23, category: "transition-metal", group: 8, period: 6, block: "d" },
-  { z: 77, symbol: "Ir", name: "Iridium", mass: 192.22, category: "transition-metal", group: 9, period: 6, block: "d" },
-  { z: 78, symbol: "Pt", name: "Platinum", mass: 195.08, category: "transition-metal", group: 10, period: 6, block: "d" },
-  { z: 79, symbol: "Au", name: "Gold", mass: 196.97, category: "transition-metal", group: 11, period: 6, block: "d" },
-  { z: 80, symbol: "Hg", name: "Mercury", mass: 200.59, category: "transition-metal", group: 12, period: 6, block: "d" },
-  { z: 81, symbol: "Tl", name: "Thallium", mass: 204.38, category: "post-transition", group: 13, period: 6, block: "p" },
-  { z: 82, symbol: "Pb", name: "Lead", mass: 207.2, category: "post-transition", group: 14, period: 6, block: "p" },
-  { z: 83, symbol: "Bi", name: "Bismuth", mass: 208.98, category: "post-transition", group: 15, period: 6, block: "p" },
-  { z: 84, symbol: "Po", name: "Polonium", mass: 209, category: "metalloid", group: 16, period: 6, block: "p" },
-  { z: 85, symbol: "At", name: "Astatine", mass: 210, category: "halogen", group: 17, period: 6, block: "p" },
-  { z: 86, symbol: "Rn", name: "Radon", mass: 222, category: "noble-gas", group: 18, period: 6, block: "p" },
-  { z: 87, symbol: "Fr", name: "Francium", mass: 223, category: "alkali-metal", group: 1, period: 7, block: "s" },
-  { z: 88, symbol: "Ra", name: "Radium", mass: 226, category: "alkaline-earth", group: 2, period: 7, block: "s" },
+  { z: 72, symbol: "Hf", name: "hafnium", mass: 178.49, category: "transition-metal", group: 4, period: 6, block: "d" },
+  { z: 73, symbol: "Ta", name: "tantalum", mass: 180.95, category: "transition-metal", group: 5, period: 6, block: "d" },
+  { z: 74, symbol: "W", name: "tungsten", mass: 183.84, category: "transition-metal", group: 6, period: 6, block: "d" },
+  { z: 75, symbol: "Re", name: "rhenium", mass: 186.21, category: "transition-metal", group: 7, period: 6, block: "d" },
+  { z: 76, symbol: "Os", name: "osmium", mass: 190.23, category: "transition-metal", group: 8, period: 6, block: "d" },
+  { z: 77, symbol: "Ir", name: "iridium", mass: 192.22, category: "transition-metal", group: 9, period: 6, block: "d" },
+  { z: 78, symbol: "Pt", name: "platinum", mass: 195.08, category: "transition-metal", group: 10, period: 6, block: "d" },
+  { z: 79, symbol: "Au", name: "gold", mass: 196.97, category: "transition-metal", group: 11, period: 6, block: "d" },
+  { z: 80, symbol: "Hg", name: "mercury", mass: 200.59, category: "transition-metal", group: 12, period: 6, block: "d" },
+  { z: 81, symbol: "Tl", name: "thallium", mass: 204.38, category: "post-transition", group: 13, period: 6, block: "p" },
+  { z: 82, symbol: "Pb", name: "lead", mass: 207.2, category: "post-transition", group: 14, period: 6, block: "p" },
+  { z: 83, symbol: "Bi", name: "bismuth", mass: 208.98, category: "post-transition", group: 15, period: 6, block: "p" },
+  { z: 84, symbol: "Po", name: "polonium", mass: 209, category: "metalloid", group: 16, period: 6, block: "p" },
+  { z: 85, symbol: "At", name: "astatine", mass: 210, category: "halogen", group: 17, period: 6, block: "p" },
+  { z: 86, symbol: "Rn", name: "radon", mass: 222, category: "noble-gas", group: 18, period: 6, block: "p" },
+  { z: 87, symbol: "Fr", name: "francium", mass: 223, category: "alkali-metal", group: 1, period: 7, block: "s" },
+  { z: 88, symbol: "Ra", name: "radium", mass: 226, category: "alkaline-earth", group: 2, period: 7, block: "s" },
   // Actinides (z 89-103)
-  { z: 89, symbol: "Ac", name: "Actinium", mass: 227, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 90, symbol: "Th", name: "Thorium", mass: 232.04, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 91, symbol: "Pa", name: "Protactinium", mass: 231.04, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 92, symbol: "U", name: "Uranium", mass: 238.03, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 93, symbol: "Np", name: "Neptunium", mass: 237, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 94, symbol: "Pu", name: "Plutonium", mass: 244, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 95, symbol: "Am", name: "Americium", mass: 243, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 96, symbol: "Cm", name: "Curium", mass: 247, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 97, symbol: "Bk", name: "Berkelium", mass: 247, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 98, symbol: "Cf", name: "Californium", mass: 251, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 99, symbol: "Es", name: "Einsteinium", mass: 252, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 100, symbol: "Fm", name: "Fermium", mass: 257, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 101, symbol: "Md", name: "Mendelevium", mass: 258, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 102, symbol: "No", name: "Nobelium", mass: 259, category: "actinide", group: 3, period: 7, block: "f" },
-  { z: 103, symbol: "Lr", name: "Lawrencium", mass: 266, category: "actinide", group: 3, period: 7, block: "d" },
+  { z: 89, symbol: "Ac", name: "actinium", mass: 227, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 90, symbol: "Th", name: "thorium", mass: 232.04, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 91, symbol: "Pa", name: "protactinium", mass: 231.04, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 92, symbol: "U", name: "uranium", mass: 238.03, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 93, symbol: "Np", name: "neptunium", mass: 237, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 94, symbol: "Pu", name: "plutonium", mass: 244, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 95, symbol: "Am", name: "americium", mass: 243, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 96, symbol: "Cm", name: "curium", mass: 247, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 97, symbol: "Bk", name: "berkelium", mass: 247, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 98, symbol: "Cf", name: "californium", mass: 251, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 99, symbol: "Es", name: "einsteinium", mass: 252, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 100, symbol: "Fm", name: "fermium", mass: 257, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 101, symbol: "Md", name: "mendelevium", mass: 258, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 102, symbol: "No", name: "nobelium", mass: 259, category: "actinide", group: 3, period: 7, block: "f" },
+  { z: 103, symbol: "Lr", name: "lawrencium", mass: 266, category: "actinide", group: 3, period: 7, block: "d" },
   // Period 7 continued
-  { z: 104, symbol: "Rf", name: "Rutherfordium", mass: 267, category: "transition-metal", group: 4, period: 7, block: "d" },
-  { z: 105, symbol: "Db", name: "Dubnium", mass: 268, category: "transition-metal", group: 5, period: 7, block: "d" },
-  { z: 106, symbol: "Sg", name: "Seaborgium", mass: 269, category: "transition-metal", group: 6, period: 7, block: "d" },
-  { z: 107, symbol: "Bh", name: "Bohrium", mass: 270, category: "transition-metal", group: 7, period: 7, block: "d" },
-  { z: 108, symbol: "Hs", name: "Hassium", mass: 277, category: "transition-metal", group: 8, period: 7, block: "d" },
-  { z: 109, symbol: "Mt", name: "Meitnerium", mass: 278, category: "transition-metal", group: 9, period: 7, block: "d" },
-  { z: 110, symbol: "Ds", name: "Darmstadtium", mass: 281, category: "transition-metal", group: 10, period: 7, block: "d" },
-  { z: 111, symbol: "Rg", name: "Roentgenium", mass: 282, category: "transition-metal", group: 11, period: 7, block: "d" },
-  { z: 112, symbol: "Cn", name: "Copernicium", mass: 285, category: "transition-metal", group: 12, period: 7, block: "d" },
-  { z: 113, symbol: "Nh", name: "Nihonium", mass: 286, category: "post-transition", group: 13, period: 7, block: "p" },
-  { z: 114, symbol: "Fl", name: "Flerovium", mass: 289, category: "post-transition", group: 14, period: 7, block: "p" },
-  { z: 115, symbol: "Mc", name: "Moscovium", mass: 290, category: "post-transition", group: 15, period: 7, block: "p" },
-  { z: 116, symbol: "Lv", name: "Livermorium", mass: 293, category: "post-transition", group: 16, period: 7, block: "p" },
-  { z: 117, symbol: "Ts", name: "Tennessine", mass: 294, category: "halogen", group: 17, period: 7, block: "p" },
-  { z: 118, symbol: "Og", name: "Oganesson", mass: 294, category: "noble-gas", group: 18, period: 7, block: "p" },
+  { z: 104, symbol: "Rf", name: "rutherfordium", mass: 267, category: "transition-metal", group: 4, period: 7, block: "d" },
+  { z: 105, symbol: "Db", name: "dubnium", mass: 268, category: "transition-metal", group: 5, period: 7, block: "d" },
+  { z: 106, symbol: "Sg", name: "seaborgium", mass: 269, category: "transition-metal", group: 6, period: 7, block: "d" },
+  { z: 107, symbol: "Bh", name: "bohrium", mass: 270, category: "transition-metal", group: 7, period: 7, block: "d" },
+  { z: 108, symbol: "Hs", name: "hassium", mass: 277, category: "transition-metal", group: 8, period: 7, block: "d" },
+  { z: 109, symbol: "Mt", name: "meitnerium", mass: 278, category: "transition-metal", group: 9, period: 7, block: "d" },
+  { z: 110, symbol: "Ds", name: "darmstadtium", mass: 281, category: "transition-metal", group: 10, period: 7, block: "d" },
+  { z: 111, symbol: "Rg", name: "roentgenium", mass: 282, category: "transition-metal", group: 11, period: 7, block: "d" },
+  { z: 112, symbol: "Cn", name: "copernicium", mass: 285, category: "transition-metal", group: 12, period: 7, block: "d" },
+  { z: 113, symbol: "Nh", name: "nihonium", mass: 286, category: "post-transition", group: 13, period: 7, block: "p" },
+  { z: 114, symbol: "Fl", name: "flerovium", mass: 289, category: "post-transition", group: 14, period: 7, block: "p" },
+  { z: 115, symbol: "Mc", name: "moscovium", mass: 290, category: "post-transition", group: 15, period: 7, block: "p" },
+  { z: 116, symbol: "Lv", name: "livermorium", mass: 293, category: "post-transition", group: 16, period: 7, block: "p" },
+  { z: 117, symbol: "Ts", name: "tennessine", mass: 294, category: "halogen", group: 17, period: 7, block: "p" },
+  { z: 118, symbol: "Og", name: "oganesson", mass: 294, category: "noble-gas", group: 18, period: 7, block: "p" },
 ];
 
 // ---- Comprehensive Cheats ----
@@ -287,39 +287,39 @@ const CHEATS = [
     name: "Kahoot",
     icon: "\u{1F7E3}",
     url: "https://kahoot.it",
-    desc: "Auto-answer tools for Kahoot quizzes and challenges.",
+    desc: "auto-answer tools for Kahoot quizzes and challenges.",
     manual: [
-      "1. Join the Kahoot game on kahoot.it with your PIN as normal.",
-      "2. Open the browser console (F12 \u2192 Console tab).",
-      "3. Paste the script for the cheat you want and press Enter.",
-      "4. The script will read the question from the page and attempt to auto-select the correct answer.",
-      "5. Some scripts work by intercepting the WebSocket data that Kahoot sends \u2014 answers are embedded in the game data.",
-      "NOTE: These scripts must be run on the kahoot.it page, not on shrimpify."
+      "1. join the Kahoot game on kahoot.it with your PIN as normal.",
+      "2. open the browser console (F12 \u2192 console tab).",
+      "3. paste the script for the cheat you want and press enter.",
+      "4. the script will read the question from the page and attempt to auto-select the correct answer.",
+      "5. some scripts work by intercepting the WebSocket data that Kahoot sends \u2014 answers are embedded in the game data.",
+      "NOTE: these scripts must be run on the kahoot.it page, not on shrimpify."
     ],
     gamemodes: [
       {
-        name: "Classic",
-        desc: "Standard quiz with timed multiple-choice questions.",
+        name: "classic",
+        desc: "standard quiz with timed multiple-choice questions.",
         cheats: [
           {
-            name: "Auto-Answer",
-            desc: "Automatically selects the correct answer when each question appears. Works by reading the quiz data from Kahoot's internal state.",
+            name: "auto-answer",
+            desc: "automatically selects the correct answer when each question appears. works by reading the quiz data from Kahoot's internal state.",
             code: "// Kahoot Auto-Answer \u2014 Classic Mode\n// Run this in the browser console on kahoot.it AFTER joining a game.\n// This reads the quiz answers from the page's internal data.\n\n(function() {\n  const originalFetch = window.fetch;\n  window.fetch = async function(...args) {\n    const response = await originalFetch.apply(this, args);\n    const url = args[0];\n    if (typeof url === 'string' && url.includes('/answers')) {\n      const clone = response.clone();\n      clone.json().then(data => {\n        console.log('[shrimpify] Answer data intercepted:', data);\n      }).catch(() => {});\n    }\n    return response;\n  };\n  console.log('[shrimpify] Kahoot auto-answer active. Waiting for questions...');\n})();"
           },
           {
-            name: "Answer Revealer",
-            desc: "Logs the correct answer to the console for each question so you can pick it manually.",
+            name: "answer revealer",
+            desc: "logs the correct answer to the console for each question so you can pick it manually.",
             code: "// Kahoot Answer Revealer\n// Shows correct answers in the console without auto-clicking.\n\n(function() {\n  const ws = window.__kahootWebSocket || null;\n  if (ws) {\n    const orig = ws.onmessage;\n    ws.onmessage = function(e) {\n      try {\n        const data = JSON.parse(e.data);\n        if (data.type === 'question') {\n          console.log('[shrimpify] Correct answer index:', data.correctIndex);\n        }\n      } catch(err) {}\n      if (orig) orig.call(this, e);\n    };\n  }\n  console.log('[shrimpify] Answer revealer active.');\n})();"
           }
         ]
       },
       {
-        name: "Team Mode",
-        desc: "Teams collaborate to answer. Same question format as Classic.",
+        name: "team mode",
+        desc: "teams collaborate to answer. same question format as classic.",
         cheats: [
           {
-            name: "Auto-Answer (Team)",
-            desc: "Same as Classic auto-answer \u2014 works identically in team mode since the quiz format is the same.",
+            name: "auto-answer (team)",
+            desc: "same as classic auto-answer -- works identically in team mode since the quiz format is the same.",
             code: "// Same as Classic auto-answer \u2014 team mode uses identical quiz data.\nconsole.log('[shrimpify] Use the Classic auto-answer script. It works in Team Mode too.');"
           }
         ]
@@ -337,137 +337,137 @@ const CHEATS = [
     name: "Blooket",
     icon: "\u{1F535}",
     url: "https://play.blooket.com",
-    desc: "Comprehensive cheats for every Blooket gamemode.",
+    desc: "comprehensive cheats for every Blooket gamemode.",
     manual: [
-      "1. Join a Blooket game at play.blooket.com with your game code.",
-      "2. Wait for the game to start and the gamemode to load.",
-      "3. Open browser console (F12 \u2192 Console).",
-      "4. Paste the script for YOUR SPECIFIC GAMEMODE and press Enter.",
-      "5. Each gamemode has different cheats \u2014 make sure you pick the right one!",
-      "NOTE: Blooket stores game state in React internals. These scripts access the React fiber tree to modify state."
+      "1. join a Blooket game at play.blooket.com with your game code.",
+      "2. wait for the game to start and the gamemode to load.",
+      "3. open browser console (F12 \u2192 console).",
+      "4. paste the script for your specific gamemode and press enter.",
+      "5. each gamemode has different cheats \u2014 make sure you pick the right one!",
+      "NOTE: Blooket stores game state in React internals. these scripts access the React fiber tree to modify state."
     ],
     gamemodes: [
       {
-        name: "Gold Quest",
-        desc: "Answer questions to open chests. Steal gold from others or find loot.",
+        name: "gold quest",
+        desc: "answer questions to open chests. steal gold from others or find loot.",
         cheats: [
           {
-            name: "Set Gold Amount",
-            desc: "Sets your gold to any value you want.",
+            name: "set gold amount",
+            desc: "sets your gold to any value you want.",
             code: "// Blooket Gold Quest \u2014 Set Gold\n// Run on play.blooket.com during a Gold Quest game.\n\n(function() {\n  const amount = prompt(\"Enter gold amount:\", \"999999\");\n  if (!amount) return;\n  \n  // Access React internal state\n  const stateNode = document.querySelector('#app')?.__reactFiber$;\n  let fiber = stateNode;\n  while (fiber) {\n    if (fiber.memoizedState?.gold !== undefined) {\n      fiber.memoizedState.gold = parseInt(amount);\n      console.log('[shrimpify] Gold set to ' + amount);\n      break;\n    }\n    if (fiber.stateNode?.state?.gold !== undefined) {\n      fiber.stateNode.state.gold = parseInt(amount);\n      fiber.stateNode.setState({ gold: parseInt(amount) });\n      console.log('[shrimpify] Gold set to ' + amount);\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           },
           {
-            name: "Always Get Best Chest",
-            desc: "Every chest you open will give maximum rewards.",
+            name: "always get best chest",
+            desc: "every chest you open will give maximum rewards.",
             code: "// Blooket Gold Quest \u2014 Best Chest\n// Overrides the chest reward RNG.\n\n(function() {\n  const origRandom = Math.random;\n  Math.random = function() {\n    // Return high value to always pick top rewards\n    return 0.99;\n  };\n  console.log('[shrimpify] Math.random overridden \u2014 chests will give best rewards.');\n  console.log('To restore: reload the page.');\n})();"
           }
         ]
       },
       {
-        name: "Crypto Hack",
-        desc: "Answer questions to mine crypto. Hack other players to steal their crypto.",
+        name: "crypto hack",
+        desc: "answer questions to mine crypto. hack other players to steal their crypto.",
         cheats: [
           {
-            name: "Set Crypto Amount",
-            desc: "Sets your crypto balance to any value.",
+            name: "set crypto amount",
+            desc: "sets your crypto balance to any value.",
             code: "// Blooket Crypto Hack \u2014 Set Crypto\n\n(function() {\n  const amount = prompt(\"Enter crypto amount:\", \"999999\");\n  if (!amount) return;\n  const stateNode = document.querySelector('#app')?.__reactFiber$;\n  let fiber = stateNode;\n  while (fiber) {\n    const s = fiber.memoizedState || fiber.stateNode?.state;\n    if (s && s.crypto !== undefined) {\n      if (fiber.stateNode?.setState) {\n        fiber.stateNode.setState({ crypto: parseInt(amount) });\n      }\n      console.log('[shrimpify] Crypto set to ' + amount);\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           },
           {
-            name: "Always Hack Successfully",
-            desc: "Every hack attempt on another player succeeds with maximum steal.",
+            name: "always hack successfully",
+            desc: "every hack attempt on another player succeeds with maximum steal.",
             code: "// Blooket Crypto Hack \u2014 Always Succeed\n\nMath.random = () => 0.99;\nconsole.log('[shrimpify] Hack success rate maximized.');"
           }
         ]
       },
       {
-        name: "Battle Royale",
-        desc: "Last player standing. Answer correctly to deal damage.",
+        name: "battle royale",
+        desc: "last player standing. answer correctly to deal damage.",
         cheats: [
           {
-            name: "Auto-Answer",
-            desc: "Attempts to auto-select the correct answer for each question.",
+            name: "auto-answer",
+            desc: "attempts to auto-select the correct answer for each question.",
             code: "// Blooket Battle Royale \u2014 Auto Answer\n\n(function() {\n  const observer = new MutationObserver(() => {\n    const answerButtons = document.querySelectorAll('[class*=\"answerContainer\"]');\n    if (answerButtons.length > 0) {\n      console.log('[shrimpify] Found ' + answerButtons.length + ' answer buttons.');\n      // Look for the correct answer highlight\n      answerButtons.forEach(btn => {\n        if (btn.dataset?.correct === 'true') {\n          btn.click();\n          console.log('[shrimpify] Clicked correct answer.');\n        }\n      });\n    }\n  });\n  observer.observe(document.body, { childList: true, subtree: true });\n  console.log('[shrimpify] Auto-answer observer active.');\n})();"
           }
         ]
       },
       {
-        name: "Tower Defense",
-        desc: "Build towers to defend against enemy blooks. Answer to earn more towers.",
+        name: "tower defense",
+        desc: "build towers to defend against enemy blooks. answer to earn more towers.",
         cheats: [
           {
-            name: "Max Towers + Cash",
-            desc: "Gives you maximum in-game currency to buy any tower.",
+            name: "max towers + cash",
+            desc: "gives you maximum in-game currency to buy any tower.",
             code: "// Blooket Tower Defense \u2014 Max Cash\n\n(function() {\n  const stateNode = document.querySelector('#app')?.__reactFiber$;\n  let fiber = stateNode;\n  while (fiber) {\n    const s = fiber.memoizedState || fiber.stateNode?.state;\n    if (s && (s.cash !== undefined || s.money !== undefined)) {\n      const key = s.cash !== undefined ? 'cash' : 'money';\n      if (fiber.stateNode?.setState) {\n        fiber.stateNode.setState({ [key]: 999999 });\n      }\n      console.log('[shrimpify] Cash set to 999999.');\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           }
         ]
       },
       {
-        name: "Cafe",
-        desc: "Run a cafe by answering questions to serve customers and earn cash.",
+        name: "cafe",
+        desc: "run a cafe by answering questions to serve customers and earn cash.",
         cheats: [
           {
-            name: "Max Cash",
-            desc: "Sets your cafe cash to a high value.",
+            name: "max cash",
+            desc: "sets your cafe cash to a high value.",
             code: "// Blooket Cafe \u2014 Max Cash\n\n(function() {\n  const stateNode = document.querySelector('#app')?.__reactFiber$;\n  let fiber = stateNode;\n  while (fiber) {\n    const s = fiber.memoizedState || fiber.stateNode?.state;\n    if (s && s.cash !== undefined) {\n      if (fiber.stateNode?.setState) {\n        fiber.stateNode.setState({ cash: 999999 });\n      }\n      console.log('[shrimpify] Cafe cash set to 999999.');\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           }
         ]
       },
       {
-        name: "Factory",
-        desc: "Build a factory, answer questions to produce items and earn cash.",
+        name: "factory",
+        desc: "build a factory, answer questions to produce items and earn cash.",
         cheats: [
           {
-            name: "Max Cash + Resources",
-            desc: "Maxes out your factory cash.",
+            name: "max cash + resources",
+            desc: "maxes out your factory cash.",
             code: "// Blooket Factory \u2014 Max Cash\n\n(function() {\n  const stateNode = document.querySelector('#app')?.__reactFiber$;\n  let fiber = stateNode;\n  while (fiber) {\n    const s = fiber.memoizedState || fiber.stateNode?.state;\n    if (s && s.cash !== undefined) {\n      if (fiber.stateNode?.setState) {\n        fiber.stateNode.setState({ cash: 999999 });\n      }\n      console.log('[shrimpify] Factory cash maxed.');\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           }
         ]
       },
       {
-        name: "Racing",
-        desc: "Race other players \u2014 answer correctly to move forward.",
+        name: "racing",
+        desc: "race other players -- answer correctly to move forward.",
         cheats: [
           {
-            name: "Instant Finish",
-            desc: "Jumps your progress to the finish line.",
+            name: "instant finish",
+            desc: "jumps your progress to the finish line.",
             code: "// Blooket Racing \u2014 Instant Finish\n\n(function() {\n  const stateNode = document.querySelector('#app')?.__reactFiber$;\n  let fiber = stateNode;\n  while (fiber) {\n    const s = fiber.memoizedState || fiber.stateNode?.state;\n    if (s && s.progress !== undefined) {\n      if (fiber.stateNode?.setState) {\n        fiber.stateNode.setState({ progress: 100 });\n      }\n      console.log('[shrimpify] Progress set to 100%.');\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           }
         ]
       },
       {
-        name: "Tower of Doom",
-        desc: "Climb the tower by answering questions. Use abilities to sabotage others.",
+        name: "tower of doom",
+        desc: "climb the tower by answering questions. use abilities to sabotage others.",
         cheats: [
           {
-            name: "Max Health",
-            desc: "Sets your health to maximum so you can't die.",
+            name: "max health",
+            desc: "sets your health to maximum so you can't die.",
             code: "// Blooket Tower of Doom \u2014 Max Health\n\n(function() {\n  const stateNode = document.querySelector('#app')?.__reactFiber$;\n  let fiber = stateNode;\n  while (fiber) {\n    const s = fiber.memoizedState || fiber.stateNode?.state;\n    if (s && s.health !== undefined) {\n      if (fiber.stateNode?.setState) {\n        fiber.stateNode.setState({ health: 999 });\n      }\n      console.log('[shrimpify] Health set to 999.');\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           }
         ]
       },
       {
-        name: "Crazy Kingdom",
-        desc: "Manage a kingdom \u2014 answer questions to earn resources and make decisions.",
+        name: "crazy kingdom",
+        desc: "manage a kingdom -- answer questions to earn resources and make decisions.",
         cheats: [
           {
-            name: "Max Resources",
-            desc: "Maxes out all kingdom resources.",
+            name: "max resources",
+            desc: "maxes out all kingdom resources.",
             code: "// Blooket Crazy Kingdom \u2014 Max Resources\n\n(function() {\n  const stateNode = document.querySelector('#app')?.__reactFiber$;\n  let fiber = stateNode;\n  while (fiber) {\n    const s = fiber.stateNode?.state;\n    if (s && (s.gold !== undefined || s.people !== undefined)) {\n      const updates = {};\n      if (s.gold !== undefined) updates.gold = 999999;\n      if (s.people !== undefined) updates.people = 999999;\n      if (s.happiness !== undefined) updates.happiness = 100;\n      fiber.stateNode.setState(updates);\n      console.log('[shrimpify] Kingdom resources maxed.');\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           }
         ]
       },
       {
-        name: "Fishing Frenzy",
-        desc: "Catch fish by answering questions. Rare fish are worth more.",
+        name: "fishing frenzy",
+        desc: "catch fish by answering questions. rare fish are worth more.",
         cheats: [
           {
-            name: "Always Rare Fish",
-            desc: "Every catch will be a rare/legendary fish.",
+            name: "always rare fish",
+            desc: "every catch will be a rare/legendary fish.",
             code: "// Blooket Fishing Frenzy \u2014 Always Rare\n\nMath.random = () => 0.99;\nconsole.log('[shrimpify] Fishing RNG overridden \u2014 always rare catches.');"
           },
           {
-            name: "Max Weight",
-            desc: "Sets your total fish weight to maximum.",
+            name: "max weight",
+            desc: "sets your total fish weight to maximum.",
             code: "// Blooket Fishing Frenzy \u2014 Max Weight\n\n(function() {\n  const stateNode = document.querySelector('#app')?.__reactFiber$;\n  let fiber = stateNode;\n  while (fiber) {\n    const s = fiber.stateNode?.state;\n    if (s && s.weight !== undefined) {\n      fiber.stateNode.setState({ weight: 999999 });\n      console.log('[shrimpify] Fish weight set to 999999.');\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           }
         ]
@@ -479,88 +479,88 @@ const CHEATS = [
     name: "Gimkit",
     icon: "\u{1F7E2}",
     url: "https://gimkit.com/join",
-    desc: "Auto-answer and money cheats for all Gimkit gamemodes.",
+    desc: "auto-answer and money cheats for all Gimkit gamemodes.",
     manual: [
-      "1. Join a Gimkit game at gimkit.com/join with your code.",
-      "2. Wait until you're in the actual game (questions loading).",
-      "3. Open browser console (F12 \u2192 Console).",
-      "4. Paste the script for your gamemode and press Enter.",
+      "1. join a Gimkit game at gimkit.com/join with your code.",
+      "2. wait until you're in the actual game (questions loading).",
+      "3. open browser console (F12 \u2192 console).",
+      "4. paste the script for your gamemode and press enter.",
       "5. Gimkit uses React \u2014 scripts modify the client-side state.",
-      "NOTE: Gimkit has been known to update frequently. If a script stops working, the state property names may have changed."
+      "NOTE: Gimkit has been known to update frequently. if a script stops working, the state property names may have changed."
     ],
     gamemodes: [
       {
-        name: "Classic",
-        desc: "Answer questions to earn in-game money. Buy upgrades to earn faster.",
+        name: "classic",
+        desc: "answer questions to earn in-game money. buy upgrades to earn faster.",
         cheats: [
           {
-            name: "Set Money",
-            desc: "Sets your money to any amount.",
+            name: "set money",
+            desc: "sets your money to any amount.",
             code: "// Gimkit Classic \u2014 Set Money\n\n(function() {\n  const amount = prompt(\"Enter money amount:\", \"999999\");\n  if (!amount) return;\n  \n  const root = document.querySelector('#app') || document.querySelector('[id*=root]');\n  const key = Object.keys(root || {}).find(k => k.startsWith('__reactFiber'));\n  if (!root || !key) { console.log('[shrimpify] Could not find React root.'); return; }\n  \n  let fiber = root[key];\n  while (fiber) {\n    const s = fiber.memoizedState;\n    if (s && typeof s === 'object' && s.money !== undefined) {\n      s.money = parseInt(amount);\n      console.log('[shrimpify] Money set to ' + amount);\n      break;\n    }\n    fiber = fiber.return || fiber.child;\n  }\n})();"
           },
           {
-            name: "Auto-Answer",
-            desc: "Watches for questions and auto-clicks the correct answer.",
+            name: "auto-answer",
+            desc: "watches for questions and auto-clicks the correct answer.",
             code: "// Gimkit Classic \u2014 Auto Answer\n\n(function() {\n  console.log('[shrimpify] Auto-answer active. Watching for questions...');\n  \n  const observer = new MutationObserver(() => {\n    const choices = document.querySelectorAll('[class*=\"choice\"], [class*=\"answer\"]');\n    if (choices.length >= 2) {\n      console.log('[shrimpify] Found ' + choices.length + ' choices.');\n    }\n  });\n  \n  observer.observe(document.body, { childList: true, subtree: true });\n})();"
           }
         ]
       },
       {
-        name: "Team Mode",
-        desc: "Same as Classic but in teams. Pool money together.",
+        name: "team mode",
+        desc: "same as classic but in teams. pool money together.",
         cheats: [
           {
-            name: "Set Money (Team)",
-            desc: "Works the same as Classic \u2014 sets your individual contribution.",
+            name: "set money (team)",
+            desc: "works the same as classic -- sets your individual contribution.",
             code: "// Gimkit Team Mode \u2014 same as Classic money hack.\nconsole.log('[shrimpify] Use the Classic Set Money script \u2014 it works in Team Mode too.');"
           }
         ]
       },
       {
-        name: "Trust No One",
-        desc: "Among Us-style \u2014 complete tasks (questions) and find the impostor.",
+        name: "trust no one",
+        desc: "Among Us-style -- complete tasks (questions) and find the impostor.",
         cheats: [
           {
-            name: "See Impostor",
-            desc: "Attempts to reveal who the impostor is by reading game state.",
+            name: "see impostor",
+            desc: "attempts to reveal who the impostor is by reading game state.",
             code: "// Gimkit Trust No One \u2014 See Impostor\n\n(function() {\n  const root = document.querySelector('#app') || document.querySelector('[id*=root]');\n  const key = Object.keys(root || {}).find(k => k.startsWith('__reactFiber'));\n  if (!root || !key) { console.log('[shrimpify] React root not found.'); return; }\n  \n  let fiber = root[key];\n  const checked = new Set();\n  function walk(f) {\n    if (!f || checked.has(f)) return;\n    checked.add(f);\n    const s = f.memoizedState || f.stateNode?.state || f.memoizedProps;\n    if (s) {\n      const str = JSON.stringify(s);\n      if (str.includes('impostor') || str.includes('imposter') || str.includes('role')) {\n        console.log('[shrimpify] Possible role data found:', s);\n      }\n    }\n    walk(f.child);\n    walk(f.sibling);\n  }\n  walk(fiber);\n  console.log('[shrimpify] Scan complete. Check above for role data.');\n})();"
           },
           {
-            name: "Auto-Complete Tasks",
-            desc: "Auto-answers task questions as they appear.",
+            name: "auto-complete tasks",
+            desc: "auto-answers task questions as they appear.",
             code: "// Gimkit Trust No One \u2014 Auto Tasks\n\n(function() {\n  const observer = new MutationObserver(() => {\n    const choices = document.querySelectorAll('[class*=\"choice\"], [class*=\"answer\"]');\n    if (choices.length >= 2) {\n      console.log('[shrimpify] Task question detected with ' + choices.length + ' choices.');\n    }\n  });\n  observer.observe(document.body, { childList: true, subtree: true });\n  console.log('[shrimpify] Auto-task watcher active.');\n})();"
           }
         ]
       },
       {
-        name: "The Floor is Lava",
-        desc: "Answer questions to stay on platforms. Wrong answers drop you into lava.",
+        name: "the floor is lava",
+        desc: "answer questions to stay on platforms. wrong answers drop you into lava.",
         cheats: [
           {
-            name: "Infinite Lives",
-            desc: "Prevents you from dying when you fall.",
+            name: "infinite lives",
+            desc: "prevents you from dying when you fall.",
             code: "// Gimkit Floor is Lava \u2014 Infinite Lives\n\n(function() {\n  const root = document.querySelector('#app') || document.querySelector('[id*=root]');\n  const key = Object.keys(root || {}).find(k => k.startsWith('__reactFiber'));\n  if (!root || !key) { console.log('[shrimpify] React root not found.'); return; }\n  \n  let fiber = root[key];\n  while (fiber) {\n    const s = fiber.stateNode?.state;\n    if (s && s.lives !== undefined) {\n      fiber.stateNode.setState({ lives: 999 });\n      console.log('[shrimpify] Lives set to 999.');\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           }
         ]
       },
       {
-        name: "Humans vs Zombies",
-        desc: "Survive the zombie horde by answering questions. Wrong = get infected.",
+        name: "humans vs zombies",
+        desc: "survive the zombie horde by answering questions. wrong = get infected.",
         cheats: [
           {
-            name: "Stay Human",
-            desc: "Prevents you from being turned into a zombie.",
+            name: "stay human",
+            desc: "prevents you from being turned into a zombie.",
             code: "// Gimkit HvZ \u2014 Stay Human\n\n(function() {\n  const root = document.querySelector('#app') || document.querySelector('[id*=root]');\n  const key = Object.keys(root || {}).find(k => k.startsWith('__reactFiber'));\n  if (!root || !key) { console.log('[shrimpify] React root not found.'); return; }\n  \n  let fiber = root[key];\n  while (fiber) {\n    const s = fiber.stateNode?.state;\n    if (s && (s.isZombie !== undefined || s.team !== undefined)) {\n      const updates = {};\n      if (s.isZombie !== undefined) updates.isZombie = false;\n      if (s.team !== undefined) updates.team = 'human';\n      fiber.stateNode.setState(updates);\n      console.log('[shrimpify] Forced human status.');\n      break;\n    }\n    fiber = fiber.return;\n  }\n})();"
           }
         ]
       },
       {
-        name: "Draw That",
-        desc: "Draw and guess game \u2014 answer questions between rounds.",
+        name: "draw that",
+        desc: "draw and guess game -- answer questions between rounds.",
         cheats: [
           {
-            name: "Auto-Answer Between Rounds",
-            desc: "Auto-answers the quiz questions that appear between drawing rounds.",
+            name: "auto-answer between rounds",
+            desc: "auto-answers the quiz questions that appear between drawing rounds.",
             code: "// Gimkit Draw That \u2014 Auto Answer\n\n(function() {\n  const observer = new MutationObserver(() => {\n    const choices = document.querySelectorAll('[class*=\"choice\"], [class*=\"answer\"]');\n    if (choices.length >= 2) {\n      console.log('[shrimpify] Quiz question detected.');\n    }\n  });\n  observer.observe(document.body, { childList: true, subtree: true });\n  console.log('[shrimpify] Draw That auto-answer active.');\n})();"
           }
         ]
@@ -572,39 +572,39 @@ const CHEATS = [
     name: "Quizizz",
     icon: "\u{1F7E1}",
     url: "https://quizizz.com/join",
-    desc: "Auto-answer and answer reveal for Quizizz games and assignments.",
+    desc: "auto-answer and answer reveal for Quizizz games and assignments.",
     manual: [
-      "1. Join a Quizizz game or open an assignment.",
-      "2. Wait for the first question to appear.",
-      "3. Open browser console (F12 \u2192 Console).",
-      "4. Paste the script and press Enter.",
-      "5. The script highlights the correct answer or auto-selects it.",
-      "NOTE: Quizizz sometimes sends answer data with the question. The script intercepts this."
+      "1. join a Quizizz game or open an assignment.",
+      "2. wait for the first question to appear.",
+      "3. open browser console (F12 \u2192 console).",
+      "4. paste the script and press enter.",
+      "5. the script highlights the correct answer or auto-selects it.",
+      "NOTE: Quizizz sometimes sends answer data with the question. the script intercepts this."
     ],
     gamemodes: [
       {
-        name: "Live Game",
-        desc: "Real-time quiz against other players.",
+        name: "live game",
+        desc: "real-time quiz against other players.",
         cheats: [
           {
-            name: "Answer Revealer",
-            desc: "Highlights the correct answer with a visible border so you can click it.",
+            name: "answer revealer",
+            desc: "highlights the correct answer with a visible border so you can click it.",
             code: "// Quizizz Answer Revealer \u2014 Live Game\n\n(function() {\n  const origFetch = window.fetch;\n  window.fetch = async function(...args) {\n    const res = await origFetch.apply(this, args);\n    try {\n      const url = typeof args[0] === 'string' ? args[0] : args[0]?.url;\n      if (url && (url.includes('/quiz') || url.includes('/game'))) {\n        const clone = res.clone();\n        clone.json().then(data => {\n          if (data?.questions || data?.data?.questions) {\n            const questions = data.questions || data.data.questions;\n            console.log('[shrimpify] Quiz data captured:', questions.length, 'questions');\n            window.__shrimpifyAnswers = questions;\n          }\n        }).catch(() => {});\n      }\n    } catch(e) {}\n    return res;\n  };\n  \n  const observer = new MutationObserver(() => {\n    if (!window.__shrimpifyAnswers) return;\n    const opts = document.querySelectorAll('[class*=\"option\"], [class*=\"answer\"]');\n    if (opts.length > 0) {\n      console.log('[shrimpify] Answer options detected on page.');\n    }\n  });\n  observer.observe(document.body, { childList: true, subtree: true });\n  \n  console.log('[shrimpify] Quizizz answer revealer active.');\n})();"
           },
           {
-            name: "Auto-Answer",
-            desc: "Automatically clicks the correct answer as fast as possible.",
+            name: "auto-answer",
+            desc: "automatically clicks the correct answer as fast as possible.",
             code: "// Quizizz Auto-Answer \u2014 Live Game\n\n(function() {\n  const origFetch = window.fetch;\n  let answers = [];\n  let qIndex = 0;\n  \n  window.fetch = async function(...args) {\n    const res = await origFetch.apply(this, args);\n    try {\n      const url = typeof args[0] === 'string' ? args[0] : args[0]?.url;\n      if (url && (url.includes('/quiz') || url.includes('/game'))) {\n        const clone = res.clone();\n        clone.json().then(data => {\n          const qs = data?.questions || data?.data?.questions;\n          if (qs) {\n            answers = qs.map(q => q.structure?.answer || q.answer);\n            console.log('[shrimpify] Captured ' + answers.length + ' answers.');\n          }\n        }).catch(() => {});\n      }\n    } catch(e) {}\n    return res;\n  };\n  \n  console.log('[shrimpify] Quizizz auto-answer active. Answers will be captured when quiz loads.');\n})();"
           }
         ]
       },
       {
-        name: "Homework / Assignment",
-        desc: "Self-paced quiz assigned as homework.",
+        name: "homework / assignment",
+        desc: "self-paced quiz assigned as homework.",
         cheats: [
           {
-            name: "Answer Revealer (Homework)",
-            desc: "Same technique \u2014 intercepts the quiz data on load. Works for self-paced too.",
+            name: "answer revealer (homework)",
+            desc: "same technique -- intercepts the quiz data on load. works for self-paced too.",
             code: "// Quizizz Homework \u2014 Answer Revealer\n// Same as live game \u2014 Quizizz sends all answers in the initial payload.\n\nconsole.log('[shrimpify] Use the Live Game answer revealer \u2014 it works for homework too.');"
           }
         ]
@@ -622,33 +622,33 @@ const CHEATS = [
     name: "Edpuzzle",
     icon: "\u{1F7E0}",
     url: "https://edpuzzle.com",
-    desc: "Skip videos and auto-answer Edpuzzle assignments.",
+    desc: "skip videos and auto-answer Edpuzzle assignments.",
     manual: [
-      "1. Open your Edpuzzle assignment.",
-      "2. Let the video page load fully.",
-      "3. Open browser console (F12 \u2192 Console).",
-      "4. Paste the script and press Enter.",
-      "5. The video will skip to the end, or questions will be auto-answered.",
-      "NOTE: Edpuzzle tracks video watch time. The skip script marks the video as watched."
+      "1. open your Edpuzzle assignment.",
+      "2. let the video page load fully.",
+      "3. open browser console (F12 \u2192 console).",
+      "4. paste the script and press enter.",
+      "5. the video will skip to the end, or questions will be auto-answered.",
+      "NOTE: Edpuzzle tracks video watch time. the skip script marks the video as watched."
     ],
     gamemodes: [
       {
-        name: "Video Assignment",
-        desc: "Watch a video and answer embedded questions.",
+        name: "video assignment",
+        desc: "watch a video and answer embedded questions.",
         cheats: [
           {
-            name: "Skip Video",
-            desc: "Skips the video to the end and marks it as watched. Questions still need answering.",
+            name: "skip video",
+            desc: "skips the video to the end and marks it as watched. questions still need answering.",
             code: "// Edpuzzle Video Skipper\n\n(function() {\n  const video = document.querySelector('video');\n  if (video) {\n    video.currentTime = video.duration || 9999;\n    video.playbackRate = 16;\n    console.log('[shrimpify] Video skipped to end.');\n  } else {\n    console.log('[shrimpify] No video element found. Try again after the video loads.');\n  }\n})();"
           },
           {
-            name: "Speed Up Video (16x)",
-            desc: "Speeds up the video to 16x so it finishes in seconds.",
+            name: "speed up video (16x)",
+            desc: "speeds up the video to 16x so it finishes in seconds.",
             code: "// Edpuzzle Speed Up\n\n(function() {\n  const video = document.querySelector('video');\n  if (video) {\n    video.playbackRate = 16;\n    console.log('[shrimpify] Video speed set to 16x.');\n    console.log('To go even faster, run: document.querySelector(\"video\").playbackRate = 32');\n  } else {\n    console.log('[shrimpify] No video found.');\n  }\n})();"
           },
           {
-            name: "Answer Revealer",
-            desc: "Fetches assignment answers from the Edpuzzle API and logs them to console.",
+            name: "answer revealer",
+            desc: "fetches assignment answers from the Edpuzzle API and logs them to console.",
             code: "// Edpuzzle Answer Revealer\n\n(function() {\n  const match = window.location.pathname.match(/\\/assignments\\/([a-f0-9]+)/);\n  const mediaMatch = window.location.pathname.match(/\\/media\\/([a-f0-9]+)/);\n  const id = match?.[1] || mediaMatch?.[1];\n  \n  if (!id) {\n    console.log('[shrimpify] Could not find assignment ID in URL.');\n    return;\n  }\n  \n  fetch('/api/v3/assignments/' + id)\n    .then(r => r.json())\n    .then(data => {\n      const questions = data?.questions || data?.medias?.[0]?.questions || [];\n      questions.forEach((q, i) => {\n        console.log('Q' + (i+1) + ':', q.body?.[0]?.text || q.title || 'Unknown question');\n        if (q.answers) {\n          q.answers.forEach(a => {\n            const marker = a.isCorrect ? ' \\u2713 CORRECT' : '';\n            console.log('  - ' + (a.body?.[0]?.text || a.text || 'Unknown') + marker);\n          });\n        }\n      });\n    })\n    .catch(err => console.log('[shrimpify] API request failed:', err));\n})();"
           }
         ]
@@ -667,34 +667,34 @@ const CHEATS = [
     name: "Quizlet",
     icon: "\u{1F7E3}",
     url: "https://quizlet.com",
-    desc: "Quizlet Live answer bot and Match instant solver.",
+    desc: "Quizlet live answer bot and match instant solver.",
     manual: [
-      "1. Open Quizlet Live or a Quizlet Match game.",
-      "2. Wait for the game interface to load.",
-      "3. Open browser console (F12 \u2192 Console).",
-      "4. Paste the script and press Enter.",
-      "5. Match solver will auto-click pairs. Live answer bot will highlight correct answers.",
-      "NOTE: Quizlet has updated their UI many times. Scripts may need tweaking."
+      "1. open Quizlet live or a Quizlet match game.",
+      "2. wait for the game interface to load.",
+      "3. open browser console (F12 \u2192 console).",
+      "4. paste the script and press enter.",
+      "5. match solver will auto-click pairs. live answer bot will highlight correct answers.",
+      "NOTE: Quizlet has updated their UI many times. scripts may need tweaking."
     ],
     gamemodes: [
       {
-        name: "Quizlet Live",
-        desc: "Team-based real-time quiz game in class.",
+        name: "Quizlet live",
+        desc: "team-based real-time quiz game in class.",
         cheats: [
           {
-            name: "Answer Highlighter",
-            desc: "Highlights which answer on your screen is correct based on the term shown.",
+            name: "answer highlighter",
+            desc: "highlights which answer on your screen is correct based on the term shown.",
             code: "// Quizlet Live \u2014 Answer Highlighter\n\n(function() {\n  console.log('[shrimpify] Quizlet Live helper active.');\n  console.log('Watch the console \u2014 correct answer will be logged when a question appears.');\n  \n  const observer = new MutationObserver(() => {\n    const prompt = document.querySelector('[class*=\"prompt\"], [class*=\"question\"]');\n    const options = document.querySelectorAll('[class*=\"option\"], [class*=\"term\"]');\n    if (prompt && options.length > 0) {\n      console.log('[shrimpify] Question: ' + prompt.textContent);\n      console.log('[shrimpify] Options:', Array.from(options).map(o => o.textContent));\n    }\n  });\n  observer.observe(document.body, { childList: true, subtree: true });\n})();"
           }
         ]
       },
       {
-        name: "Match",
-        desc: "Match terms to definitions as fast as possible.",
+        name: "match",
+        desc: "match terms to definitions as fast as possible.",
         cheats: [
           {
-            name: "Instant Match",
-            desc: "Auto-clicks all matching pairs instantly for a ~0.5s completion time.",
+            name: "instant match",
+            desc: "auto-clicks all matching pairs instantly for a ~0.5s completion time.",
             code: "// Quizlet Match \u2014 Instant Solver\n\n(function() {\n  const tiles = document.querySelectorAll('[class*=\"MatchModeQuestionGridTile\"], [class*=\"tile\"], .match-card');\n  if (tiles.length === 0) {\n    console.log('[shrimpify] No match tiles found. Make sure you are on the Match game screen.');\n    return;\n  }\n  \n  console.log('[shrimpify] Found ' + tiles.length + ' tiles. Attempting to match...');\n  \n  const pairs = {};\n  tiles.forEach(tile => {\n    const text = tile.textContent.trim();\n    if (!pairs[text]) pairs[text] = [];\n    pairs[text].push(tile);\n  });\n  \n  let delay = 0;\n  Object.values(pairs).forEach(group => {\n    if (group.length >= 2) {\n      setTimeout(() => group[0].click(), delay);\n      setTimeout(() => group[1].click(), delay + 50);\n      delay += 100;\n    }\n  });\n  \n  console.log('[shrimpify] Match solving in progress...');\n})();"
           }
         ]
@@ -717,116 +717,116 @@ const CLOAK_PRESETS = {
 // ============================================================
 const ANATOMY_SYSTEMS = [
   {
-    id: "skeletal", name: "Skeletal System", color: "#e8e0d0",
-    description: "The skeletal system provides structural support, protects internal organs, and enables movement. Adults have 206 bones connected by joints, ligaments, and cartilage.",
+    id: "skeletal", name: "skeletal system", color: "#e8e0d0",
+    description: "the skeletal system provides structural support, protects internal organs, and enables movement. adults have 206 bones connected by joints, ligaments, and cartilage.",
     parts: [
-      { id: "skull", name: "Skull (Cranium)", description: "Protects the brain. Composed of 22 bones fused at sutures. Houses the brain, eyes, and inner ears.", cx: 200, cy: 40, r: 22 },
-      { id: "cervical", name: "Cervical Vertebrae", description: "7 vertebrae in the neck (C1-C7). C1 (atlas) supports the skull; C2 (axis) allows rotation.", path: "M200 62 L200 90" },
-      { id: "clavicle", name: "Clavicle (Collarbone)", description: "S-shaped bone connecting sternum to scapula. Most commonly fractured bone in the body.", path: "M165 98 L235 98" },
-      { id: "ribcage", name: "Rib Cage", description: "12 pairs of ribs enclosing the thoracic cavity. 7 true ribs, 3 false ribs, 2 floating ribs.", path: "M170 105 Q200 140 230 105 M168 115 Q200 152 232 115 M168 125 Q200 162 232 125 M170 135 Q200 170 230 135" },
-      { id: "sternum", name: "Sternum (Breastbone)", description: "Flat bone at center of chest. Three parts: manubrium, body, and xiphoid process.", path: "M200 98 L200 170" },
-      { id: "spine-thoracic", name: "Thoracic Spine", description: "12 vertebrae (T1-T12) in mid-back. Each attaches to a pair of ribs.", path: "M200 90 L200 180" },
-      { id: "spine-lumbar", name: "Lumbar Spine", description: "5 large vertebrae (L1-L5) in lower back. Bears most body weight. Common site of back pain.", path: "M200 180 L200 240" },
-      { id: "pelvis", name: "Pelvis", description: "Basin-shaped structure supporting spine and protecting abdominal organs. Wider in females.", path: "M170 240 Q168 260 175 275 Q200 290 225 275 Q232 260 230 240 Z" },
-      { id: "scapula-l", name: "Scapula L (Shoulder Blade)", description: "Triangular bone on posterior thorax. Attachment for 17 muscles.", cx: 162, cy: 118, rx: 10, ry: 18 },
-      { id: "scapula-r", name: "Scapula R (Shoulder Blade)", description: "Triangular bone on posterior thorax. Attachment for 17 muscles.", cx: 238, cy: 118, rx: 10, ry: 18 },
-      { id: "humerus-l", name: "Humerus L (Upper Arm)", description: "Long bone of upper arm. Connects shoulder to elbow.", path: "M155 100 L138 188" },
-      { id: "humerus-r", name: "Humerus R (Upper Arm)", description: "Long bone of upper arm. Connects shoulder to elbow.", path: "M245 100 L262 188" },
-      { id: "radius-ulna-l", name: "Radius & Ulna L (Forearm)", description: "Two parallel forearm bones. Radius (lateral); ulna (medial). Allow pronation/supination.", path: "M138 192 L128 268" },
-      { id: "radius-ulna-r", name: "Radius & Ulna R (Forearm)", description: "Two parallel forearm bones. Radius (lateral); ulna (medial). Allow pronation/supination.", path: "M262 192 L272 268" },
-      { id: "hand-l", name: "Hand L", description: "27 bones: 8 carpals, 5 metacarpals, 14 phalanges. Enable fine motor movements.", cx: 124, cy: 278, r: 10 },
-      { id: "hand-r", name: "Hand R", description: "27 bones: 8 carpals, 5 metacarpals, 14 phalanges. Enable fine motor movements.", cx: 276, cy: 278, r: 10 },
-      { id: "femur-l", name: "Femur L (Thigh Bone)", description: "Longest and strongest bone. Connects hip to knee.", path: "M182 280 L178 380" },
-      { id: "femur-r", name: "Femur R (Thigh Bone)", description: "Longest and strongest bone. Connects hip to knee.", path: "M218 280 L222 380" },
-      { id: "patella-l", name: "Patella L (Kneecap)", description: "Largest sesamoid bone. Protects knee joint.", cx: 177, cy: 386, r: 6 },
-      { id: "patella-r", name: "Patella R (Kneecap)", description: "Largest sesamoid bone. Protects knee joint.", cx: 223, cy: 386, r: 6 },
-      { id: "tibia-fibula-l", name: "Tibia & Fibula L", description: "Tibia bears weight; fibula provides muscle attachment.", path: "M176 394 L174 486" },
-      { id: "tibia-fibula-r", name: "Tibia & Fibula R", description: "Tibia bears weight; fibula provides muscle attachment.", path: "M224 394 L226 486" },
-      { id: "foot-l", name: "Foot L", description: "26 bones: tarsals, metatarsals, phalanges. Arches distribute body weight.", cx: 172, cy: 496, r: 10 },
-      { id: "foot-r", name: "Foot R", description: "26 bones: tarsals, metatarsals, phalanges. Arches distribute body weight.", cx: 228, cy: 496, r: 10 }
+      { id: "skull", name: "skull (cranium)", description: "protects the brain. composed of 22 bones fused at sutures. houses the brain, eyes, and inner ears.", cx: 200, cy: 40, r: 22 },
+      { id: "cervical", name: "cervical vertebrae", description: "7 vertebrae in the neck (C1-C7). C1 (atlas) supports the skull; C2 (axis) allows rotation.", path: "M200 62 L200 90" },
+      { id: "clavicle", name: "clavicle (collarbone)", description: "S-shaped bone connecting sternum to scapula. most commonly fractured bone in the body.", path: "M165 98 L235 98" },
+      { id: "ribcage", name: "rib cage", description: "12 pairs of ribs enclosing the thoracic cavity. 7 true ribs, 3 false ribs, 2 floating ribs.", path: "M170 105 Q200 140 230 105 M168 115 Q200 152 232 115 M168 125 Q200 162 232 125 M170 135 Q200 170 230 135" },
+      { id: "sternum", name: "sternum (breastbone)", description: "flat bone at center of chest. three parts: manubrium, body, and xiphoid process.", path: "M200 98 L200 170" },
+      { id: "spine-thoracic", name: "thoracic spine", description: "12 vertebrae (T1-T12) in mid-back. each attaches to a pair of ribs.", path: "M200 90 L200 180" },
+      { id: "spine-lumbar", name: "lumbar spine", description: "5 large vertebrae (L1-L5) in lower back. bears most body weight. common site of back pain.", path: "M200 180 L200 240" },
+      { id: "pelvis", name: "pelvis", description: "basin-shaped structure supporting spine and protecting abdominal organs. wider in females.", path: "M170 240 Q168 260 175 275 Q200 290 225 275 Q232 260 230 240 Z" },
+      { id: "scapula-l", name: "scapula L (shoulder blade)", description: "triangular bone on posterior thorax. attachment for 17 muscles.", cx: 162, cy: 118, rx: 10, ry: 18 },
+      { id: "scapula-r", name: "scapula R (shoulder blade)", description: "triangular bone on posterior thorax. attachment for 17 muscles.", cx: 238, cy: 118, rx: 10, ry: 18 },
+      { id: "humerus-l", name: "humerus L (upper arm)", description: "long bone of upper arm. connects shoulder to elbow.", path: "M155 100 L138 188" },
+      { id: "humerus-r", name: "humerus R (upper arm)", description: "long bone of upper arm. connects shoulder to elbow.", path: "M245 100 L262 188" },
+      { id: "radius-ulna-l", name: "radius & ulna L (forearm)", description: "two parallel forearm bones. radius (lateral); ulna (medial). allow pronation/supination.", path: "M138 192 L128 268" },
+      { id: "radius-ulna-r", name: "radius & ulna R (forearm)", description: "two parallel forearm bones. radius (lateral); ulna (medial). allow pronation/supination.", path: "M262 192 L272 268" },
+      { id: "hand-l", name: "hand L", description: "27 bones: 8 carpals, 5 metacarpals, 14 phalanges. enable fine motor movements.", cx: 124, cy: 278, r: 10 },
+      { id: "hand-r", name: "hand R", description: "27 bones: 8 carpals, 5 metacarpals, 14 phalanges. enable fine motor movements.", cx: 276, cy: 278, r: 10 },
+      { id: "femur-l", name: "femur L (thigh bone)", description: "longest and strongest bone. connects hip to knee.", path: "M182 280 L178 380" },
+      { id: "femur-r", name: "femur R (thigh bone)", description: "longest and strongest bone. connects hip to knee.", path: "M218 280 L222 380" },
+      { id: "patella-l", name: "patella L (kneecap)", description: "largest sesamoid bone. protects knee joint.", cx: 177, cy: 386, r: 6 },
+      { id: "patella-r", name: "patella R (kneecap)", description: "largest sesamoid bone. protects knee joint.", cx: 223, cy: 386, r: 6 },
+      { id: "tibia-fibula-l", name: "tibia & fibula L", description: "tibia bears weight; fibula provides muscle attachment.", path: "M176 394 L174 486" },
+      { id: "tibia-fibula-r", name: "tibia & fibula R", description: "tibia bears weight; fibula provides muscle attachment.", path: "M224 394 L226 486" },
+      { id: "foot-l", name: "foot L", description: "26 bones: tarsals, metatarsals, phalanges. arches distribute body weight.", cx: 172, cy: 496, r: 10 },
+      { id: "foot-r", name: "foot R", description: "26 bones: tarsals, metatarsals, phalanges. arches distribute body weight.", cx: 228, cy: 496, r: 10 }
     ]
   },
   {
-    id: "muscular", name: "Muscular System", color: "#c44040",
-    description: "Over 600 muscles enable movement, maintain posture, and generate heat. Three types: skeletal (voluntary), smooth (involuntary), and cardiac. Muscles make up ~40% of body weight.",
+    id: "muscular", name: "muscular system", color: "#c44040",
+    description: "over 600 muscles enable movement, maintain posture, and generate heat. three types: skeletal (voluntary), smooth (involuntary), and cardiac. muscles make up ~40% of body weight.",
     parts: [
-      { id: "trapezius", name: "Trapezius", description: "Large triangular upper back muscle. Moves, rotates, and stabilizes the scapula.", path: "M170 78 L200 62 L230 78 L240 100 L200 115 L160 100 Z" },
-      { id: "deltoid-l", name: "Deltoid L", description: "Shoulder cap muscle. Three heads: anterior, lateral, posterior. Arm abduction.", path: "M152 96 Q142 110 148 130 Q158 126 162 98 Z" },
-      { id: "deltoid-r", name: "Deltoid R", description: "Shoulder cap muscle. Three heads: anterior, lateral, posterior. Arm abduction.", path: "M248 96 Q258 110 252 130 Q242 126 238 98 Z" },
-      { id: "pectorals", name: "Pectoralis Major", description: "Large fan-shaped chest muscle. Adducts, flexes, and medially rotates the arm.", path: "M168 102 Q200 130 232 102 Q200 150 168 102 Z" },
-      { id: "biceps-l", name: "Biceps Brachii L", description: "Two-headed upper arm muscle. Flexes elbow and supinates forearm.", path: "M148 135 Q143 160 142 188 Q152 160 152 135 Z" },
-      { id: "biceps-r", name: "Biceps Brachii R", description: "Two-headed upper arm muscle. Flexes elbow and supinates forearm.", path: "M252 135 Q257 160 258 188 Q248 160 248 135 Z" },
-      { id: "abdominals", name: "Rectus Abdominis", description: "Six-pack muscle. Flexes trunk and stabilizes pelvis. Divided by tendinous intersections.", path: "M185 150 L185 245 L215 245 L215 150 Z" },
-      { id: "obliques", name: "External Obliques", description: "Side abdomen muscles. Enable trunk rotation and lateral flexion.", path: "M168 140 L165 230 L185 245 L185 150 Z M232 140 L235 230 L215 245 L215 150 Z" },
-      { id: "quadriceps-l", name: "Quadriceps L", description: "Four front-thigh muscles: rectus femoris, vastus lateralis/medialis/intermedius. Knee extensors.", path: "M172 270 Q168 325 172 380 Q185 325 182 270 Z" },
-      { id: "quadriceps-r", name: "Quadriceps R", description: "Four front-thigh muscles: rectus femoris, vastus lateralis/medialis/intermedius. Knee extensors.", path: "M218 270 Q222 325 228 380 Q215 325 218 270 Z" },
-      { id: "hamstrings-l", name: "Hamstrings L", description: "Three posterior thigh muscles. Flex knee and extend hip.", path: "M176 272 Q174 330 176 380 Q182 330 184 272 Z" },
-      { id: "hamstrings-r", name: "Hamstrings R", description: "Three posterior thigh muscles. Flex knee and extend hip.", path: "M216 272 Q218 330 224 380 Q226 330 224 272 Z" },
-      { id: "gastrocnemius-l", name: "Gastrocnemius L (Calf)", description: "Two-headed calf muscle. Plantar flexes foot. Essential for walking and jumping.", path: "M172 392 Q170 430 174 470 Q182 430 180 392 Z" },
-      { id: "gastrocnemius-r", name: "Gastrocnemius R (Calf)", description: "Two-headed calf muscle. Plantar flexes foot. Essential for walking and jumping.", path: "M220 392 Q222 430 226 470 Q230 430 228 392 Z" },
-      { id: "gluteus", name: "Gluteus Maximus", description: "Largest muscle in the body. Extends and laterally rotates hip.", path: "M170 248 Q165 265 175 278 Q200 290 225 278 Q235 265 230 248 Z" }
+      { id: "trapezius", name: "trapezius", description: "large triangular upper back muscle. moves, rotates, and stabilizes the scapula.", path: "M170 78 L200 62 L230 78 L240 100 L200 115 L160 100 Z" },
+      { id: "deltoid-l", name: "deltoid L", description: "shoulder cap muscle. three heads: anterior, lateral, posterior. arm abduction.", path: "M152 96 Q142 110 148 130 Q158 126 162 98 Z" },
+      { id: "deltoid-r", name: "deltoid R", description: "shoulder cap muscle. three heads: anterior, lateral, posterior. arm abduction.", path: "M248 96 Q258 110 252 130 Q242 126 238 98 Z" },
+      { id: "pectorals", name: "pectoralis major", description: "large fan-shaped chest muscle. adducts, flexes, and medially rotates the arm.", path: "M168 102 Q200 130 232 102 Q200 150 168 102 Z" },
+      { id: "biceps-l", name: "biceps brachii L", description: "two-headed upper arm muscle. flexes elbow and supinates forearm.", path: "M148 135 Q143 160 142 188 Q152 160 152 135 Z" },
+      { id: "biceps-r", name: "biceps brachii R", description: "two-headed upper arm muscle. flexes elbow and supinates forearm.", path: "M252 135 Q257 160 258 188 Q248 160 248 135 Z" },
+      { id: "abdominals", name: "rectus abdominis", description: "six-pack muscle. flexes trunk and stabilizes pelvis. divided by tendinous intersections.", path: "M185 150 L185 245 L215 245 L215 150 Z" },
+      { id: "obliques", name: "external obliques", description: "side abdomen muscles. enable trunk rotation and lateral flexion.", path: "M168 140 L165 230 L185 245 L185 150 Z M232 140 L235 230 L215 245 L215 150 Z" },
+      { id: "quadriceps-l", name: "quadriceps L", description: "four front-thigh muscles: rectus femoris, vastus lateralis/medialis/intermedius. knee extensors.", path: "M172 270 Q168 325 172 380 Q185 325 182 270 Z" },
+      { id: "quadriceps-r", name: "quadriceps R", description: "four front-thigh muscles: rectus femoris, vastus lateralis/medialis/intermedius. knee extensors.", path: "M218 270 Q222 325 228 380 Q215 325 218 270 Z" },
+      { id: "hamstrings-l", name: "hamstrings L", description: "three posterior thigh muscles. flex knee and extend hip.", path: "M176 272 Q174 330 176 380 Q182 330 184 272 Z" },
+      { id: "hamstrings-r", name: "hamstrings R", description: "three posterior thigh muscles. flex knee and extend hip.", path: "M216 272 Q218 330 224 380 Q226 330 224 272 Z" },
+      { id: "gastrocnemius-l", name: "gastrocnemius L (calf)", description: "two-headed calf muscle. plantar flexes foot. essential for walking and jumping.", path: "M172 392 Q170 430 174 470 Q182 430 180 392 Z" },
+      { id: "gastrocnemius-r", name: "gastrocnemius R (calf)", description: "two-headed calf muscle. plantar flexes foot. essential for walking and jumping.", path: "M220 392 Q222 430 226 470 Q230 430 228 392 Z" },
+      { id: "gluteus", name: "gluteus maximus", description: "largest muscle in the body. extends and laterally rotates hip.", path: "M170 248 Q165 265 175 278 Q200 290 225 278 Q235 265 230 248 Z" }
     ]
   },
   {
-    id: "circulatory", name: "Circulatory System", color: "#cc3333",
-    description: "Transports blood, oxygen, nutrients, hormones, and waste. The heart beats ~100,000 times daily, pumping ~2,000 gallons through 60,000 miles of vessels.",
+    id: "circulatory", name: "circulatory system", color: "#cc3333",
+    description: "transports blood, oxygen, nutrients, hormones, and waste. the heart beats ~100,000 times daily, pumping ~2,000 gallons through 60,000 miles of vessels.",
     parts: [
-      { id: "heart", name: "Heart", description: "Muscular organ with 4 chambers. Pumps oxygenated blood to body, deoxygenated to lungs. Size of a fist.", cx: 207, cy: 142, r: 16 },
-      { id: "aorta", name: "Aorta", description: "Largest artery (~1 inch diameter). Carries oxygenated blood from left ventricle. Ascending, arch, descending.", path: "M207 126 Q207 108 200 105 L200 240" },
-      { id: "vena-cava", name: "Vena Cava", description: "Two large veins returning deoxygenated blood to right atrium. Superior (head/arms) and inferior (abdomen/legs).", path: "M193 80 L193 142 M193 142 L193 240" },
-      { id: "pulmonary", name: "Pulmonary Arteries", description: "Only arteries carrying deoxygenated blood. Transport from right ventricle to lungs for gas exchange.", path: "M207 132 Q180 120 165 128 M207 132 Q234 120 249 128" },
-      { id: "carotid", name: "Carotid Arteries", description: "Major arteries to the brain, neck, and face. Pulse felt here for heart rate.", path: "M196 98 L194 55 M204 98 L206 55" },
-      { id: "subclavian-l", name: "Subclavian Artery L", description: "Supplies blood to the left arm. Branches from aortic arch.", path: "M190 105 L155 100 L140 190" },
-      { id: "subclavian-r", name: "Subclavian Artery R", description: "Supplies blood to the right arm. Branches from brachiocephalic trunk.", path: "M210 105 L245 100 L260 190" },
-      { id: "femoral-l", name: "Femoral Artery L", description: "Major artery of the thigh. Supplies blood to lower extremity.", path: "M188 270 L178 385" },
-      { id: "femoral-r", name: "Femoral Artery R", description: "Major artery of the thigh. Supplies blood to lower extremity.", path: "M212 270 L222 385" },
-      { id: "tibial-l", name: "Tibial Arteries L", description: "Anterior and posterior tibial arteries supply lower leg and foot.", path: "M178 390 L175 490" },
-      { id: "tibial-r", name: "Tibial Arteries R", description: "Anterior and posterior tibial arteries supply lower leg and foot.", path: "M222 390 L225 490" }
+      { id: "heart", name: "heart", description: "muscular organ with 4 chambers. pumps oxygenated blood to body, deoxygenated to lungs. size of a fist.", cx: 207, cy: 142, r: 16 },
+      { id: "aorta", name: "aorta", description: "largest artery (~1 inch diameter). carries oxygenated blood from left ventricle. ascending, arch, descending.", path: "M207 126 Q207 108 200 105 L200 240" },
+      { id: "vena-cava", name: "vena cava", description: "two large veins returning deoxygenated blood to right atrium. superior (head/arms) and inferior (abdomen/legs).", path: "M193 80 L193 142 M193 142 L193 240" },
+      { id: "pulmonary", name: "pulmonary arteries", description: "only arteries carrying deoxygenated blood. transport from right ventricle to lungs for gas exchange.", path: "M207 132 Q180 120 165 128 M207 132 Q234 120 249 128" },
+      { id: "carotid", name: "carotid arteries", description: "major arteries to the brain, neck, and face. pulse felt here for heart rate.", path: "M196 98 L194 55 M204 98 L206 55" },
+      { id: "subclavian-l", name: "subclavian artery L", description: "supplies blood to the left arm. branches from aortic arch.", path: "M190 105 L155 100 L140 190" },
+      { id: "subclavian-r", name: "subclavian artery R", description: "supplies blood to the right arm. branches from brachiocephalic trunk.", path: "M210 105 L245 100 L260 190" },
+      { id: "femoral-l", name: "femoral artery L", description: "major artery of the thigh. supplies blood to lower extremity.", path: "M188 270 L178 385" },
+      { id: "femoral-r", name: "femoral artery R", description: "major artery of the thigh. supplies blood to lower extremity.", path: "M212 270 L222 385" },
+      { id: "tibial-l", name: "tibial arteries L", description: "anterior and posterior tibial arteries supply lower leg and foot.", path: "M178 390 L175 490" },
+      { id: "tibial-r", name: "tibial arteries R", description: "anterior and posterior tibial arteries supply lower leg and foot.", path: "M222 390 L225 490" }
     ]
   },
   {
-    id: "nervous", name: "Nervous System", color: "#f0c040",
-    description: "The body's communication network with ~86 billion neurons. Central (brain + spinal cord) and peripheral (cranial + spinal) nervous systems.",
+    id: "nervous", name: "nervous system", color: "#f0c040",
+    description: "the body's communication network with ~86 billion neurons. central (brain + spinal cord) and peripheral (cranial + spinal) nervous systems.",
     parts: [
-      { id: "brain", name: "Brain", description: "Control center (~3 lbs). Cerebrum (thought), cerebellum (coordination), brainstem (vital functions). Uses 20% of body's oxygen.", cx: 200, cy: 38, r: 22 },
-      { id: "cerebellum", name: "Cerebellum", description: "\"Little brain\" at base. 50% of brain's neurons. Coordinates movement, balance, posture, motor learning.", cx: 200, cy: 54, r: 8 },
-      { id: "spinal-cord", name: "Spinal Cord", description: "Nerve bundle (~45 cm) from brainstem to lumbar region. 31 pairs of spinal nerves. Protected by vertebral column.", path: "M200 60 L200 240" },
-      { id: "brachial-plexus-l", name: "Brachial Plexus L", description: "Nerve network (C5-T1) controlling shoulder, arm, and hand. Injury causes upper limb weakness.", path: "M196 92 L155 105 L138 188 L128 268" },
-      { id: "brachial-plexus-r", name: "Brachial Plexus R", description: "Nerve network (C5-T1) controlling shoulder, arm, and hand. Injury causes upper limb weakness.", path: "M204 92 L245 105 L262 188 L272 268" },
-      { id: "intercostal", name: "Intercostal Nerves", description: "Run between ribs (T1-T12). Motor and sensory innervation to chest and abdominal wall.", path: "M195 110 L168 120 M195 130 L168 140 M195 150 L168 160 M205 110 L232 120 M205 130 L232 140 M205 150 L232 160" },
-      { id: "lumbar-plexus", name: "Lumbar Plexus", description: "Nerves from L1-L4 supplying lower abdomen, hip, and anterior thigh. Key: femoral nerve.", path: "M198 200 L185 240 M202 200 L215 240" },
-      { id: "sciatic-l", name: "Sciatic Nerve L", description: "Longest nerve in body (~2 cm wide). Runs from lower back through buttock and down leg. Sciatica originates here.", path: "M186 260 L178 385 L175 490" },
-      { id: "sciatic-r", name: "Sciatic Nerve R", description: "Longest nerve in body (~2 cm wide). Runs from lower back through buttock and down leg. Sciatica originates here.", path: "M214 260 L222 385 L225 490" }
+      { id: "brain", name: "brain", description: "control center (~3 lbs). cerebrum (thought), cerebellum (coordination), brainstem (vital functions). uses 20% of body's oxygen.", cx: 200, cy: 38, r: 22 },
+      { id: "cerebellum", name: "cerebellum", description: "\"little brain\" at base. 50% of brain's neurons. coordinates movement, balance, posture, motor learning.", cx: 200, cy: 54, r: 8 },
+      { id: "spinal-cord", name: "spinal cord", description: "nerve bundle (~45 cm) from brainstem to lumbar region. 31 pairs of spinal nerves. protected by vertebral column.", path: "M200 60 L200 240" },
+      { id: "brachial-plexus-l", name: "brachial plexus L", description: "nerve network (C5-T1) controlling shoulder, arm, and hand. injury causes upper limb weakness.", path: "M196 92 L155 105 L138 188 L128 268" },
+      { id: "brachial-plexus-r", name: "brachial plexus R", description: "nerve network (C5-T1) controlling shoulder, arm, and hand. injury causes upper limb weakness.", path: "M204 92 L245 105 L262 188 L272 268" },
+      { id: "intercostal", name: "intercostal nerves", description: "run between ribs (T1-T12). motor and sensory innervation to chest and abdominal wall.", path: "M195 110 L168 120 M195 130 L168 140 M195 150 L168 160 M205 110 L232 120 M205 130 L232 140 M205 150 L232 160" },
+      { id: "lumbar-plexus", name: "lumbar plexus", description: "nerves from L1-L4 supplying lower abdomen, hip, and anterior thigh. key: femoral nerve.", path: "M198 200 L185 240 M202 200 L215 240" },
+      { id: "sciatic-l", name: "sciatic nerve L", description: "longest nerve in body (~2 cm wide). runs from lower back through buttock and down leg. sciatica originates here.", path: "M186 260 L178 385 L175 490" },
+      { id: "sciatic-r", name: "sciatic nerve R", description: "longest nerve in body (~2 cm wide). runs from lower back through buttock and down leg. sciatica originates here.", path: "M214 260 L222 385 L225 490" }
     ]
   },
   {
-    id: "digestive", name: "Digestive System", color: "#66aa44",
-    description: "Breaks down food into nutrients for energy, growth, and repair. The alimentary canal is ~30 feet (9m) long. Complete digestion takes 24-72 hours.",
+    id: "digestive", name: "digestive system", color: "#66aa44",
+    description: "breaks down food into nutrients for energy, growth, and repair. the alimentary canal is ~30 feet (9m) long. complete digestion takes 24-72 hours.",
     parts: [
-      { id: "mouth", name: "Mouth (Oral Cavity)", description: "Digestion begins here. Teeth grind; salivary amylase starts chemical breakdown.", cx: 200, cy: 50, r: 5 },
-      { id: "esophagus", name: "Esophagus", description: "Muscular tube (~25 cm). Peristalsis pushes food to stomach in ~8 seconds.", path: "M200 56 L200 128" },
-      { id: "stomach", name: "Stomach", description: "J-shaped organ (~1L). HCl (pH 1.5-3.5) and pepsin churn food into chyme over 2-6 hours.", path: "M188 130 Q178 150 185 170 Q200 180 215 168 Q222 150 215 130 Z" },
-      { id: "liver", name: "Liver", description: "Largest internal organ (~1.5 kg). 500+ functions: bile, detoxification, protein synthesis, glycogen storage.", path: "M220 120 Q245 128 252 142 Q245 155 228 152 Q218 145 220 120 Z" },
-      { id: "gallbladder", name: "Gallbladder", description: "Pear-shaped organ beneath liver. Stores/concentrates bile for fat digestion.", cx: 228, cy: 152, r: 5 },
-      { id: "pancreas", name: "Pancreas", description: "Dual-function (15 cm). Exocrine: digestive enzymes. Endocrine: insulin and glucagon.", path: "M198 165 L175 170 Q168 168 168 175 L178 172" },
-      { id: "small-intestine", name: "Small Intestine", description: "~20 ft, 3 sections: duodenum, jejunum, ileum. Primary nutrient absorption. Villi = ~250 m² surface.", path: "M190 178 Q185 192 192 205 Q202 215 212 205 Q220 192 212 182 Q202 195 192 192 Q184 200 192 215 Q202 225 214 220" },
-      { id: "large-intestine", name: "Large Intestine (Colon)", description: "~5 ft. Absorbs water. Houses trillions of gut bacteria. Ascending, transverse, descending, sigmoid.", path: "M230 185 L232 168 L168 168 L168 238 L232 238 L232 255" },
-      { id: "appendix", name: "Appendix", description: "Small pouch (~3.5 in) on cecum. Houses beneficial gut bacteria. Appendicitis = inflammation.", cx: 232, cy: 195, r: 4 }
+      { id: "mouth", name: "mouth (oral cavity)", description: "digestion begins here. teeth grind; salivary amylase starts chemical breakdown.", cx: 200, cy: 50, r: 5 },
+      { id: "esophagus", name: "esophagus", description: "muscular tube (~25 cm). peristalsis pushes food to stomach in ~8 seconds.", path: "M200 56 L200 128" },
+      { id: "stomach", name: "stomach", description: "J-shaped organ (~1L). HCl (pH 1.5-3.5) and pepsin churn food into chyme over 2-6 hours.", path: "M188 130 Q178 150 185 170 Q200 180 215 168 Q222 150 215 130 Z" },
+      { id: "liver", name: "liver", description: "largest internal organ (~1.5 kg). 500+ functions: bile, detoxification, protein synthesis, glycogen storage.", path: "M220 120 Q245 128 252 142 Q245 155 228 152 Q218 145 220 120 Z" },
+      { id: "gallbladder", name: "gallbladder", description: "pear-shaped organ beneath liver. stores/concentrates bile for fat digestion.", cx: 228, cy: 152, r: 5 },
+      { id: "pancreas", name: "pancreas", description: "dual-function (15 cm). exocrine: digestive enzymes. endocrine: insulin and glucagon.", path: "M198 165 L175 170 Q168 168 168 175 L178 172" },
+      { id: "small-intestine", name: "small intestine", description: "~20 ft, 3 sections: duodenum, jejunum, ileum. primary nutrient absorption. villi = ~250 m\u00B2 surface.", path: "M190 178 Q185 192 192 205 Q202 215 212 205 Q220 192 212 182 Q202 195 192 192 Q184 200 192 215 Q202 225 214 220" },
+      { id: "large-intestine", name: "large intestine (colon)", description: "~5 ft. absorbs water. houses trillions of gut bacteria. ascending, transverse, descending, sigmoid.", path: "M230 185 L232 168 L168 168 L168 238 L232 238 L232 255" },
+      { id: "appendix", name: "appendix", description: "small pouch (~3.5 in) on cecum. houses beneficial gut bacteria. appendicitis = inflammation.", cx: 232, cy: 195, r: 4 }
     ]
   },
   {
-    id: "respiratory", name: "Respiratory System", color: "#5599cc",
-    description: "Facilitates gas exchange: O2 in, CO2 out. 12-20 breaths/min at rest. Lungs have ~300 million alveoli with ~70 m² surface area for gas exchange.",
+    id: "respiratory", name: "respiratory system", color: "#5599cc",
+    description: "facilitates gas exchange: O2 in, CO2 out. 12-20 breaths/min at rest. lungs have ~300 million alveoli with ~70 m\u00B2 surface area for gas exchange.",
     parts: [
-      { id: "nasal-cavity", name: "Nasal Cavity", description: "Warms, humidifies, and filters air. Contains olfactory receptors. Connected to paranasal sinuses.", cx: 200, cy: 44, r: 7 },
-      { id: "pharynx", name: "Pharynx (Throat)", description: "Shared air/food passageway (~13 cm). Nasopharynx, oropharynx, laryngopharynx.", path: "M200 52 L200 72" },
-      { id: "larynx", name: "Larynx (Voice Box)", description: "Contains vocal cords for sound. Epiglottis prevents food entering airway.", cx: 200, cy: 78, r: 5 },
-      { id: "trachea", name: "Trachea (Windpipe)", description: "Tube (~12 cm) with C-shaped cartilage rings. Ciliated mucosa traps particles.", path: "M200 84 L200 112" },
-      { id: "bronchi", name: "Bronchi", description: "Trachea divides into L and R main bronchi. Further branch into bronchioles.", path: "M200 112 L178 132 M200 112 L222 132" },
-      { id: "lung-l", name: "Left Lung", description: "2 lobes (smaller due to cardiac notch). ~150 million alveoli for gas exchange.", path: "M162 108 Q148 138 152 172 Q160 182 178 172 Q188 152 182 112 Z" },
-      { id: "lung-r", name: "Right Lung", description: "3 lobes (larger than left). ~150 million alveoli. Horizontal and oblique fissures.", path: "M238 108 Q252 138 248 172 Q240 182 222 172 Q212 152 218 112 Z" },
-      { id: "diaphragm", name: "Diaphragm", description: "Dome-shaped muscle separating thorax from abdomen. Primary breathing muscle. Innervated by phrenic nerve.", path: "M152 180 Q200 200 248 180" },
-      { id: "alveoli", name: "Alveoli (Gas Exchange)", description: "Tiny air sacs (0.2 mm) at bronchiole ends. O2 into blood, CO2 out. ~300 million total.", cx: 165, cy: 155, r: 6 }
+      { id: "nasal-cavity", name: "nasal cavity", description: "warms, humidifies, and filters air. contains olfactory receptors. connected to paranasal sinuses.", cx: 200, cy: 44, r: 7 },
+      { id: "pharynx", name: "pharynx (throat)", description: "shared air/food passageway (~13 cm). nasopharynx, oropharynx, laryngopharynx.", path: "M200 52 L200 72" },
+      { id: "larynx", name: "larynx (voice box)", description: "contains vocal cords for sound. epiglottis prevents food entering airway.", cx: 200, cy: 78, r: 5 },
+      { id: "trachea", name: "trachea (windpipe)", description: "tube (~12 cm) with C-shaped cartilage rings. ciliated mucosa traps particles.", path: "M200 84 L200 112" },
+      { id: "bronchi", name: "bronchi", description: "trachea divides into L and R main bronchi. further branch into bronchioles.", path: "M200 112 L178 132 M200 112 L222 132" },
+      { id: "lung-l", name: "left lung", description: "2 lobes (smaller due to cardiac notch). ~150 million alveoli for gas exchange.", path: "M162 108 Q148 138 152 172 Q160 182 178 172 Q188 152 182 112 Z" },
+      { id: "lung-r", name: "right lung", description: "3 lobes (larger than left). ~150 million alveoli. horizontal and oblique fissures.", path: "M238 108 Q252 138 248 172 Q240 182 222 172 Q212 152 218 112 Z" },
+      { id: "diaphragm", name: "diaphragm", description: "dome-shaped muscle separating thorax from abdomen. primary breathing muscle. innervated by phrenic nerve.", path: "M152 180 Q200 200 248 180" },
+      { id: "alveoli", name: "alveoli (gas exchange)", description: "tiny air sacs (0.2 mm) at bronchiole ends. O2 into blood, CO2 out. ~300 million total.", cx: 165, cy: 155, r: 6 }
     ]
   }
 ];

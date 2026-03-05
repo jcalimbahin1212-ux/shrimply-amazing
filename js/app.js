@@ -185,7 +185,19 @@
     toast("bypass features unlocked");
   }
 
+  function lock() {
+    localStorage.removeItem(BYPASS_KEY);
+    applyUnlockState();
+    // If currently on a gated page, navigate home
+    var gatedPages = ["apps", "cheats", "proxy"];
+    if (gatedPages.indexOf(state.currentPage) !== -1) {
+      navigate("home");
+    }
+    toast("workspace mode re-enabled");
+  }
+
   window.shrimpUnlock = unlock;
+  window.shrimpLock = lock;
   applyUnlockState();
 
   // ---- Scramjet Proxy Setup ----
@@ -222,7 +234,7 @@
 
   async function registerScramjetSW() {
     if (!navigator.serviceWorker) {
-      throw new Error("Service workers not supported.");
+      throw new Error("service workers not supported.");
     }
     var reg = await navigator.serviceWorker.register(BASE_PATH + "sw.js", { scope: BASE_PATH });
     // Wait for the service worker to become active
@@ -520,6 +532,7 @@
         ShrimpTools.gradeCalc();
         ShrimpTools.typingTest();
         ShrimpTools.randomPicker();
+        ShrimpTools.grapher();
       } else if (page === "writer") {
         ShrimpTools.textTools();
         ShrimpTools.citations();
@@ -601,7 +614,7 @@
   function openInBlank(url) {
     const win = window.open("about:blank", "_blank");
     if (!win) {
-      toast("Pop-up blocked! Allow pop-ups for this site.");
+      toast("pop-up blocked! allow pop-ups for this site.");
       return;
     }
     // Clone current cloak or use defaults
@@ -623,7 +636,7 @@
     win.document.close();
     // Focus the iframe so keyboard events work immediately
     try { win.document.querySelector("iframe").focus(); } catch (_) {}
-    toast("Opened in about:blank");
+    toast("opened in about:blank");
   }
 
   // ---- About:Blank Launcher with Scramjet Proxy ----
@@ -631,7 +644,7 @@
 
   async function ensureScramjetReady() {
     if (!scramjetController || !bareMuxConn) {
-      throw new Error("Scramjet not initialized. Check that the site is served over HTTP (not file://) and that scramjet.all.js loaded.");
+      throw new Error("Scramjet not initialized. check that the site is served over HTTP (not file://) and that scramjet.all.js loaded.");
     }
     // Wait for controller init (writes config to IndexedDB)
     if (scramjetInitPromise) {
@@ -682,16 +695,16 @@
     _currentProxyUrl = url;
 
     try {
-      toast("Loading proxy\u2026");
+      toast("loading proxy\u2026");
       await ensureScramjetReady();
 
       var proxyUrl = encodeProxyUrl(url);
       console.log("Proxy URL encoded:", url, "->", proxyUrl);
       if (frame) frame.src = proxyUrl;
-      toast("Loaded via Scramjet proxy");
+      toast("loaded via Scramjet proxy");
     } catch (err) {
       console.error("Scramjet proxy error:", err);
-      toast("Proxy error: " + (err.message || err));
+      toast("proxy error: " + (err.message || err));
       // Still show the browser but with direct URL as last resort
       if (frame) frame.src = url;
     }
@@ -704,7 +717,7 @@
 
       var win = window.open("about:blank", "_blank");
       if (!win) {
-        toast("Pop-up blocked! Allow pop-ups for this site.");
+        toast("pop-up blocked! allow pop-ups for this site.");
         return;
       }
 
@@ -727,10 +740,10 @@
         '</body></html>'
       );
       win.document.close();
-      toast("Opened via Scramjet proxy in new tab");
+      toast("opened via Scramjet proxy in new tab");
     } catch (err) {
       console.error("Scramjet proxy error:", err);
-      toast("Proxy failed: " + (err.message || err));
+      toast("proxy failed: " + (err.message || err));
       // Fallback: open in built-in browser instead
       openInBuiltInProxy(url);
     }
@@ -752,7 +765,7 @@
 
     function launchProxy() {
       var url = proxyInput.value.trim();
-      if (!url) { toast("Enter a URL"); return; }
+      if (!url) { toast("enter a URL"); return; }
       if (!/^https?:\/\//i.test(url)) url = "https://" + url;
       openInBuiltInProxy(url);
     }
@@ -785,7 +798,7 @@
         document.exitFullscreen();
       } else {
         browser.requestFullscreen().catch(function () {
-          toast("Fullscreen not supported");
+          toast("fullscreen not supported");
         });
       }
     });
@@ -793,7 +806,7 @@
       if (_currentProxyUrl) {
         openInBlankProxy(_currentProxyUrl);
       } else {
-        toast("Nothing to pop out");
+        toast("nothing to pop out");
       }
     });
     if (closeBtn) closeBtn.addEventListener("click", function () {
@@ -811,7 +824,7 @@
   function openGameWithPanel(cheat) {
     const win = window.open("about:blank", "_blank");
     if (!win) {
-      toast("Pop-up blocked! Allow pop-ups for this site.");
+      toast("pop-up blocked! allow pop-ups for this site.");
       return;
     }
     const cloakTitle = document.title || "Google Docs";
@@ -831,7 +844,7 @@
     win.document.write(buildPanelHTML(cloakTitle, cloakIcon, cheat.url, dataB64));
     win.document.close();
     try { win.document.querySelector("#game-frame").focus(); } catch (_) {}
-    toast("Launched " + cheat.name + " with shrimpanel");
+    toast("launched " + cheat.name + " with shrimpanel");
   }
 
   function buildPanelHTML(cloakTitle, cloakIcon, gameUrl, dataB64) {
@@ -970,7 +983,7 @@
 
     // Manual
     $("#cheat-manual").innerHTML = `
-      <h3>How to Use</h3>
+      <h3>how to use</h3>
       <div class="manual-steps">
         ${cheat.manual.map((step) => `<div class="manual-step">${step}</div>`).join("")}
       </div>
@@ -1023,7 +1036,7 @@
             </div>
             <div class="script-code-wrapper">
               <pre class="script-code"><code>${escapeHtml(c.code)}</code></pre>
-              <button class="btn copy-btn" data-gm="${gmIndex}" data-script="${i}">Copy</button>
+              <button class="btn copy-btn" data-gm="${gmIndex}" data-script="${i}">copy</button>
             </div>
           </div>
         `
@@ -1040,9 +1053,9 @@
         const code = cheat.gamemodes[gmIdx].cheats[scriptIdx].code;
         navigator.clipboard.writeText(code).then(
           () => {
-            btn.textContent = "Copied!";
-            toast("Script copied to clipboard");
-            setTimeout(() => (btn.textContent = "Copy"), 1500);
+            btn.textContent = "copied!";
+            toast("script copied to clipboard");
+            setTimeout(() => (btn.textContent = "copy"), 1500);
           },
           () => {
             const ta = document.createElement("textarea");
@@ -1051,9 +1064,9 @@
             ta.select();
             document.execCommand("copy");
             document.body.removeChild(ta);
-            btn.textContent = "Copied!";
-            toast("Script copied to clipboard");
-            setTimeout(() => (btn.textContent = "Copy"), 1500);
+            btn.textContent = "copied!";
+            toast("script copied to clipboard");
+            setTimeout(() => (btn.textContent = "copy"), 1500);
           }
         );
       });
@@ -1093,7 +1106,7 @@
     panicInput.addEventListener("change", () => {
       state.panicUrl = panicInput.value;
       localStorage.setItem("shrimpify-panic-url", panicInput.value);
-      toast("Panic URL updated");
+      toast("panic URL updated");
     });
   }
 
@@ -1109,7 +1122,7 @@
     link.href = iconUrl;
     localStorage.setItem("shrimpify-cloak-title", title);
     localStorage.setItem("shrimpify-cloak-icon", iconUrl);
-    toast("Tab cloaked as " + title);
+    toast("tab cloaked as " + title);
   }
 
   // apply saved cloak on load
@@ -1137,7 +1150,7 @@
     if (link)
       link.href =
         "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
-    toast("Cloak reset");
+    toast("cloak reset");
   });
 
   // cloak presets
@@ -1154,7 +1167,7 @@
   // ---- Open self in about:blank ----
   $("#aboutblank-self").addEventListener("click", () => {
     if (isInsideIframe()) {
-      toast("Already running in about:blank");
+      toast("already running in about:blank");
       return;
     }
     openInBlank(window.location.href);
@@ -1168,7 +1181,7 @@
 
   const disguiseExit = document.createElement("button");
   disguiseExit.id = "disguise-exit";
-  disguiseExit.title = "Exit disguise";
+  disguiseExit.title = "exit disguise";
   document.body.appendChild(disguiseExit);
 
   function activateDisguise() {
@@ -1177,7 +1190,7 @@
     let link = $("link[rel='icon']");
     if (link) link.href = "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
     localStorage.setItem("shrimpify-disguise", "1");
-    toast("Disguise activated");
+    toast("disguise activated");
   }
 
   function deactivateDisguise() {
@@ -1188,7 +1201,7 @@
     let link = $("link[rel='icon']");
     if (link) link.href = savedIcon || "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
     localStorage.removeItem("shrimpify-disguise");
-    toast("Disguise deactivated");
+    toast("disguise deactivated");
   }
 
   $("#disguise-toggle").addEventListener("click", () => {
@@ -1204,6 +1217,14 @@
     document.title = "Untitled document - Google Docs";
     let link = $("link[rel='icon']");
     if (link) link.href = "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
+  }
+
+  // ---- Bypass Lock Button ----
+  var bypassLockBtn = $("#bypass-lock-btn");
+  if (bypassLockBtn) {
+    bypassLockBtn.addEventListener("click", function () {
+      lock();
+    });
   }
 
   // ---- Apps: open in built-in proxy browser ----
@@ -1228,8 +1249,8 @@
       var url = wispInput.value.trim();
       if (url) {
         localStorage.setItem("shrimpify-wisp-url", url);
-        if (statusEl) statusEl.textContent = "✓ Proxy URL saved. Changes apply on next app launch.";
-        toast("Proxy URL saved");
+        if (statusEl) statusEl.textContent = "✓ proxy URL saved. changes apply on next app launch.";
+        toast("proxy URL saved");
       }
     });
 
@@ -1237,8 +1258,8 @@
       localStorage.removeItem("shrimpify-wisp-url");
       wispInput.value = "";
       wispInput.placeholder = DEFAULT_WISP_URL;
-      if (statusEl) statusEl.textContent = "✓ Reset to default.";
-      toast("Proxy URL reset to default");
+      if (statusEl) statusEl.textContent = "✓ reset to default.";
+      toast("proxy URL reset to default");
     });
   })();
 

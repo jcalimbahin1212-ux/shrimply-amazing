@@ -1107,11 +1107,24 @@
 
       <!-- ==================== PROXY ==================== -->
       <div id="page-proxy" class="page">
-        <h2>Proxy</h2>
-        <p class="page-desc">Browse any website through the Scramjet proxy. Enter a URL to get started.</p>
-        <div class="proxy-input-container">
-          <input type="text" id="proxy-url-input" placeholder="Enter a URL (e.g. https://example.com)">
-          <button id="proxy-go-btn" class="btn">Go</button>
+        <div id="proxy-landing">
+          <h2>Proxy</h2>
+          <p class="page-desc">Browse any website through the Scramjet proxy. Enter a URL to get started.</p>
+          <div class="proxy-input-container">
+            <input type="text" id="proxy-url-input" placeholder="Enter a URL (e.g. https://example.com)">
+            <button id="proxy-go-btn" class="btn">Go</button>
+          </div>
+        </div>
+        <div id="proxy-browser" style="display:none">
+          <div class="proxy-toolbar">
+            <button id="proxy-back" class="proxy-nav-btn" title="Back">&#9664;</button>
+            <button id="proxy-forward" class="proxy-nav-btn" title="Forward">&#9654;</button>
+            <button id="proxy-reload" class="proxy-nav-btn" title="Reload">&#8635;</button>
+            <input type="text" id="proxy-address-bar" class="proxy-address-bar" placeholder="URL" readonly>
+            <button id="proxy-popout" class="proxy-nav-btn" title="Open in new tab">&#8599;</button>
+            <button id="proxy-close" class="proxy-nav-btn" title="Close">&#10005;</button>
+          </div>
+          <iframe id="proxy-frame" class="proxy-frame" allowfullscreen allow="clipboard-read; clipboard-write"></iframe>
         </div>
       </div>
 

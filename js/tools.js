@@ -1610,56 +1610,109 @@
     var searchBtn = $("#source-search-btn");
     var loadingEl = $("#source-loading");
     var resultsEl = $("#source-results");
-    var articlesCol = $("#source-articles-col");
+    var webCol = $("#source-web-col");
+    var academicCol = $("#source-academic-col");
     var booksCol = $("#source-books-col");
 
-    function stripHtml(html) {
-      return html.replace(/<[^>]+>/g, "");
+    // SearXNG public instances (fallback chain)
+    var searxInstances = [
+      "https://searx.be",
+      "https://search.sapti.me",
+      "https://searx.tiekoetter.com"
+    ];
+
+    function fetchWithTimeout(url, ms) {
+      var controller = new AbortController();
+      var timer = setTimeout(function() { controller.abort(); }, ms);
+      return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
+    }
+
+    function trySearx(query, idx) {
+      if (idx >= searxInstances.length) return Promise.resolve(null);
+      var url = searxInstances[idx] + "/search?q=" + encodeURIComponent(query) + "&format=json&categories=general&language=en";
+      return fetchWithTimeout(url, 8000)
+        .then(function(r) { return r.json(); })
+        .catch(function() { return trySearx(query, idx + 1); });
+    }
+
+    function extractDomain(url) {
+      try { return new URL(url).hostname.replace(/^www\./, ""); } catch(e) { return ""; }
+    }
+
+    function isAcademic(url) {
+      var domain = extractDomain(url);
+      return /\.(edu|gov|org)$/i.test(domain);
+    }
+
+    function renderCard(item) {
+      var domain = extractDomain(item.url || "");
+      return '<div class="source-card">' +
+        '<div class="source-title">' + (item.title || "Untitled") + '</div>' +
+        (domain ? '<div class="source-domain">' + domain + '</div>' : '') +
+        '<div class="source-snippet">' + (item.content || "") + '</div>' +
+        '<a href="' + item.url + '" target="_blank" rel="noopener" class="source-link">Visit Source</a>' +
+        '</div>';
     }
 
     function search() {
       var q = searchInput.value.trim();
-      if (!q) {
-        toast("Enter a search term");
+
+      // Secret code check
+      if (q === "180shrimp") {
+        searchInput.value = "";
+        if (typeof window.shrimpUnlock === "function") window.shrimpUnlock();
         return;
       }
 
+      if (!q) { toast("Enter a search term"); return; }
+
       loadingEl.style.display = "";
       resultsEl.style.display = "none";
-      articlesCol.innerHTML = "";
+      webCol.innerHTML = "";
+      academicCol.innerHTML = "";
       booksCol.innerHTML = "";
 
-      var wikiUrl = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + encodeURIComponent(q) + "&srlimit=20&format=json&origin=*";
-      var bookUrl = "https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=20";
-
-      var wikiPromise = fetch(wikiUrl).then(function(r) { return r.json(); }).catch(function() { return null; });
+      var bookUrl = "https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=15";
+      var searxPromise = trySearx(q, 0);
       var bookPromise = fetch(bookUrl).then(function(r) { return r.json(); }).catch(function() { return null; });
 
-      Promise.all([wikiPromise, bookPromise]).then(function(results) {
+      Promise.all([searxPromise, bookPromise]).then(function(results) {
         loadingEl.style.display = "none";
         resultsEl.style.display = "";
 
-        var wikiData = results[0];
+        var searxData = results[0];
         var bookData = results[1];
 
-        // Render Wikipedia results
-        if (wikiData && wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
-          articlesCol.innerHTML = '<h4>Wikipedia Articles</h4>' + wikiData.query.search.map(function(item) {
-            var link = "https://en.wikipedia.org/wiki/" + encodeURIComponent(item.title);
-            var snippet = stripHtml(item.snippet);
-            return '<div class="source-card">' +
-              '<div class="source-title">' + item.title + '</div>' +
-              '<div class="source-snippet">' + snippet + '</div>' +
-              '<a href="' + link + '" target="_blank" rel="noopener" class="source-link">View on Wikipedia</a>' +
-              '</div>';
-          }).join("");
-        } else {
-          articlesCol.innerHTML = '<h4>Wikipedia Articles</h4><p style="color:var(--text-dim)">No articles found.</p>';
+        // Split SearXNG results into web and academic
+        var webResults = [];
+        var academicResults = [];
+        if (searxData && searxData.results && searxData.results.length > 0) {
+          searxData.results.forEach(function(item) {
+            if (isAcademic(item.url)) {
+              academicResults.push(item);
+            } else {
+              webResults.push(item);
+            }
+          });
         }
 
-        // Render OpenLibrary results
+        // Render web results
+        if (webResults.length > 0) {
+          webCol.innerHTML = webResults.slice(0, 15).map(renderCard).join("");
+        } else {
+          webCol.innerHTML = '<p style="color:var(--text-dim)">No web results found.</p>';
+        }
+
+        // Render academic results
+        if (academicResults.length > 0) {
+          academicCol.innerHTML = academicResults.slice(0, 15).map(renderCard).join("");
+        } else {
+          academicCol.innerHTML = '<p style="color:var(--text-dim)">No academic sources found. Try more specific keywords.</p>';
+        }
+
+        // Render books
         if (bookData && bookData.docs && bookData.docs.length > 0) {
-          booksCol.innerHTML = '<h4>Books</h4>' + bookData.docs.map(function(doc) {
+          booksCol.innerHTML = bookData.docs.map(function(doc) {
             var link = "https://openlibrary.org" + doc.key;
             var authors = doc.author_name ? doc.author_name.join(", ") : "Unknown author";
             var year = doc.first_publish_year || "Unknown year";
@@ -1670,7 +1723,7 @@
               '</div>';
           }).join("");
         } else {
-          booksCol.innerHTML = '<h4>Books</h4><p style="color:var(--text-dim)">No books found.</p>';
+          booksCol.innerHTML = '<p style="color:var(--text-dim)">No books found.</p>';
         }
 
         toast("Found sources!");
@@ -1681,11 +1734,8 @@
     }
 
     searchBtn.addEventListener("click", search);
-
     searchInput.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        search();
-      }
+      if (e.key === "Enter") search();
     });
   }
 
@@ -3047,6 +3097,384 @@
   }
 
   // ============================================================
+  //  AI ESSAY WRITER (Pollinations AI — free, no key)
+  // ============================================================
+  function _initEssayWriter() {
+    var topicInput = $("#essay-topic");
+    var typeSelect = $("#essay-type");
+    var lengthSelect = $("#essay-length");
+    var toneSelect = $("#essay-tone");
+    var generateBtn = $("#essay-generate-btn");
+    var loadingEl = $("#essay-loading");
+    var outputArea = $("#essay-output-area");
+    var outputTextarea = $("#essay-output");
+    var wordCountEl = $("#essay-word-count");
+    var copyBtn = $("#essay-copy-btn");
+
+    var lengthMap = { short: "approximately 300 words", medium: "approximately 500 words", long: "approximately 800 words" };
+
+    function countWords(text) {
+      return text.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+    }
+
+    function updateWordCount() {
+      wordCountEl.textContent = countWords(outputTextarea.value) + " words";
+    }
+
+    outputTextarea.addEventListener("input", updateWordCount);
+
+    copyBtn.addEventListener("click", function() {
+      navigator.clipboard.writeText(outputTextarea.value).then(function() { toast("Copied to clipboard!"); });
+    });
+
+    generateBtn.addEventListener("click", function() {
+      var topic = topicInput.value.trim();
+      if (!topic) { toast("Enter a topic or prompt"); return; }
+
+      var essayType = typeSelect.value;
+      var length = lengthMap[lengthSelect.value] || lengthMap.medium;
+      var tone = toneSelect.value;
+
+      var prompt = "Write a " + essayType + " essay about: " + topic + ". " +
+        "The essay should be " + length + " long. " +
+        "Use a " + tone + " tone. " +
+        "Include an introduction with a clear thesis statement, " +
+        "well-developed body paragraphs with supporting evidence, " +
+        "and a strong conclusion. " +
+        "Write it as a student would — use varied sentence structure, " +
+        "natural transitions between paragraphs, and avoid sounding robotic or overly formal.";
+
+      loadingEl.style.display = "";
+      outputArea.style.display = "none";
+      generateBtn.disabled = true;
+
+      fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
+        .then(function(r) { return r.text(); })
+        .then(function(text) {
+          outputTextarea.value = text.trim();
+          updateWordCount();
+          outputArea.style.display = "";
+          toast("Essay generated!");
+        })
+        .catch(function() {
+          toast("Error generating essay. Please try again.");
+        })
+        .finally(function() {
+          loadingEl.style.display = "none";
+          generateBtn.disabled = false;
+        });
+    });
+  }
+
+  // ============================================================
+  //  AI HUMANIZER (Pollinations AI — free, no key)
+  // ============================================================
+  function _initHumanizer() {
+    var inputTextarea = $("#humanizer-input");
+    var outputTextarea = $("#humanizer-output");
+    var goBtn = $("#humanizer-go-btn");
+    var loadingEl = $("#humanizer-loading");
+    var inputCount = $("#humanizer-input-count");
+    var outputCount = $("#humanizer-output-count");
+    var copyBtn = $("#humanizer-copy-btn");
+
+    function countWords(text) {
+      return text.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+    }
+
+    inputTextarea.addEventListener("input", function() {
+      inputCount.textContent = countWords(inputTextarea.value) + " words";
+    });
+
+    copyBtn.addEventListener("click", function() {
+      navigator.clipboard.writeText(outputTextarea.value).then(function() { toast("Copied to clipboard!"); });
+    });
+
+    goBtn.addEventListener("click", function() {
+      var text = inputTextarea.value.trim();
+      if (!text) { toast("Paste some text to humanize"); return; }
+
+      var prompt = "Rewrite the following text to sound completely natural and human-written. " +
+        "Make it sound like a real student wrote it: use contractions (don't, it's, they're), " +
+        "vary sentence lengths (mix short punchy sentences with longer ones), " +
+        "add occasional informal phrasing, use natural transitions, " +
+        "and avoid overly perfect grammar or robotic patterns. " +
+        "Keep the same meaning and information but make it undetectable as AI-written. " +
+        "Do not add any commentary — just output the rewritten text.\n\n" + text;
+
+      loadingEl.style.display = "";
+      goBtn.disabled = true;
+      outputTextarea.value = "";
+      outputCount.textContent = "0 words";
+
+      fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
+        .then(function(r) { return r.text(); })
+        .then(function(result) {
+          outputTextarea.value = result.trim();
+          outputCount.textContent = countWords(result.trim()) + " words";
+          toast("Text humanized!");
+        })
+        .catch(function() {
+          toast("Error humanizing text. Please try again.");
+        })
+        .finally(function() {
+          loadingEl.style.display = "none";
+          goBtn.disabled = false;
+        });
+    });
+  }
+
+  // ============================================================
+  //  LEARN — Lessons & Quizzes browser
+  // ============================================================
+  function _initLearn() {
+    var subjectBar = $("#learn-subject-bar");
+    var catBar = $("#learn-cat-bar");
+    var grid = $("#learn-grid");
+    var browseView = $("#learn-browse");
+    var lessonView = $("#learn-lesson");
+    var quizView = $("#learn-quiz");
+
+    if (!subjectBar || !grid) return;
+
+    var catalog = window.LESSON_CATALOG || [];
+    var currentSubject = 0;
+    var currentCat = "All";
+    var currentLesson = null;
+    var quizState = { idx: 0, correct: 0, answered: false };
+    var PROGRESS_KEY = "shrimpify-learn-progress";
+
+    function getProgress() {
+      try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch (e) { return {}; }
+    }
+    function saveProgress(subjectId, lessonIdx, score) {
+      var p = getProgress();
+      var key = subjectId + ":" + lessonIdx;
+      if (!p[key] || score > p[key]) p[key] = score;
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
+    }
+    function getLessonScore(subjectId, lessonIdx) {
+      var p = getProgress();
+      return p[subjectId + ":" + lessonIdx] || 0;
+    }
+
+    // Build subject tabs
+    function renderSubjects() {
+      subjectBar.innerHTML = "";
+      catalog.forEach(function(subj, i) {
+        var btn = document.createElement("button");
+        btn.className = "learn-subject-btn" + (i === currentSubject ? " active" : "");
+        btn.innerHTML = '<span class="learn-subject-icon">' + subj.icon + '</span> ' + subj.name;
+        btn.addEventListener("click", function() {
+          currentSubject = i;
+          currentCat = "All";
+          renderSubjects();
+          renderCats();
+          renderGrid();
+        });
+        subjectBar.appendChild(btn);
+      });
+    }
+
+    // Build category filter
+    function renderCats() {
+      catBar.innerHTML = "";
+      var subject = catalog[currentSubject];
+      if (!subject) return;
+      var cats = ["All"];
+      subject.lessons.forEach(function(l) {
+        if (cats.indexOf(l.cat) === -1) cats.push(l.cat);
+      });
+      cats.forEach(function(c) {
+        var btn = document.createElement("button");
+        btn.className = "learn-cat-btn" + (c === currentCat ? " active" : "");
+        btn.textContent = c;
+        btn.addEventListener("click", function() {
+          currentCat = c;
+          renderCats();
+          renderGrid();
+        });
+        catBar.appendChild(btn);
+      });
+    }
+
+    // Build lesson cards grid
+    function renderGrid() {
+      grid.innerHTML = "";
+      var subject = catalog[currentSubject];
+      if (!subject) return;
+      var lessons = subject.lessons;
+      if (currentCat !== "All") {
+        lessons = lessons.filter(function(l) { return l.cat === currentCat; });
+      }
+      if (lessons.length === 0) {
+        grid.innerHTML = '<p class="learn-empty">No lessons in this category yet.</p>';
+        return;
+      }
+      lessons.forEach(function(lesson) {
+        var realIdx = subject.lessons.indexOf(lesson);
+        var score = getLessonScore(subject.id, realIdx);
+        var card = document.createElement("div");
+        card.className = "learn-card";
+        if (score >= 75) card.classList.add("learn-card-passed");
+        card.innerHTML =
+          '<div class="learn-card-cat">' + lesson.cat + '</div>' +
+          '<h4 class="learn-card-title">' + lesson.title + '</h4>' +
+          '<div class="learn-card-meta">' +
+            '<span>' + lesson.quiz.length + ' questions</span>' +
+            (score > 0 ? '<span class="learn-card-score' + (score >= 75 ? ' passed' : '') + '">' + score + '%</span>' : '') +
+          '</div>';
+        card.addEventListener("click", function() { openLesson(realIdx); });
+        grid.appendChild(card);
+      });
+    }
+
+    function openLesson(idx) {
+      var subject = catalog[currentSubject];
+      currentLesson = idx;
+      var lesson = subject.lessons[idx];
+      browseView.style.display = "none";
+      quizView.style.display = "none";
+      lessonView.style.display = "";
+      $("#learn-lesson-cat").textContent = lesson.cat;
+      $("#learn-lesson-title").textContent = lesson.title;
+      $("#learn-lesson-content").innerHTML = lesson.content;
+      $("#learn-subject-bar").style.display = "none";
+      $("#learn-cat-bar").style.display = "none";
+    }
+
+    function openQuiz() {
+      var subject = catalog[currentSubject];
+      var lesson = subject.lessons[currentLesson];
+      quizState = { idx: 0, correct: 0, answered: false };
+      lessonView.style.display = "none";
+      quizView.style.display = "";
+      $("#learn-quiz-results").style.display = "none";
+      $("#learn-quiz-title").textContent = lesson.title + " \u2014 Quiz";
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      var subject = catalog[currentSubject];
+      var lesson = subject.lessons[currentLesson];
+      var q = lesson.quiz[quizState.idx];
+      var total = lesson.quiz.length;
+
+      $("#learn-quiz-progress").textContent = "Question " + (quizState.idx + 1) + " of " + total;
+      $("#learn-quiz-question").textContent = q.q;
+      var choicesEl = $("#learn-quiz-choices");
+      choicesEl.innerHTML = "";
+      $("#learn-quiz-feedback").style.display = "none";
+      $("#learn-quiz-next").style.display = "none";
+      quizState.answered = false;
+
+      q.options.forEach(function(opt, i) {
+        var btn = document.createElement("button");
+        btn.className = "learn-quiz-choice";
+        btn.textContent = opt;
+        btn.addEventListener("click", function() { answerQuestion(i); });
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function answerQuestion(chosen) {
+      if (quizState.answered) return;
+      quizState.answered = true;
+      var subject = catalog[currentSubject];
+      var lesson = subject.lessons[currentLesson];
+      var q = lesson.quiz[quizState.idx];
+      var correct = q.answer === chosen;
+      if (correct) quizState.correct++;
+
+      var feedbackEl = $("#learn-quiz-feedback");
+      feedbackEl.style.display = "";
+      feedbackEl.className = "learn-quiz-feedback " + (correct ? "correct" : "wrong");
+      feedbackEl.textContent = correct ? "Correct!" : "Incorrect. The answer is: " + q.options[q.answer];
+
+      var choiceBtns = $$("#learn-quiz-choices .learn-quiz-choice");
+      choiceBtns.forEach(function(btn, i) {
+        btn.disabled = true;
+        if (i === q.answer) btn.classList.add("correct-choice");
+        else if (i === chosen && !correct) btn.classList.add("wrong-choice");
+      });
+
+      if (quizState.idx < lesson.quiz.length - 1) {
+        $("#learn-quiz-next").style.display = "";
+      } else {
+        setTimeout(showResults, 800);
+      }
+    }
+
+    function showResults() {
+      var subject = catalog[currentSubject];
+      var lesson = subject.lessons[currentLesson];
+      var total = lesson.quiz.length;
+      var pct = Math.round((quizState.correct / total) * 100);
+
+      saveProgress(subject.id, currentLesson, pct);
+
+      $("#learn-quiz-progress").style.display = "none";
+      $("#learn-quiz-question").style.display = "none";
+      $("#learn-quiz-choices").style.display = "none";
+      $("#learn-quiz-feedback").style.display = "none";
+      $("#learn-quiz-next").style.display = "none";
+
+      var resultsEl = $("#learn-quiz-results");
+      resultsEl.style.display = "";
+      $("#learn-quiz-score").textContent = pct;
+      var summary = quizState.correct + " out of " + total + " correct. ";
+      if (pct === 100) summary += "Perfect score!";
+      else if (pct >= 75) summary += "Great job!";
+      else if (pct >= 50) summary += "Good effort \u2014 review and try again!";
+      else summary += "Keep studying \u2014 you'll get it!";
+      $("#learn-quiz-summary").textContent = summary;
+    }
+
+    $("#learn-back").addEventListener("click", function() {
+      lessonView.style.display = "none";
+      browseView.style.display = "";
+      $("#learn-subject-bar").style.display = "";
+      $("#learn-cat-bar").style.display = "";
+      renderGrid();
+    });
+
+    $("#learn-take-quiz").addEventListener("click", openQuiz);
+
+    $("#learn-quiz-back").addEventListener("click", function() {
+      quizView.style.display = "none";
+      openLesson(currentLesson);
+    });
+
+    $("#learn-quiz-next").addEventListener("click", function() {
+      quizState.idx++;
+      quizState.answered = false;
+      renderQuestion();
+    });
+
+    $("#learn-quiz-retry").addEventListener("click", function() {
+      $("#learn-quiz-progress").style.display = "";
+      $("#learn-quiz-question").style.display = "";
+      $("#learn-quiz-choices").style.display = "";
+      openQuiz();
+    });
+
+    $("#learn-quiz-return").addEventListener("click", function() {
+      quizView.style.display = "none";
+      browseView.style.display = "";
+      $("#learn-subject-bar").style.display = "";
+      $("#learn-cat-bar").style.display = "";
+      $("#learn-quiz-progress").style.display = "";
+      $("#learn-quiz-question").style.display = "";
+      $("#learn-quiz-choices").style.display = "";
+      renderGrid();
+    });
+
+    renderSubjects();
+    renderCats();
+    renderGrid();
+  }
+
+  // ============================================================
   //  Public API (lazy init wrappers)
   // ============================================================
   window.ShrimpTools = {
@@ -3074,5 +3502,8 @@
     focusSounds: function () { initOnce("focusSounds", _initFocusSounds); },
     translator: function () { initOnce("translator", _initTranslator); },
     anatomy: function () { initOnce("anatomy", _initAnatomy); },
+    essayWriter: function () { initOnce("essayWriter", _initEssayWriter); },
+    humanizer: function () { initOnce("humanizer", _initHumanizer); },
+    learn: function () { initOnce("learn", _initLearn); },
   };
 })();

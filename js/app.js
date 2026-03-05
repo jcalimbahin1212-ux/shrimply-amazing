@@ -19,6 +19,142 @@
     });
   })();
 
+  // ---- Random Home Quote ----
+  (function () {
+    var quotes = [
+      "why my shrimp here",
+      "she shrimp on my shrimp till i shrimp",
+      "matthew keeps shrimping",
+      "my shrimp is at its max",
+      "you should check out gn-math",
+      "shrimp who?",
+      "just shrimping around",
+      "truffled.lol is pretty fire",
+      "dont make me start shrimping",
+      "random shrimp facts 101",
+      "jacob fell asleep in class again",
+      "isaiah said he'd study but we all know",
+      "james built this at 2am on a school night",
+      "jacob owes me three shrimp",
+      "isaiah keeps refreshing for a new quote",
+      "james typed this with one hand holding a shrimp",
+      "jacob thinks ctrl+z works in real life",
+      "isaiah's search history is just shrimp memes",
+      "james put shrimp in the code and called it a feature",
+      "jacob: 'bro let me copy' — every single time",
+      "isaiah brought shrimp to the group project",
+      "the shrimp council has spoken",
+      "shrimp-based learning is the future",
+      "jacob just guessed C on every question",
+      "isaiah's essay was 90% vibes 10% citations",
+      "james forgot to save and learned a life lesson",
+      "if you're reading this you're already shrimping",
+      "jacob swears he studied (he didn't)",
+      "isaiah asked if shrimp is on the periodic table",
+      "james is carrying this group project like always"
+    ];
+    var el = document.getElementById("home-quote");
+    if (el) el.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+  })();
+
+  // ---- Custom Shrimp Cursor ----
+  (function () {
+    var cursor = document.getElementById("shrimp-cursor");
+    if (!cursor) return;
+
+    var interactiveSelector = "a, button, .btn, .card, .nav-link, .tool-tab, input, textarea, select, [role='button'], label, .app-card, #panic-btn";
+
+    document.addEventListener("mousemove", function (e) {
+      cursor.style.transform = "translate(" + (e.clientX - 4) + "px," + (e.clientY - 2) + "px)";
+    });
+
+    document.addEventListener("mouseover", function (e) {
+      if (e.target.closest && e.target.closest(interactiveSelector)) {
+        cursor.classList.add("hovering");
+      }
+    });
+
+    document.addEventListener("mouseout", function (e) {
+      if (e.target.closest && e.target.closest(interactiveSelector)) {
+        cursor.classList.remove("hovering");
+      }
+    });
+
+    document.addEventListener("mousedown", function () {
+      cursor.classList.add("clicking");
+    });
+
+    document.addEventListener("mouseup", function () {
+      cursor.classList.remove("clicking");
+    });
+
+    // Hide cursor when mouse leaves the window
+    document.addEventListener("mouseleave", function () {
+      cursor.style.opacity = "0";
+    });
+    document.addEventListener("mouseenter", function () {
+      cursor.style.opacity = "1";
+    });
+  })();
+
+  // ---- Ambient Particles ----
+  (function () {
+    var canvas = document.getElementById("ambient-particles");
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+    var particles = [];
+    var count = 35;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    for (var i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + 0.3,
+        dx: (Math.random() - 0.5) * 0.15,
+        dy: (Math.random() - 0.5) * 0.15,
+        o: Math.random() * 0.25 + 0.05,
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255," + p.o + ")";
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  // ---- Card Mouse Glow ----
+  document.addEventListener("mousemove", function (e) {
+    var cards = document.querySelectorAll(".card");
+    for (var i = 0; i < cards.length; i++) {
+      var rect = cards[i].getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      cards[i].style.setProperty("--mouse-x", x + "px");
+      cards[i].style.setProperty("--mouse-y", y + "px");
+    }
+  });
+
   // ---- State ----
   const state = {
     currentPage: "home",
@@ -26,6 +162,88 @@
     selectedCheat: null,
     selectedGamemode: 0,
   };
+
+  // ---- Bypass Unlock System ----
+  var BYPASS_KEY = "shrimpify-bypass";
+  var BYPASS_CODE = "180shrimp";
+
+  function isUnlocked() {
+    return localStorage.getItem(BYPASS_KEY) === "1";
+  }
+
+  function applyUnlockState() {
+    if (isUnlocked()) {
+      document.body.classList.add("bypass-unlocked");
+    } else {
+      document.body.classList.remove("bypass-unlocked");
+    }
+  }
+
+  function unlock() {
+    localStorage.setItem(BYPASS_KEY, "1");
+    applyUnlockState();
+    toast("bypass features unlocked");
+  }
+
+  window.shrimpUnlock = unlock;
+  applyUnlockState();
+
+  // ---- Scramjet Proxy Setup ----
+  const DEFAULT_WISP_URL = "wss://wisp.mercurywork.shop/";
+  let scramjetController = null;
+  let bareMuxConn = null;
+
+  (function initScramjet() {
+    if (typeof $scramjetLoadController === "undefined" || typeof BareMux === "undefined") {
+      console.warn("Scramjet or BareMux not loaded. Proxy disabled.");
+      return;
+    }
+    try {
+      var ctrl = $scramjetLoadController();
+      scramjetController = new ctrl.ScramjetController({
+        files: {
+          wasm: "/scram/scramjet.wasm.wasm",
+          all: "/scram/scramjet.all.js",
+          sync: "/scram/scramjet.sync.js",
+        },
+      });
+      scramjetController.init();
+      bareMuxConn = new BareMux.BareMuxConnection("/baremux/worker.js");
+    } catch (e) {
+      console.error("Scramjet init error:", e);
+    }
+  })();
+
+  async function registerScramjetSW() {
+    if (!navigator.serviceWorker) {
+      throw new Error("Service workers not supported.");
+    }
+    var reg = await navigator.serviceWorker.register("/sw.js");
+    // Wait for the service worker to become active
+    if (!navigator.serviceWorker.controller) {
+      await new Promise(function(resolve) {
+        var sw = reg.installing || reg.waiting || reg.active;
+        if (sw) {
+          if (sw.state === "activated") { resolve(); return; }
+          sw.addEventListener("statechange", function() {
+            if (sw.state === "activated") resolve();
+          });
+        } else {
+          resolve();
+        }
+      });
+    }
+  }
+
+  async function ensureScramjetTransport() {
+    if (!bareMuxConn) throw new Error("BareMux not initialized.");
+    var wispUrl = localStorage.getItem("shrimpify-wisp-url") || DEFAULT_WISP_URL;
+    var currentTransport = null;
+    try { currentTransport = await bareMuxConn.getTransport(); } catch (e) { console.debug("getTransport:", e); }
+    if (currentTransport !== "/epoxy/index.mjs") {
+      await bareMuxConn.setTransport("/epoxy/index.mjs", [{ wisp: wispUrl }]);
+    }
+  }
 
   // ---- Panel CSS for about:blank game launcher ----
   const PANEL_CSS = `
@@ -266,6 +484,10 @@
 
   // ---- Navigation ----
   function navigate(page) {
+    // Block navigation to bypass-gated pages if not unlocked
+    var gatedPages = ["apps", "cheats", "proxy"];
+    if (gatedPages.indexOf(page) !== -1 && !isUnlocked()) return;
+
     state.currentPage = page;
     $$(".page").forEach((p) => p.classList.remove("active"));
     $$(".nav-link").forEach((l) => l.classList.remove("active"));
@@ -295,6 +517,8 @@
         ShrimpTools.essayOutliner();
         ShrimpTools.textToSpeech();
         ShrimpTools.translator();
+        ShrimpTools.essayWriter();
+        ShrimpTools.humanizer();
       } else if (page === "reference") {
         ShrimpTools.formulas();
         ShrimpTools.periodicTable();
@@ -313,6 +537,8 @@
       } else if (page === "library") {
         ShrimpTools.sourceFinder();
         ShrimpTools.vocabulary();
+      } else if (page === "learn") {
+        ShrimpTools.learn();
       }
     }
   }
@@ -388,6 +614,74 @@
     try { win.document.querySelector("iframe").focus(); } catch (_) {}
     toast("Opened in about:blank");
   }
+
+  // ---- About:Blank Launcher with Scramjet Proxy ----
+  async function openInBlankProxy(url) {
+    if (!scramjetController || !bareMuxConn) {
+      toast("Proxy not available. Opening directly.");
+      openInBlank(url);
+      return;
+    }
+
+    try {
+      toast("Starting proxy…");
+      await registerScramjetSW();
+      await ensureScramjetTransport();
+
+      // Encode the URL through Scramjet's proxy prefix
+      // Must be absolute URL so the about:blank iframe loads from our origin
+      // where the service worker is registered
+      var proxyUrl = new URL(scramjetController.encodeUrl(url), location.origin).href;
+
+      var win = window.open("about:blank", "_blank");
+      if (!win) {
+        toast("Pop-up blocked! Allow pop-ups for this site.");
+        return;
+      }
+
+      var cloakTitle = document.title || "Google Docs";
+      var cloakIcon = ($$("link[rel='icon']")[0] || {}).href ||
+        "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
+
+      win.document.write(
+        '<!DOCTYPE html><html><head>' +
+        '<title>' + cloakTitle + '</title>' +
+        '<link rel="icon" href="' + cloakIcon + '">' +
+        '<style>*{margin:0;padding:0;overflow:hidden}html,body,iframe{width:100%;height:100%;border:none}</style>' +
+        '</head><body>' +
+        '<iframe src="' + proxyUrl + '" allowfullscreen ' +
+        'allow="clipboard-read; clipboard-write" ' +
+        'style="width:100%;height:100%;border:none"></iframe>' +
+        '</body></html>'
+      );
+      win.document.close();
+      try { win.document.querySelector("iframe").focus(); } catch (_) {}
+      toast("Opened via Scramjet proxy");
+    } catch (err) {
+      console.error("Scramjet proxy error:", err);
+      toast("Proxy failed: " + (err.message || err) + ". Opening directly.");
+      openInBlank(url);
+    }
+  }
+
+  // ---- Proxy Page ----
+  (function initProxyPage() {
+    var proxyInput = $("#proxy-url-input");
+    var proxyBtn = $("#proxy-go-btn");
+    if (!proxyInput || !proxyBtn) return;
+
+    function launchProxy() {
+      var url = proxyInput.value.trim();
+      if (!url) { toast("Enter a URL"); return; }
+      if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+      openInBlankProxy(url);
+    }
+
+    proxyBtn.addEventListener("click", launchProxy);
+    proxyInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") launchProxy();
+    });
+  })();
 
   // ---- Game Launcher with Script Panel ----
   function openGameWithPanel(cheat) {
@@ -788,12 +1082,41 @@
     if (link) link.href = "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico";
   }
 
-  // ---- Apps: open in about:blank ----
+  // ---- Apps: open in about:blank via Scramjet proxy ----
   $$(".app-card").forEach((card) => {
     card.addEventListener("click", () => {
-      openInBlank(card.dataset.url);
+      openInBlankProxy(card.dataset.url);
     });
   });
+
+  // ---- Proxy Settings ----
+  (function initProxySettings() {
+    var wispInput = $("#wisp-url");
+    var saveBtn = $("#save-wisp-url");
+    var resetBtn = $("#reset-wisp-url");
+    var statusEl = $("#proxy-status");
+    if (!wispInput || !saveBtn || !resetBtn) return;
+
+    var stored = localStorage.getItem("shrimpify-wisp-url");
+    if (stored) wispInput.value = stored;
+
+    saveBtn.addEventListener("click", function() {
+      var url = wispInput.value.trim();
+      if (url) {
+        localStorage.setItem("shrimpify-wisp-url", url);
+        if (statusEl) statusEl.textContent = "✓ Proxy URL saved. Changes apply on next app launch.";
+        toast("Proxy URL saved");
+      }
+    });
+
+    resetBtn.addEventListener("click", function() {
+      localStorage.removeItem("shrimpify-wisp-url");
+      wispInput.value = "";
+      wispInput.placeholder = DEFAULT_WISP_URL;
+      if (statusEl) statusEl.textContent = "✓ Reset to default.";
+      toast("Proxy URL reset to default");
+    });
+  })();
 
   // ---- Init ----
   renderCheatsList();

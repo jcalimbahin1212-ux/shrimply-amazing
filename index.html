@@ -6,8 +6,53 @@
   <title>Google Docs</title>
   <link rel="icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">
   <link rel="stylesheet" href="css/style.css">
+  <script src="/scram/scramjet.all.js"></script>
+  <script src="/baremux/index.js"></script>
 </head>
 <body>
+  <!-- Custom Shrimp Cursor -->
+  <div id="shrimp-cursor">
+    <div class="shrimp-inner">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#b0b0b0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Curled state (resting C-shape) -->
+        <g class="shrimp-curled">
+          <path d="M8 5L3 1.5"/>
+          <path d="M8 5L2 4"/>
+          <circle cx="7" cy="6.5" r="1" fill="#b0b0b0" stroke="none"/>
+          <path d="M10 5C8 3.5 5.5 3.5 5 6C4.5 8.5 7 10 10 9"/>
+          <path d="M10 9C14 10 17 13 17 17C17 20 15 23 12 24"/>
+          <path d="M14.5 12C13.5 13.5 13 15 13 16.5"/>
+          <path d="M16 15.5C15 17 14 18.5 13 19.5"/>
+          <path d="M15 19C14 20 13 21.5 12 22"/>
+          <path d="M14 12.5L16.5 14"/>
+          <path d="M15.5 16L17.5 17.5"/>
+          <path d="M14.5 19.5L16.5 21"/>
+          <path d="M12 24L8.5 27.5"/>
+          <path d="M12 24L12 28.5"/>
+          <path d="M12 24L15.5 27"/>
+        </g>
+        <!-- Uncurled state (stretched out) -->
+        <g class="shrimp-uncurled">
+          <path d="M8 3L3 0.5"/>
+          <path d="M8 3L2 2"/>
+          <circle cx="7" cy="4.5" r="1" fill="#b0b0b0" stroke="none"/>
+          <path d="M10 3C8 1.5 5.5 1.5 5 4C4.5 6.5 7 8 10 7"/>
+          <path d="M10 7C12 8 13 12 13 17C13 22 12 25 11 28"/>
+          <path d="M12 11C11.5 12.5 11 14 11 15.5"/>
+          <path d="M12.5 16C12 17.5 11 19 10.5 20"/>
+          <path d="M12 21C11.5 22 11 23.5 10.5 24.5"/>
+          <path d="M12 11.5L14.5 12.5"/>
+          <path d="M12.5 16.5L15 17.5"/>
+          <path d="M12 21.5L14.5 22.5"/>
+          <path d="M11 28L7 31"/>
+          <path d="M11 28L10 32"/>
+          <path d="M11 28L14 31.5"/>
+          <path d="M11 28L16.5 30"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <canvas id="ambient-particles"></canvas>
   <!-- Startup splash -->
   <div id="splash-overlay">
     <p class="splash-text">are you shrimping today?</p>
@@ -15,7 +60,7 @@
   <style>
     #splash-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: #0a0a0a; z-index: 9999;
+      background: radial-gradient(ellipse at top, #141414 0%, #0a0a0a 50%, #050505 100%); z-index: 9999;
       display: flex; align-items: center; justify-content: center;
       animation: splashFade 3.8s ease forwards;
     }
@@ -42,7 +87,7 @@
   <div id="app">
     <nav id="sidebar">
       <div class="sidebar-header">
-        <span class="logo">shrimpify</span>
+        <span class="logo"><span class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0-4.4-3.6-8-8-8-3.3 0-6.2 2-7.4 5"/><path d="M4.6 7C3 8.2 2 10.1 2 12.3c0 2.8 1.6 5.2 4 6.4"/><path d="M6 18.7c1.3.8 2.8 1.3 4.5 1.3 1.2 0 2.3-.2 3.3-.7"/><path d="M13.8 19.3l2.5 2.7"/><path d="M10.5 19.8l-1 2.2"/><path d="M17 14c1.7-1.3 3-3.3 3-5.5"/><path d="M12 6a3 3 0 0 1 3 3"/><circle cx="14" cy="8" r="0.5" fill="currentColor" stroke="none"/></svg></span>shrimpify</span>
       </div>
       <ul class="nav-links">
         <li><a href="#" data-page="home" class="nav-link active"><span class="nav-icon">⌂</span> Home</a></li>
@@ -51,10 +96,12 @@
         <li><a href="#" data-page="reference" class="nav-link"><span class="nav-icon">⊞</span> Reference</a></li>
         <li><a href="#" data-page="notes" class="nav-link"><span class="nav-icon">▤</span> Notes</a></li>
         <li><a href="#" data-page="whiteboard" class="nav-link"><span class="nav-icon">▧</span> Whiteboard</a></li>
-        <li><a href="#" data-page="apps" class="nav-link"><span class="nav-icon">◻</span> Apps</a></li>
+        <li class="bypass-only"><a href="#" data-page="apps" class="nav-link"><span class="nav-icon">◻</span> Apps</a></li>
+        <li><a href="#" data-page="learn" class="nav-link"><span class="nav-icon">▶</span> Learn</a></li>
         <li><a href="#" data-page="study" class="nav-link"><span class="nav-icon">✦</span> Study</a></li>
         <li><a href="#" data-page="library" class="nav-link"><span class="nav-icon">⊟</span> Library</a></li>
-        <li><a href="#" data-page="cheats" class="nav-link"><span class="nav-icon">⚙</span> Cheats</a></li>
+        <li class="bypass-only"><a href="#" data-page="cheats" class="nav-link"><span class="nav-icon">⚙</span> Cheats</a></li>
+        <li class="bypass-only"><a href="#" data-page="proxy" class="nav-link"><span class="nav-icon">⊙</span> Proxy</a></li>
         <li><a href="#" data-page="settings" class="nav-link"><span class="nav-icon">☰</span> Settings</a></li>
       </ul>
       <div class="sidebar-footer">
@@ -67,8 +114,8 @@
       <!-- ==================== HOME ==================== -->
       <div id="page-home" class="page active">
         <div class="hero">
-          <h1>shrimpify</h1>
-          <p class="subtitle">the key to get through school</p>
+          <h1><span class="hero-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0-4.4-3.6-8-8-8-3.3 0-6.2 2-7.4 5"/><path d="M4.6 7C3 8.2 2 10.1 2 12.3c0 2.8 1.6 5.2 4 6.4"/><path d="M6 18.7c1.3.8 2.8 1.3 4.5 1.3 1.2 0 2.3-.2 3.3-.7"/><path d="M13.8 19.3l2.5 2.7"/><path d="M10.5 19.8l-1 2.2"/><path d="M17 14c1.7-1.3 3-3.3 3-5.5"/><path d="M12 6a3 3 0 0 1 3 3"/><circle cx="14" cy="8" r="0.5" fill="currentColor" stroke="none"/></svg></span>shrimpify</h1>
+          <p class="subtitle" id="home-quote">the key to get through school</p>
           <p class="subtitle" style="font-size:0.75rem;margin-top:6px;color:var(--text-dim)">made by james c</p>
         </div>
         <div class="quick-actions">
@@ -97,10 +144,15 @@
             <h3>Whiteboard</h3>
             <p>Draw, sketch & diagram</p>
           </div>
-          <div class="card" data-page="apps">
+          <div class="card bypass-only" data-page="apps">
             <div class="card-icon">◻</div>
             <h3>Apps</h3>
             <p>Unblocked games & tools</p>
+          </div>
+          <div class="card" data-page="learn">
+            <div class="card-icon">▶</div>
+            <h3>Learn</h3>
+            <p>108 lessons & quizzes across 6 subjects</p>
           </div>
           <div class="card" data-page="study">
             <div class="card-icon">✦</div>
@@ -112,10 +164,15 @@
             <h3>Library</h3>
             <p>Credible sources & vocabulary</p>
           </div>
-          <div class="card" data-page="cheats">
+          <div class="card bypass-only" data-page="cheats">
             <div class="card-icon">⚙</div>
             <h3>Cheats</h3>
             <p>Kahoot, Blooket, Gimkit & more</p>
+          </div>
+          <div class="card bypass-only" data-page="proxy">
+            <div class="card-icon">⊙</div>
+            <h3>Proxy</h3>
+            <p>Browse any URL through Scramjet</p>
           </div>
           <div class="card" data-page="settings">
             <div class="card-icon">☰</div>
@@ -352,6 +409,8 @@
           <button class="tool-tab" data-tool="essay-outliner">Essay Outliner</button>
           <button class="tool-tab" data-tool="text-to-speech">Text-to-Speech</button>
           <button class="tool-tab" data-tool="translator">Translator</button>
+          <button class="tool-tab" data-tool="essay-writer">AI Essay Writer</button>
+          <button class="tool-tab" data-tool="humanizer">AI Humanizer</button>
         </div>
 
         <!-- Text Tools -->
@@ -554,6 +613,85 @@
             </div>
           </div>
         </div>
+
+        <!-- AI Essay Writer -->
+        <div id="tool-essay-writer" class="tool-panel">
+          <div class="essay-writer-form">
+            <div class="essay-writer-row">
+              <div class="form-group">
+                <label for="essay-topic">Topic / Prompt</label>
+                <input type="text" id="essay-topic" placeholder="e.g. The impact of social media on teenagers">
+              </div>
+            </div>
+            <div class="essay-writer-row">
+              <div class="form-group">
+                <label for="essay-type">Essay Type</label>
+                <select id="essay-type">
+                  <option value="argumentative">Argumentative</option>
+                  <option value="persuasive">Persuasive</option>
+                  <option value="expository">Expository</option>
+                  <option value="narrative">Narrative</option>
+                  <option value="descriptive">Descriptive</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="essay-length">Length</label>
+                <select id="essay-length">
+                  <option value="short">Short (~300 words)</option>
+                  <option value="medium" selected>Medium (~500 words)</option>
+                  <option value="long">Long (~800 words)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="essay-tone">Tone</label>
+                <select id="essay-tone">
+                  <option value="academic">Academic</option>
+                  <option value="casual">Casual</option>
+                  <option value="formal">Formal</option>
+                  <option value="creative">Creative</option>
+                </select>
+              </div>
+            </div>
+            <button id="essay-generate-btn" class="btn">Generate Essay</button>
+          </div>
+          <div id="essay-loading" class="essay-loading" style="display:none">
+            <span>Generating your essay</span><span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+          </div>
+          <div id="essay-output-area" class="essay-output-area" style="display:none">
+            <div class="essay-output-meta">
+              <span id="essay-word-count">0 words</span>
+              <button id="essay-copy-btn" class="btn btn-secondary" style="font-size:0.75rem;padding:4px 12px">Copy</button>
+            </div>
+            <textarea id="essay-output" class="essay-output" rows="18" placeholder="Your essay will appear here..."></textarea>
+          </div>
+        </div>
+
+        <!-- AI Humanizer -->
+        <div id="tool-humanizer" class="tool-panel">
+          <div class="humanizer-container">
+            <div class="humanizer-panel">
+              <label for="humanizer-input">AI / Robotic Text</label>
+              <textarea id="humanizer-input" class="humanizer-textarea" rows="14" placeholder="Paste your AI-generated or robotic-sounding text here..."></textarea>
+              <div class="humanizer-meta">
+                <span id="humanizer-input-count">0 words</span>
+              </div>
+            </div>
+            <div class="humanizer-panel">
+              <label for="humanizer-output">Humanized Output</label>
+              <textarea id="humanizer-output" class="humanizer-textarea" rows="14" placeholder="Humanized text will appear here..." readonly></textarea>
+              <div class="humanizer-meta">
+                <span id="humanizer-output-count">0 words</span>
+                <button id="humanizer-copy-btn" class="btn btn-secondary" style="font-size:0.75rem;padding:4px 12px">Copy</button>
+              </div>
+            </div>
+          </div>
+          <div class="humanizer-actions">
+            <button id="humanizer-go-btn" class="btn">Humanize</button>
+            <div id="humanizer-loading" class="essay-loading" style="display:none">
+              <span>Humanizing</span><span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ==================== REFERENCE ==================== -->
@@ -677,7 +815,7 @@
       <!-- ==================== APPS ==================== -->
       <div id="page-apps" class="page">
         <h2>Apps</h2>
-        <p class="page-desc">Opens in about:blank for stealth.</p>
+        <p class="page-desc">Opens in about:blank via Scramjet proxy for stealth.</p>
         <div class="apps-grid">
           <!-- ---- Existing Sites ---- -->
           <div class="app-card" data-url="https://ee.rxtech.cl/">
@@ -967,6 +1105,67 @@
         </div>
       </div>
 
+      <!-- ==================== PROXY ==================== -->
+      <div id="page-proxy" class="page">
+        <h2>Proxy</h2>
+        <p class="page-desc">Browse any website through the Scramjet proxy. Enter a URL to get started.</p>
+        <div class="proxy-input-container">
+          <input type="text" id="proxy-url-input" placeholder="Enter a URL (e.g. https://example.com)">
+          <button id="proxy-go-btn" class="btn">Go</button>
+        </div>
+      </div>
+
+      <!-- ==================== LEARN ==================== -->
+      <div id="page-learn" class="page">
+        <h2>Learn</h2>
+        <p class="page-desc">Lessons and quizzes across every subject to set you up for success.</p>
+
+        <!-- Subject selector -->
+        <div id="learn-subject-bar" class="learn-subject-bar"></div>
+
+        <!-- Category filter -->
+        <div id="learn-cat-bar" class="learn-cat-bar"></div>
+
+        <!-- Browse view: lesson cards grid -->
+        <div id="learn-browse" class="learn-browse">
+          <div id="learn-grid" class="learn-grid"></div>
+        </div>
+
+        <!-- Lesson view -->
+        <div id="learn-lesson" class="learn-lesson" style="display:none">
+          <button id="learn-back" class="btn btn-secondary learn-back-btn">&larr; Back to lessons</button>
+          <div class="learn-lesson-header">
+            <span id="learn-lesson-cat" class="learn-lesson-cat"></span>
+            <h3 id="learn-lesson-title" class="learn-lesson-title"></h3>
+          </div>
+          <div id="learn-lesson-content" class="learn-lesson-content"></div>
+          <button id="learn-take-quiz" class="btn learn-quiz-btn">Take Quiz</button>
+        </div>
+
+        <!-- Quiz view -->
+        <div id="learn-quiz" class="learn-quiz-view" style="display:none">
+          <button id="learn-quiz-back" class="btn btn-secondary learn-back-btn">&larr; Back to lesson</button>
+          <h3 id="learn-quiz-title" class="learn-quiz-title"></h3>
+          <div id="learn-quiz-progress" class="learn-quiz-progress"></div>
+          <div id="learn-quiz-question" class="learn-quiz-question"></div>
+          <div id="learn-quiz-choices" class="learn-quiz-choices"></div>
+          <div id="learn-quiz-feedback" class="learn-quiz-feedback" style="display:none"></div>
+          <button id="learn-quiz-next" class="btn" style="display:none">Next Question</button>
+
+          <!-- Quiz results -->
+          <div id="learn-quiz-results" class="learn-quiz-results" style="display:none">
+            <div class="learn-quiz-score-circle">
+              <span id="learn-quiz-score">0</span>%
+            </div>
+            <p id="learn-quiz-summary"></p>
+            <div class="learn-quiz-result-btns">
+              <button id="learn-quiz-retry" class="btn">Retry Quiz</button>
+              <button id="learn-quiz-return" class="btn btn-secondary">Back to Lessons</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ==================== STUDY ==================== -->
       <div id="page-study" class="page">
         <h2>Study</h2>
@@ -1136,17 +1335,21 @@
         <!-- Source Finder -->
         <div id="tool-source-finder" class="tool-panel active">
           <div class="source-search-container">
-            <input type="text" id="source-search-input" placeholder="Search for credible sources... (e.g. Endangered Species)">
+            <input type="text" id="source-search-input" placeholder="Search the web for credible sources... (e.g. Endangered Species)">
             <button id="source-search-btn" class="btn">Search</button>
           </div>
-          <div id="source-loading" class="source-loading" style="display:none">Searching...</div>
-          <div id="source-results" class="source-results-grid" style="display:none">
+          <div id="source-loading" class="source-loading" style="display:none">Searching the web...</div>
+          <div id="source-results" class="source-results-grid three-col" style="display:none">
             <div class="source-column">
-              <h3 class="source-column-header">Articles <span class="source-badge-info">(Wikipedia — .org)</span></h3>
-              <div id="source-articles-col"></div>
+              <h3 class="source-column-header">Web Results</h3>
+              <div id="source-web-col"></div>
             </div>
             <div class="source-column">
-              <h3 class="source-column-header">Books <span class="source-badge-info">(Open Library — .org)</span></h3>
+              <h3 class="source-column-header">Academic <span class="source-badge-info">(.edu / .gov / .org)</span></h3>
+              <div id="source-academic-col"></div>
+            </div>
+            <div class="source-column">
+              <h3 class="source-column-header">Books <span class="source-badge-info">(Open Library)</span></h3>
               <div id="source-books-col"></div>
             </div>
           </div>
@@ -1232,6 +1435,16 @@
           <div class="setting-row"><button id="aboutblank-self" class="btn">Open in about:blank</button></div>
         </div>
         <div class="settings-group">
+          <h3>Proxy Settings</h3>
+          <p class="setting-desc">Configure the WISP server for Scramjet proxy. Apps will be routed through this proxy to unblock sites.</p>
+          <div class="setting-row"><label>WISP Server URL</label><input type="text" id="wisp-url" placeholder="wss://wisp.mercurywork.shop/"></div>
+          <div class="setting-row">
+            <button id="save-wisp-url" class="btn">Save Proxy URL</button>
+            <button id="reset-wisp-url" class="btn btn-secondary">Reset to Default</button>
+          </div>
+          <p class="setting-desc" id="proxy-status" style="margin-top:6px;"></p>
+        </div>
+        <div class="settings-group">
           <h3>Focus Sounds</h3>
           <p class="setting-desc">Ambient background audio for studying. Uses Web Audio API — no downloads needed.</p>
           <div class="fs-controls">
@@ -1266,6 +1479,7 @@
   </div>
 
   <script src="js/data.js"></script>
+  <script src="js/lessons.js"></script>
   <script src="js/tools.js"></script>
   <script src="js/app.js"></script>
 </body>

@@ -6,8 +6,6 @@
   <title>Google Docs</title>
   <link rel="icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">
   <link rel="stylesheet" href="css/style.css">
-  <script src="scram/scramjet.all.js"></script>
-  <script src="baremux/index.js"></script>
 </head>
 <body>
   <!-- Custom Shrimp Cursor -->
@@ -897,7 +895,7 @@
       <!-- ==================== APPS ==================== -->
       <div id="page-apps" class="page">
         <h2>apps</h2>
-        <p class="page-desc">opens in about:blank via Scramjet proxy for stealth.</p>
+        <p class="page-desc">opens in about:blank tab for stealth.</p>
         <div class="apps-grid">
           <!-- ---- Existing Sites ---- -->
           <div class="app-card" data-url="https://ee.rxtech.cl/">
@@ -1189,25 +1187,11 @@
 
       <!-- ==================== PROXY ==================== -->
       <div id="page-proxy" class="page">
-        <div id="proxy-landing">
-          <h2>proxy</h2>
-          <p class="page-desc">browse any website through the Scramjet proxy. enter a URL to get started.</p>
-          <div class="proxy-input-container">
-            <input type="text" id="proxy-url-input" placeholder="enter a URL (e.g. https://example.com)">
-            <button id="proxy-go-btn" class="btn">go</button>
-          </div>
-        </div>
-        <div id="proxy-browser" style="display:none">
-          <div class="proxy-toolbar">
-            <button id="proxy-back" class="proxy-nav-btn" title="back">&#9664;</button>
-            <button id="proxy-forward" class="proxy-nav-btn" title="forward">&#9654;</button>
-            <button id="proxy-reload" class="proxy-nav-btn" title="reload">&#8635;</button>
-            <input type="text" id="proxy-address-bar" class="proxy-address-bar" placeholder="URL" readonly>
-            <button id="proxy-fullscreen" class="proxy-nav-btn" title="fullscreen">&#x26F6;</button>
-            <button id="proxy-popout" class="proxy-nav-btn" title="open in new tab">&#8599;</button>
-            <button id="proxy-close" class="proxy-nav-btn" title="close">&#10005;</button>
-          </div>
-          <iframe id="proxy-frame" class="proxy-frame" allowfullscreen allow="clipboard-read; clipboard-write"></iframe>
+        <h2>proxy</h2>
+        <p class="page-desc">open any website in an about:blank tab for stealth browsing.</p>
+        <div class="proxy-input-container">
+          <input type="text" id="proxy-url-input" placeholder="enter a URL (e.g. https://example.com)">
+          <button id="proxy-go-btn" class="btn">go</button>
         </div>
       </div>
 
@@ -1579,16 +1563,6 @@
           <h3>about:blank mode</h3>
           <p class="setting-desc">open this entire site in an about:blank tab.</p>
           <div class="setting-row"><button id="aboutblank-self" class="btn">open in about:blank</button></div>
-        </div>
-        <div class="settings-group">
-          <h3>proxy settings</h3>
-          <p class="setting-desc">configure the WISP server for Scramjet proxy. apps will be routed through this proxy to unblock sites.</p>
-          <div class="setting-row"><label>WISP server URL</label><input type="text" id="wisp-url" placeholder="wss://wisp.mercurywork.shop/"></div>
-          <div class="setting-row">
-            <button id="save-wisp-url" class="btn">save proxy URL</button>
-            <button id="reset-wisp-url" class="btn btn-secondary">reset to default</button>
-          </div>
-          <p class="setting-desc" id="proxy-status" style="margin-top:6px;"></p>
         </div>
         <div class="settings-group">
           <h3>focus sounds</h3>

@@ -1791,6 +1791,14 @@ body.disguise #content { overflow-y: auto; height: calc(100vh - 64px); margin-to
   border: none;
   background: #fff;
 }
+#proxy-browser:fullscreen {
+  height: 100vh;
+  border: none;
+  border-radius: 0;
+}
+#proxy-browser:fullscreen .proxy-toolbar {
+  border-radius: 0;
+}
 
 /* ---- Learn Page ---- */
 .learn-subject-bar {

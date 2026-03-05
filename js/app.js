@@ -738,6 +738,7 @@
     var backBtn = $("#proxy-back");
     var fwdBtn = $("#proxy-forward");
     var reloadBtn = $("#proxy-reload");
+    var fullscreenBtn = $("#proxy-fullscreen");
     var popoutBtn = $("#proxy-popout");
     var closeBtn = $("#proxy-close");
     var frame = $("#proxy-frame");
@@ -770,6 +771,17 @@
     if (reloadBtn) reloadBtn.addEventListener("click", function () {
       if (frame && frame.contentWindow) {
         try { frame.contentWindow.location.reload(); } catch (_) {}
+      }
+    });
+    if (fullscreenBtn) fullscreenBtn.addEventListener("click", function () {
+      var browser = $("#proxy-browser");
+      if (!browser) return;
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        browser.requestFullscreen().catch(function () {
+          toast("Fullscreen not supported");
+        });
       }
     });
     if (popoutBtn) popoutBtn.addEventListener("click", function () {

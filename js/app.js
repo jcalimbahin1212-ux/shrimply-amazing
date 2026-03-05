@@ -31,7 +31,27 @@
       "just shrimping around",
       "truffled.lol is pretty fire",
       "dont make me start shrimping",
-      "random shrimp facts 101"
+      "random shrimp facts 101",
+      "jacob fell asleep in class again",
+      "isaiah said he'd study but we all know",
+      "james built this at 2am on a school night",
+      "jacob owes me three shrimp",
+      "isaiah keeps refreshing for a new quote",
+      "james typed this with one hand holding a shrimp",
+      "jacob thinks ctrl+z works in real life",
+      "isaiah's search history is just shrimp memes",
+      "james put shrimp in the code and called it a feature",
+      "jacob: 'bro let me copy' — every single time",
+      "isaiah brought shrimp to the group project",
+      "the shrimp council has spoken",
+      "shrimp-based learning is the future",
+      "jacob just guessed C on every question",
+      "isaiah's essay was 90% vibes 10% citations",
+      "james forgot to save and learned a life lesson",
+      "if you're reading this you're already shrimping",
+      "jacob swears he studied (he didn't)",
+      "isaiah asked if shrimp is on the periodic table",
+      "james is carrying this group project like always"
     ];
     var el = document.getElementById("home-quote");
     if (el) el.textContent = quotes[Math.floor(Math.random() * quotes.length)];

@@ -37,6 +37,46 @@
     if (el) el.textContent = quotes[Math.floor(Math.random() * quotes.length)];
   })();
 
+  // ---- Custom Shrimp Cursor ----
+  (function () {
+    var cursor = document.getElementById("shrimp-cursor");
+    if (!cursor) return;
+
+    var interactiveSelector = "a, button, .btn, .card, .nav-link, .tool-tab, input, textarea, select, [role='button'], label, .app-card, #panic-btn";
+
+    document.addEventListener("mousemove", function (e) {
+      cursor.style.transform = "translate(" + (e.clientX - 4) + "px," + (e.clientY - 2) + "px)";
+    });
+
+    document.addEventListener("mouseover", function (e) {
+      if (e.target.closest && e.target.closest(interactiveSelector)) {
+        cursor.classList.add("hovering");
+      }
+    });
+
+    document.addEventListener("mouseout", function (e) {
+      if (e.target.closest && e.target.closest(interactiveSelector)) {
+        cursor.classList.remove("hovering");
+      }
+    });
+
+    document.addEventListener("mousedown", function () {
+      cursor.classList.add("clicking");
+    });
+
+    document.addEventListener("mouseup", function () {
+      cursor.classList.remove("clicking");
+    });
+
+    // Hide cursor when mouse leaves the window
+    document.addEventListener("mouseleave", function () {
+      cursor.style.opacity = "0";
+    });
+    document.addEventListener("mouseenter", function () {
+      cursor.style.opacity = "1";
+    });
+  })();
+
   // ---- Ambient Particles ----
   (function () {
     var canvas = document.getElementById("ambient-particles");

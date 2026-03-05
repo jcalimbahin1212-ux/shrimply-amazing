@@ -517,6 +517,8 @@
       } else if (page === "library") {
         ShrimpTools.sourceFinder();
         ShrimpTools.vocabulary();
+      } else if (page === "learn") {
+        ShrimpTools.learn();
       }
     }
   }

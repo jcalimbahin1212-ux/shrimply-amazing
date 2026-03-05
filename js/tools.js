@@ -3225,6 +3225,256 @@
   }
 
   // ============================================================
+  //  LEARN — Lessons & Quizzes browser
+  // ============================================================
+  function _initLearn() {
+    var subjectBar = $("#learn-subject-bar");
+    var catBar = $("#learn-cat-bar");
+    var grid = $("#learn-grid");
+    var browseView = $("#learn-browse");
+    var lessonView = $("#learn-lesson");
+    var quizView = $("#learn-quiz");
+
+    if (!subjectBar || !grid) return;
+
+    var catalog = window.LESSON_CATALOG || [];
+    var currentSubject = 0;
+    var currentCat = "All";
+    var currentLesson = null;
+    var quizState = { idx: 0, correct: 0, answered: false };
+    var PROGRESS_KEY = "shrimpify-learn-progress";
+
+    function getProgress() {
+      try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch (e) { return {}; }
+    }
+    function saveProgress(subjectId, lessonIdx, score) {
+      var p = getProgress();
+      var key = subjectId + ":" + lessonIdx;
+      if (!p[key] || score > p[key]) p[key] = score;
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
+    }
+    function getLessonScore(subjectId, lessonIdx) {
+      var p = getProgress();
+      return p[subjectId + ":" + lessonIdx] || 0;
+    }
+
+    // Build subject tabs
+    function renderSubjects() {
+      subjectBar.innerHTML = "";
+      catalog.forEach(function(subj, i) {
+        var btn = document.createElement("button");
+        btn.className = "learn-subject-btn" + (i === currentSubject ? " active" : "");
+        btn.innerHTML = '<span class="learn-subject-icon">' + subj.icon + '</span> ' + subj.name;
+        btn.addEventListener("click", function() {
+          currentSubject = i;
+          currentCat = "All";
+          renderSubjects();
+          renderCats();
+          renderGrid();
+        });
+        subjectBar.appendChild(btn);
+      });
+    }
+
+    // Build category filter
+    function renderCats() {
+      catBar.innerHTML = "";
+      var subject = catalog[currentSubject];
+      if (!subject) return;
+      var cats = ["All"];
+      subject.lessons.forEach(function(l) {
+        if (cats.indexOf(l.cat) === -1) cats.push(l.cat);
+      });
+      cats.forEach(function(c) {
+        var btn = document.createElement("button");
+        btn.className = "learn-cat-btn" + (c === currentCat ? " active" : "");
+        btn.textContent = c;
+        btn.addEventListener("click", function() {
+          currentCat = c;
+          renderCats();
+          renderGrid();
+        });
+        catBar.appendChild(btn);
+      });
+    }
+
+    // Build lesson cards grid
+    function renderGrid() {
+      grid.innerHTML = "";
+      var subject = catalog[currentSubject];
+      if (!subject) return;
+      var lessons = subject.lessons;
+      if (currentCat !== "All") {
+        lessons = lessons.filter(function(l) { return l.cat === currentCat; });
+      }
+      if (lessons.length === 0) {
+        grid.innerHTML = '<p class="learn-empty">No lessons in this category yet.</p>';
+        return;
+      }
+      lessons.forEach(function(lesson) {
+        var realIdx = subject.lessons.indexOf(lesson);
+        var score = getLessonScore(subject.id, realIdx);
+        var card = document.createElement("div");
+        card.className = "learn-card";
+        if (score >= 75) card.classList.add("learn-card-passed");
+        card.innerHTML =
+          '<div class="learn-card-cat">' + lesson.cat + '</div>' +
+          '<h4 class="learn-card-title">' + lesson.title + '</h4>' +
+          '<div class="learn-card-meta">' +
+            '<span>' + lesson.quiz.length + ' questions</span>' +
+            (score > 0 ? '<span class="learn-card-score' + (score >= 75 ? ' passed' : '') + '">' + score + '%</span>' : '') +
+          '</div>';
+        card.addEventListener("click", function() { openLesson(realIdx); });
+        grid.appendChild(card);
+      });
+    }
+
+    function openLesson(idx) {
+      var subject = catalog[currentSubject];
+      currentLesson = idx;
+      var lesson = subject.lessons[idx];
+      browseView.style.display = "none";
+      quizView.style.display = "none";
+      lessonView.style.display = "";
+      $("#learn-lesson-cat").textContent = lesson.cat;
+      $("#learn-lesson-title").textContent = lesson.title;
+      $("#learn-lesson-content").innerHTML = lesson.content;
+      $("#learn-subject-bar").style.display = "none";
+      $("#learn-cat-bar").style.display = "none";
+    }
+
+    function openQuiz() {
+      var subject = catalog[currentSubject];
+      var lesson = subject.lessons[currentLesson];
+      quizState = { idx: 0, correct: 0, answered: false };
+      lessonView.style.display = "none";
+      quizView.style.display = "";
+      $("#learn-quiz-results").style.display = "none";
+      $("#learn-quiz-title").textContent = lesson.title + " \u2014 Quiz";
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      var subject = catalog[currentSubject];
+      var lesson = subject.lessons[currentLesson];
+      var q = lesson.quiz[quizState.idx];
+      var total = lesson.quiz.length;
+
+      $("#learn-quiz-progress").textContent = "Question " + (quizState.idx + 1) + " of " + total;
+      $("#learn-quiz-question").textContent = q.q;
+      var choicesEl = $("#learn-quiz-choices");
+      choicesEl.innerHTML = "";
+      $("#learn-quiz-feedback").style.display = "none";
+      $("#learn-quiz-next").style.display = "none";
+      quizState.answered = false;
+
+      q.options.forEach(function(opt, i) {
+        var btn = document.createElement("button");
+        btn.className = "learn-quiz-choice";
+        btn.textContent = opt;
+        btn.addEventListener("click", function() { answerQuestion(i); });
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function answerQuestion(chosen) {
+      if (quizState.answered) return;
+      quizState.answered = true;
+      var subject = catalog[currentSubject];
+      var lesson = subject.lessons[currentLesson];
+      var q = lesson.quiz[quizState.idx];
+      var correct = q.answer === chosen;
+      if (correct) quizState.correct++;
+
+      var feedbackEl = $("#learn-quiz-feedback");
+      feedbackEl.style.display = "";
+      feedbackEl.className = "learn-quiz-feedback " + (correct ? "correct" : "wrong");
+      feedbackEl.textContent = correct ? "Correct!" : "Incorrect. The answer is: " + q.options[q.answer];
+
+      var choiceBtns = $$("#learn-quiz-choices .learn-quiz-choice");
+      choiceBtns.forEach(function(btn, i) {
+        btn.disabled = true;
+        if (i === q.answer) btn.classList.add("correct-choice");
+        else if (i === chosen && !correct) btn.classList.add("wrong-choice");
+      });
+
+      if (quizState.idx < lesson.quiz.length - 1) {
+        $("#learn-quiz-next").style.display = "";
+      } else {
+        setTimeout(showResults, 800);
+      }
+    }
+
+    function showResults() {
+      var subject = catalog[currentSubject];
+      var lesson = subject.lessons[currentLesson];
+      var total = lesson.quiz.length;
+      var pct = Math.round((quizState.correct / total) * 100);
+
+      saveProgress(subject.id, currentLesson, pct);
+
+      $("#learn-quiz-progress").style.display = "none";
+      $("#learn-quiz-question").style.display = "none";
+      $("#learn-quiz-choices").style.display = "none";
+      $("#learn-quiz-feedback").style.display = "none";
+      $("#learn-quiz-next").style.display = "none";
+
+      var resultsEl = $("#learn-quiz-results");
+      resultsEl.style.display = "";
+      $("#learn-quiz-score").textContent = pct;
+      var summary = quizState.correct + " out of " + total + " correct. ";
+      if (pct === 100) summary += "Perfect score!";
+      else if (pct >= 75) summary += "Great job!";
+      else if (pct >= 50) summary += "Good effort \u2014 review and try again!";
+      else summary += "Keep studying \u2014 you'll get it!";
+      $("#learn-quiz-summary").textContent = summary;
+    }
+
+    $("#learn-back").addEventListener("click", function() {
+      lessonView.style.display = "none";
+      browseView.style.display = "";
+      $("#learn-subject-bar").style.display = "";
+      $("#learn-cat-bar").style.display = "";
+      renderGrid();
+    });
+
+    $("#learn-take-quiz").addEventListener("click", openQuiz);
+
+    $("#learn-quiz-back").addEventListener("click", function() {
+      quizView.style.display = "none";
+      openLesson(currentLesson);
+    });
+
+    $("#learn-quiz-next").addEventListener("click", function() {
+      quizState.idx++;
+      quizState.answered = false;
+      renderQuestion();
+    });
+
+    $("#learn-quiz-retry").addEventListener("click", function() {
+      $("#learn-quiz-progress").style.display = "";
+      $("#learn-quiz-question").style.display = "";
+      $("#learn-quiz-choices").style.display = "";
+      openQuiz();
+    });
+
+    $("#learn-quiz-return").addEventListener("click", function() {
+      quizView.style.display = "none";
+      browseView.style.display = "";
+      $("#learn-subject-bar").style.display = "";
+      $("#learn-cat-bar").style.display = "";
+      $("#learn-quiz-progress").style.display = "";
+      $("#learn-quiz-question").style.display = "";
+      $("#learn-quiz-choices").style.display = "";
+      renderGrid();
+    });
+
+    renderSubjects();
+    renderCats();
+    renderGrid();
+  }
+
+  // ============================================================
   //  Public API (lazy init wrappers)
   // ============================================================
   window.ShrimpTools = {
@@ -3254,5 +3504,6 @@
     anatomy: function () { initOnce("anatomy", _initAnatomy); },
     essayWriter: function () { initOnce("essayWriter", _initEssayWriter); },
     humanizer: function () { initOnce("humanizer", _initHumanizer); },
+    learn: function () { initOnce("learn", _initLearn); },
   };
 })();

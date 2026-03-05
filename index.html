@@ -97,6 +97,7 @@
         <li><a href="#" data-page="notes" class="nav-link"><span class="nav-icon">▤</span> Notes</a></li>
         <li><a href="#" data-page="whiteboard" class="nav-link"><span class="nav-icon">▧</span> Whiteboard</a></li>
         <li class="bypass-only"><a href="#" data-page="apps" class="nav-link"><span class="nav-icon">◻</span> Apps</a></li>
+        <li><a href="#" data-page="learn" class="nav-link"><span class="nav-icon">▶</span> Learn</a></li>
         <li><a href="#" data-page="study" class="nav-link"><span class="nav-icon">✦</span> Study</a></li>
         <li><a href="#" data-page="library" class="nav-link"><span class="nav-icon">⊟</span> Library</a></li>
         <li class="bypass-only"><a href="#" data-page="cheats" class="nav-link"><span class="nav-icon">⚙</span> Cheats</a></li>
@@ -147,6 +148,11 @@
             <div class="card-icon">◻</div>
             <h3>Apps</h3>
             <p>Unblocked games & tools</p>
+          </div>
+          <div class="card" data-page="learn">
+            <div class="card-icon">▶</div>
+            <h3>Learn</h3>
+            <p>108 lessons & quizzes across 6 subjects</p>
           </div>
           <div class="card" data-page="study">
             <div class="card-icon">✦</div>
@@ -1109,6 +1115,57 @@
         </div>
       </div>
 
+      <!-- ==================== LEARN ==================== -->
+      <div id="page-learn" class="page">
+        <h2>Learn</h2>
+        <p class="page-desc">Lessons and quizzes across every subject to set you up for success.</p>
+
+        <!-- Subject selector -->
+        <div id="learn-subject-bar" class="learn-subject-bar"></div>
+
+        <!-- Category filter -->
+        <div id="learn-cat-bar" class="learn-cat-bar"></div>
+
+        <!-- Browse view: lesson cards grid -->
+        <div id="learn-browse" class="learn-browse">
+          <div id="learn-grid" class="learn-grid"></div>
+        </div>
+
+        <!-- Lesson view -->
+        <div id="learn-lesson" class="learn-lesson" style="display:none">
+          <button id="learn-back" class="btn btn-secondary learn-back-btn">&larr; Back to lessons</button>
+          <div class="learn-lesson-header">
+            <span id="learn-lesson-cat" class="learn-lesson-cat"></span>
+            <h3 id="learn-lesson-title" class="learn-lesson-title"></h3>
+          </div>
+          <div id="learn-lesson-content" class="learn-lesson-content"></div>
+          <button id="learn-take-quiz" class="btn learn-quiz-btn">Take Quiz</button>
+        </div>
+
+        <!-- Quiz view -->
+        <div id="learn-quiz" class="learn-quiz-view" style="display:none">
+          <button id="learn-quiz-back" class="btn btn-secondary learn-back-btn">&larr; Back to lesson</button>
+          <h3 id="learn-quiz-title" class="learn-quiz-title"></h3>
+          <div id="learn-quiz-progress" class="learn-quiz-progress"></div>
+          <div id="learn-quiz-question" class="learn-quiz-question"></div>
+          <div id="learn-quiz-choices" class="learn-quiz-choices"></div>
+          <div id="learn-quiz-feedback" class="learn-quiz-feedback" style="display:none"></div>
+          <button id="learn-quiz-next" class="btn" style="display:none">Next Question</button>
+
+          <!-- Quiz results -->
+          <div id="learn-quiz-results" class="learn-quiz-results" style="display:none">
+            <div class="learn-quiz-score-circle">
+              <span id="learn-quiz-score">0</span>%
+            </div>
+            <p id="learn-quiz-summary"></p>
+            <div class="learn-quiz-result-btns">
+              <button id="learn-quiz-retry" class="btn">Retry Quiz</button>
+              <button id="learn-quiz-return" class="btn btn-secondary">Back to Lessons</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ==================== STUDY ==================== -->
       <div id="page-study" class="page">
         <h2>Study</h2>
@@ -1422,6 +1479,7 @@
   </div>
 
   <script src="js/data.js"></script>
+  <script src="js/lessons.js"></script>
   <script src="js/tools.js"></script>
   <script src="js/app.js"></script>
 </body>

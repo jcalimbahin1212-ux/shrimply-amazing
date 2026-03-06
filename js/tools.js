@@ -3850,17 +3850,192 @@
       navigator.clipboard.writeText(outputTextarea.value).then(function() { toast("copied to clipboard!"); });
     });
 
+    // Post-processing: break AI patterns that detectors flag
+    function postProcess(text) {
+      // Strip any markdown formatting
+      text = text.replace(/\*\*(.+?)\*\*/g, "$1");
+      text = text.replace(/\*(.+?)\*/g, "$1");
+      text = text.replace(/^#+\s*/gm, "");
+      text = text.replace(/^[-*]\s+/gm, "");
+
+      // Break "isn't just X — it's Y" pattern (very AI)
+      text = text.replace(/isn't just (.+?)—it's (.+?)\./gi, function(_, a, b) {
+        return "goes beyond " + a + ". It's also " + b + ".";
+      });
+      text = text.replace(/not just (.+?)—it's (.+?)\./gi, function(_, a, b) {
+        return "more than " + a + ". It's " + b + " too.";
+      });
+
+      // Break dash-metaphor-dash asides: "—like X—" → "(think X)"
+      text = text.replace(/—like (.+?)—/g, function(_, inner) {
+        return " (think " + inner + ")";
+      });
+      text = text.replace(/—such as (.+?)—/g, function(_, inner) {
+        return " (" + inner + ")";
+      });
+
+      // Kill "In short," and "To sum up," — detectors flag conclusion markers
+      text = text.replace(/\bIn short,?\s*/gi, "");
+      text = text.replace(/\bTo sum up,?\s*/gi, "");
+      text = text.replace(/\bAll in all,?\s*/gi, "");
+      text = text.replace(/\bIn summary,?\s*/gi, "");
+      text = text.replace(/\bTo summarize,?\s*/gi, "");
+      text = text.replace(/\bIn conclusion,?\s*/gi, "");
+
+      // Word replacements for AI-flagged vocabulary
+      var replacements = [
+        [/\bFurthermore,?\s*/gi, function() { return Math.random() > 0.5 ? "Plus, " : "Also, "; }],
+        [/\bMoreover,?\s*/gi, function() { return Math.random() > 0.5 ? "And " : "On top of that, "; }],
+        [/\bHowever,?\s*/gi, function() { return Math.random() > 0.5 ? "But " : "Though "; }],
+        [/\bConsequently,?\s*/gi, "So "],
+        [/\bNevertheless,?\s*/gi, "Still, "],
+        [/\bAdditionally,?\s*/gi, function() { return Math.random() > 0.5 ? "Plus, " : "And "; }],
+        [/\bIt is important to note that\s*/gi, ""],
+        [/\bIt is worth noting that\s*/gi, ""],
+        [/\bIt'?s worth noting that\s*/gi, ""],
+        [/\bIn today'?s world,?\s*/gi, ""],
+        [/\bThis is because\s*/gi, "That's because "],
+        [/\bplays a crucial role/gi, "matters a lot"],
+        [/\bplays an important role/gi, "is really important"],
+        [/\bplays a key role/gi, "is a big deal"],
+        [/\ba myriad of/gi, "a ton of"],
+        [/\bdelve into/gi, "look at"],
+        [/\bdive into/gi, "get into"],
+        [/\butilize/gi, "use"],
+        [/\bdemonstrate/gi, "show"],
+        [/\bfacilitate/gi, "help with"],
+        [/\bmultifaceted/gi, "complex"],
+        [/\blandscape/gi, "situation"],
+        [/\bparadigm/gi, "way of thinking"],
+        [/\bleverage/gi, "use"],
+        [/\brobust/gi, "strong"],
+        [/\bstreamline/gi, "simplify"],
+        [/\bholistic/gi, "overall"],
+        [/\bfoster/gi, "build"],
+        [/\bcommence/gi, "start"],
+        [/\bnumerous/gi, "a lot of"],
+        [/\bsignificant\b/gi, "big"],
+        [/\bsufficient/gi, "enough"],
+        [/\bobtain/gi, "get"],
+        [/\bendeavor/gi, "try"],
+        [/\bIn order to /gi, "To "],
+        [/\bDue to the fact that /gi, "Because "],
+        [/\bcrucial/gi, "important"],
+        [/\bvital/gi, "important"],
+        [/\bessential/gi, "important"],
+        [/\binnovative/gi, "new"],
+        [/\bcomprehensive/gi, "full"],
+        [/\bensure/gi, "make sure"],
+        [/\benhance/gi, "improve"],
+        [/\bimplement/gi, "set up"],
+        [/\boptimal/gi, "best"],
+        [/\bpivotal/gi, "key"],
+        [/\bundeniable/gi, "clear"],
+        [/\bundeniably/gi, "clearly"],
+        [/\bseamless/gi, "smooth"],
+        [/\bseamlessly/gi, "smoothly"],
+        [/\boverall,?\s*/gi, function() { return Math.random() > 0.5 ? "Basically, " : ""; }]
+      ];
+      for (var r = 0; r < replacements.length; r++) {
+        text = text.replace(replacements[r][0], replacements[r][1]);
+      }
+
+      // Break triple parallel lists: "X, Y, and Z" where items have similar structure
+      // Replace the Oxford comma pattern with varied connectors
+      text = text.replace(/,\s+and\s+it\s+/gi, function() {
+        var opts = [". It also ", ", and it also ", ". Plus it "];
+        return opts[Math.floor(Math.random() * opts.length)];
+      });
+
+      // Kill smooth AI transition phrases
+      text = text.replace(/\bOn the other hand,?\s*/gi, "But ");
+      text = text.replace(/\bOn the [\w]+ side,?\s*/gi, "");
+      text = text.replace(/\bWhen it comes to\s+/gi, "With ");
+      text = text.replace(/\bIn terms of\s+/gi, "For ");
+      text = text.replace(/\bIt goes without saying that\s*/gi, "");
+      text = text.replace(/\bNeedless to say,?\s*/gi, "");
+      text = text.replace(/\bAs a result,?\s*/gi, "So ");
+      text = text.replace(/\bFor instance,?\s*/gi, function() { return Math.random() > 0.5 ? "Like, " : ""; });
+      text = text.replace(/\bFor example,?\s*/gi, function() { return Math.random() > 0.5 ? "Like " : ""; });
+      text = text.replace(/\bThis means that\s*/gi, "So ");
+      text = text.replace(/\bThis suggests that\s*/gi, "That means ");
+      text = text.replace(/\bIt is clear that\s*/gi, "");
+      text = text.replace(/\bWhat this means is\s*/gi, "");
+
+      // Break "giving X and Y" / "creating X and letting Y" parallel gerund chains
+      text = text.replace(/,\s*giving\s+/gi, ". That gives ");
+      text = text.replace(/,\s*creating\s+/gi, ". It creates ");
+      text = text.replace(/,\s*making\s+/gi, ". That makes ");
+      text = text.replace(/,\s*allowing\s+/gi, ". It lets ");
+      text = text.replace(/,\s*enabling\s+/gi, ". It lets ");
+      text = text.replace(/,\s*providing\s+/gi, ". That gives ");
+      text = text.replace(/,\s*ensuring\s+/gi, ". This keeps ");
+      text = text.replace(/,\s*leading to\s+/gi, ". That leads to ");
+
+      // Break 4-item comma lists: "A, B, C, or/and D" → split into two sentences
+      text = text.replace(/(\w+ing),\s+(\w+ing),\s+(\w+ing),\s+(or|and)\s+(\w+ing)/gi, function(_, a, b, c, conj, d) {
+        return a + " and " + b + ". Also " + c + " " + conj + " " + d;
+      });
+
+      // Process sentence by sentence for structural changes
+      var paragraphs = text.split(/\n\n+/);
+      var processedParagraphs = [];
+
+      for (var p = 0; p < paragraphs.length; p++) {
+        var sentences = paragraphs[p].split(/(?<=[.!?])\s+/);
+        var out = [];
+        for (var i = 0; i < sentences.length; i++) {
+          var s = sentences[i];
+
+          // Expand contractions randomly (~15%) to add perplexity variance
+          if (Math.random() < 0.15) {
+            s = s.replace(/\bdon't\b/g, "do not");
+          }
+          if (Math.random() < 0.1) {
+            s = s.replace(/\bit's\b/g, "it is");
+          }
+          if (Math.random() < 0.1) {
+            s = s.replace(/\bcan't\b/g, "cannot");
+          }
+
+          // Randomly merge short consecutive sentences to vary burstiness
+          if (i < sentences.length - 1 && s.split(/\s+/).length < 10 && sentences[i + 1].split(/\s+/).length < 12 && Math.random() < 0.25) {
+            var connector = [", and ", " — ", ", plus "][Math.floor(Math.random() * 3)];
+            s = s.replace(/[.!?]$/, "") + connector + sentences[i + 1].charAt(0).toLowerCase() + sentences[i + 1].slice(1);
+            i++;
+          }
+
+          out.push(s);
+        }
+        processedParagraphs.push(out.join(" "));
+      }
+
+      text = processedParagraphs.join("\n\n");
+
+      // Clean up double spaces and leading spaces
+      text = text.replace(/  +/g, " ");
+      text = text.replace(/^ +/gm, "");
+
+      return text.trim();
+    }
+
     goBtn.addEventListener("click", function() {
       var text = inputTextarea.value.trim();
       if (!text) { toast("paste some text to humanize"); return; }
 
-      var prompt = "Rewrite the following text to sound completely natural and human-written. " +
-        "Make it sound like a real student wrote it: use contractions (don't, it's, they're), " +
-        "vary sentence lengths (mix short punchy sentences with longer ones), " +
-        "add occasional informal phrasing, use natural transitions, " +
-        "and avoid overly perfect grammar or robotic patterns. " +
-        "Keep the same meaning and information but make it undetectable as AI-written. " +
-        "Do not add any commentary — just output the rewritten text.\n\n" + text;
+      var prompt = "Rewrite the following essay as a college student. " +
+        "Use contractions (don't, it's, won't). Vary sentence length — some short, some long. " +
+        "NEVER use parallel lists like 'it does X, supports Y, and ensures Z' — phrase each item differently or split across sentences. " +
+        "NEVER write 'isn't just X — it's Y' or 'not only X but also Y'. " +
+        "Don't start paragraphs with bold claims or declarations. Start some with 'So', 'And', 'But', or just dive into a detail. " +
+        "NEVER use transition phrases like 'on the other hand', 'on the X side', 'when it comes to', 'in terms of'. Just start the new idea. " +
+        "NEVER use alliteration (repeating the same starting letter in neighboring words). " +
+        "Don't chain gerunds like 'creating X, building Y, and making Z'. " +
+        "If listing more than 2 items, split them into separate sentences. " +
+        "NEVER use: crucial, vital, essential, moreover, furthermore, consequently, nevertheless, comprehensive, innovative, multifaceted, holistic, paradigm, robust, leverage, foster, streamline, landscape, delve, navigate, enhance, ensure. " +
+        "No semicolons. No conclusion phrases like 'In short' or 'All in all'. " +
+        "Include 1-2 small grammar imperfections (comma splice, fragment, starting with And/But). " +
+        "Keep all facts and arguments. No markdown. Output ONLY the rewritten text.\n\n" + text;
 
       loadingEl.style.display = "";
       goBtn.disabled = true;
@@ -3870,8 +4045,15 @@
       fetch("https://text.pollinations.ai/" + encodeURIComponent(prompt))
         .then(function(r) { return r.text(); })
         .then(function(result) {
-          outputTextarea.value = result.trim();
-          outputCount.textContent = countWords(result.trim()) + " words";
+          // Handle JSON response in case API returns structured data
+          try {
+            var parsed = JSON.parse(result);
+            if (typeof parsed.content === "string" && parsed.content.length > 0) result = parsed.content;
+            else if (parsed.choices && parsed.choices[0]) result = parsed.choices[0].message.content;
+          } catch(e) { /* plain text response, use as-is */ }
+          result = postProcess(result);
+          outputTextarea.value = result;
+          outputCount.textContent = countWords(result) + " words";
           toast("text humanized!");
         })
         .catch(function() {

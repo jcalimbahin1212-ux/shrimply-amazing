@@ -143,6 +143,177 @@
     draw();
   })();
 
+  // ---- Floating 3D Shapes ----
+  (function () {
+    var canvas = document.getElementById("floating-shapes");
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    // 3D shape definitions (unit vertices)
+    var shapeDefs = {
+      cube: {
+        verts: [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],
+        edges: [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]]
+      },
+      tetra: {
+        verts: [[1,1,1],[-1,-1,1],[-1,1,-1],[1,-1,-1]],
+        edges: [[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]]
+      },
+      octa: {
+        verts: [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],
+        edges: [[0,2],[0,3],[0,4],[0,5],[1,2],[1,3],[1,4],[1,5],[2,4],[2,5],[3,4],[3,5]]
+      },
+      diamond: {
+        verts: [[0,-1.4,0],[-1,0,-1],[1,0,-1],[1,0,1],[-1,0,1],[0,1.4,0]],
+        edges: [[0,1],[0,2],[0,3],[0,4],[5,1],[5,2],[5,3],[5,4],[1,2],[2,3],[3,4],[4,1]]
+      },
+      prism: {
+        verts: [[0,-1,-1],[-0.87,-1,0.5],[0.87,-1,0.5],[0,1,-1],[-0.87,1,0.5],[0.87,1,0.5]],
+        edges: [[0,1],[1,2],[2,0],[3,4],[4,5],[5,3],[0,3],[1,4],[2,5]]
+      }
+    };
+
+    var shapeTypes = Object.keys(shapeDefs);
+    var shapes = [];
+    var shapeCount = 14;
+
+    for (var i = 0; i < shapeCount; i++) {
+      var type = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+      var size = 18 + Math.random() * 38;
+      shapes.push({
+        type: type,
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        z: Math.random() * 400 + 100, // depth for parallax
+        size: size,
+        rotX: Math.random() * Math.PI * 2,
+        rotY: Math.random() * Math.PI * 2,
+        rotZ: Math.random() * Math.PI * 2,
+        spinX: (Math.random() - 0.5) * 0.008,
+        spinY: (Math.random() - 0.5) * 0.008,
+        spinZ: (Math.random() - 0.5) * 0.005,
+        dx: (Math.random() - 0.5) * 0.25,
+        dy: (Math.random() - 0.5) * 0.18,
+        opacity: 0.04 + Math.random() * 0.07,
+        pulseOffset: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.003 + Math.random() * 0.004
+      });
+    }
+
+    function rotatePoint(x, y, z, rx, ry, rz) {
+      // Rotate around X
+      var cosA = Math.cos(rx), sinA = Math.sin(rx);
+      var y1 = y * cosA - z * sinA;
+      var z1 = y * sinA + z * cosA;
+      // Rotate around Y
+      var cosB = Math.cos(ry), sinB = Math.sin(ry);
+      var x2 = x * cosB + z1 * sinB;
+      var z2 = -x * sinB + z1 * cosB;
+      // Rotate around Z
+      var cosC = Math.cos(rz), sinC = Math.sin(rz);
+      var x3 = x2 * cosC - y1 * sinC;
+      var y3 = x2 * sinC + y1 * cosC;
+      return [x3, y3, z2];
+    }
+
+    function project(x, y, z, cx, cy, depth) {
+      var scale = 300 / (300 + z * 0.3 + depth * 0.1);
+      return [cx + x * scale, cy + y * scale];
+    }
+
+    var time = 0;
+    var mouseX = -9999, mouseY = -9999;
+
+    canvas.parentElement.addEventListener("mousemove", function (e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function drawShapes() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      time++;
+
+      for (var i = 0; i < shapes.length; i++) {
+        var s = shapes[i];
+        var def = shapeDefs[s.type];
+
+        // Update rotation
+        s.rotX += s.spinX;
+        s.rotY += s.spinY;
+        s.rotZ += s.spinZ;
+
+        // Mouse interaction — gentle repulsion
+        var mdx = s.x - mouseX;
+        var mdy = s.y - mouseY;
+        var mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+        if (mDist < 180 && mDist > 0) {
+          var force = (180 - mDist) / 180 * 0.3;
+          s.x += (mdx / mDist) * force;
+          s.y += (mdy / mDist) * force;
+          // Spin faster when near cursor
+          s.rotY += force * 0.02;
+        }
+
+        // Drift
+        s.x += s.dx;
+        s.y += s.dy;
+
+        // Wrap around
+        if (s.x < -80) s.x = canvas.width + 80;
+        if (s.x > canvas.width + 80) s.x = -80;
+        if (s.y < -80) s.y = canvas.height + 80;
+        if (s.y > canvas.height + 80) s.y = -80;
+
+        // Pulse opacity
+        var pulse = Math.sin(time * s.pulseSpeed + s.pulseOffset);
+        var currentOpacity = s.opacity + pulse * 0.02;
+        if (currentOpacity < 0.02) currentOpacity = 0.02;
+
+        // Project all vertices
+        var projected = [];
+        for (var v = 0; v < def.verts.length; v++) {
+          var vert = def.verts[v];
+          var rotated = rotatePoint(
+            vert[0] * s.size, vert[1] * s.size, vert[2] * s.size,
+            s.rotX, s.rotY, s.rotZ
+          );
+          projected.push(project(rotated[0], rotated[1], rotated[2], s.x, s.y, s.z));
+        }
+
+        // Draw edges
+        ctx.strokeStyle = "rgba(255, 255, 255, " + currentOpacity + ")";
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        for (var e = 0; e < def.edges.length; e++) {
+          var edge = def.edges[e];
+          var p1 = projected[edge[0]];
+          var p2 = projected[edge[1]];
+          ctx.moveTo(p1[0], p1[1]);
+          ctx.lineTo(p2[0], p2[1]);
+        }
+        ctx.stroke();
+
+        // Draw vertices as tiny dots
+        ctx.fillStyle = "rgba(255, 255, 255, " + (currentOpacity * 1.5) + ")";
+        for (var d = 0; d < projected.length; d++) {
+          ctx.beginPath();
+          ctx.arc(projected[d][0], projected[d][1], 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      requestAnimationFrame(drawShapes);
+    }
+    drawShapes();
+  })();
+
   // ---- Card Mouse Glow ----
   document.addEventListener("mousemove", function (e) {
     var cards = document.querySelectorAll(".card");
@@ -154,6 +325,31 @@
       cards[i].style.setProperty("--mouse-y", y + "px");
     }
   });
+
+  // ---- Cursor Glow (ambient light that follows mouse) ----
+  (function () {
+    var glow = document.createElement("div");
+    glow.id = "cursor-glow";
+    document.body.appendChild(glow);
+
+    var targetX = 0, targetY = 0, currentX = 0, currentY = 0;
+
+    document.addEventListener("mousemove", function (e) {
+      targetX = e.clientX;
+      targetY = e.clientY;
+    });
+
+    function animate() {
+      currentX += (targetX - currentX) * 0.08;
+      currentY += (targetY - currentY) * 0.08;
+      glow.style.transform = "translate(" + (currentX - 200) + "px," + (currentY - 200) + "px)";
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    document.addEventListener("mouseleave", function () { glow.style.opacity = "0"; });
+    document.addEventListener("mouseenter", function () { glow.style.opacity = "1"; });
+  })();
 
   // ---- State ----
   const state = {

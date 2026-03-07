@@ -1,5 +1,5 @@
 /* ============================================
-   shrimpify — tool implementations
+   shrimpify diversity — tool implementations
    ============================================ */
 
 (function () {

@@ -1,5 +1,5 @@
 /* ============================================
-   shrimpify — lesson & quiz catalog
+   shrimpify diversity — lesson & quiz catalog
    ============================================ */
 
 // Each subject has categories, each category has lessons.

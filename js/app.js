@@ -1,5 +1,5 @@
 /* ============================================
-   shrimpify diversity — main application logic
+   crustacean diverse — main application logic
    ============================================ */
 
 (function () {

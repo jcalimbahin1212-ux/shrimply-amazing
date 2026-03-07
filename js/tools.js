@@ -1,5 +1,5 @@
 /* ============================================
-   shrimpify diversity — tool implementations
+   crustacean diverse — tool implementations
    ============================================ */
 
 (function () {

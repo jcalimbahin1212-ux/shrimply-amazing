@@ -1,5 +1,5 @@
 /* ============================================
-   shrimpify diversity — data catalog
+   crustacean diverse — data catalog
    ============================================ */
 
 // ---- Grade Points ----
@@ -294,7 +294,7 @@ const CHEATS = [
       "3. paste the script for the cheat you want and press enter.",
       "4. the script will read the question from the page and attempt to auto-select the correct answer.",
       "5. some scripts work by intercepting the WebSocket data that Kahoot sends \u2014 answers are embedded in the game data.",
-      "NOTE: these scripts must be run on the kahoot.it page, not on shrimpify diversity."
+      "NOTE: these scripts must be run on the kahoot.it page, not on crustacean diverse."
     ],
     gamemodes: [
       {

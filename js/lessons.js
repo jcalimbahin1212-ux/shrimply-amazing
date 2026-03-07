@@ -1,5 +1,5 @@
 /* ============================================
-   shrimpify diversity — lesson & quiz catalog
+   crustacean diverse — lesson & quiz catalog
    ============================================ */
 
 // Each subject has categories, each category has lessons.
